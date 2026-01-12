@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: srsly
+  datasource:
+    url: jdbc:postgresql://localhost:5432/<db_name>
+    username:
+    password:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+security:
+  jwt:
+    secret-key:
+    expiration-time:
+
+
+
