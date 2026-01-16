@@ -7,8 +7,6 @@ import me.gabcytn.srsly.DTO.LoginUserDto;
 import me.gabcytn.srsly.DTO.RefreshTokenRequestDto;
 import me.gabcytn.srsly.DTO.RegisterUserDto;
 import me.gabcytn.srsly.Service.AuthService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
-  private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
   private final AuthService authService;
 
   public AuthController(AuthService authService) {
@@ -33,7 +30,6 @@ public class AuthController {
   public LoginResponseDto login(
       @RequestBody @Valid LoginUserDto user,
       @CookieValue(value = "X-REFRESH-TOKEN", required = false) String refreshToken) {
-    LOGGER.info("got here");
     return authService.authenticate(user, Optional.ofNullable(refreshToken));
   }
 
