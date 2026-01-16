@@ -29,4 +29,11 @@ public class User {
   private Timestamp createdAt;
 
   @UpdateTimestamp private Timestamp updatedAt;
+
+  public static User ofEmailAndPassword(String email, String password) {
+    User user = new User();
+    user.setEmail(email);
+    user.setPassword(password);
+    return user;
+  }
 }

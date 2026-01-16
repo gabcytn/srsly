@@ -11,4 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends CrudRepository<User, UUID> {
   @Cacheable(value = "user", key = "#email")
   Optional<User> findByEmail(String email);
+
+  Boolean existsByEmail(String email);
 }

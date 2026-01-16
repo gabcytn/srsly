@@ -13,7 +13,6 @@ import me.gabcytn.srsly.Exception.UnauthenticatedException;
 import me.gabcytn.srsly.Repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,18 +30,12 @@ public class AuthService {
   private final RefreshTokenService refreshTokenService;
 
   public void signup(RegisterUserDto user) {
-    try {
-      User userToSave = new User();
-      userToSave.setEmail(user.getEmail());
-      userToSave.setPassword(passwordEncoder.encode(user.getPassword()));
-
-      userRepository.save(userToSave);
-    } catch (DataIntegrityViolationException e) {
-      LOG.error("Error signing up user: {}", user.getEmail());
-      LOG.error(e.getMessage());
-      throw new DuplicateEmailException(
-          "User with email of: " + user.getEmail() + " fails to be inserted in the DB.");
+    if (userRepository.existsByEmail(user.getEmail())) {
+      throw new DuplicateEmailException();
     }
+    User toSave =
+        User.ofEmailAndPassword(user.getEmail(), passwordEncoder.encode(user.getPassword()));
+    userRepository.save(toSave);
   }
 
   public LoginResponseDto authenticate(LoginUserDto user, Optional<String> refreshToken) {
