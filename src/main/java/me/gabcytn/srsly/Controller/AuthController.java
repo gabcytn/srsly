@@ -36,10 +36,7 @@ public class AuthController {
   @PostMapping("/refresh-token")
   public ResponseEntity<LoginResponseDto> refreshToken(
       @RequestBody @Valid RefreshTokenRequestDto tokenRequest,
-      @CookieValue(value = "X-REFRESH-TOKEN", required = false) String refreshToken) {
-    if (refreshToken == null) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
+      @CookieValue(value = "X-REFRESH-TOKEN") String refreshToken) {
     LoginResponseDto responseDto = authService.newJwt(refreshToken, tokenRequest.getDeviceName());
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
