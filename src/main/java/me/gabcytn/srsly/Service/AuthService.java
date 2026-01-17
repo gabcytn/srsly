@@ -38,7 +38,7 @@ public class AuthService {
     userRepository.save(toSave);
   }
 
-  public LoginResponseDto authenticate(LoginUserDto user, Optional<String> refreshToken) {
+  public LoginResponseDto authenticate(LoginUserDto user) {
     Authentication authToken =
         new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
     Authentication authentication = authenticationManager.authenticate(authToken);
@@ -46,15 +46,15 @@ public class AuthService {
     if (!authentication.isAuthenticated()) throw new UnauthenticatedException("User not found");
 
     String token = jwtService.generateToken(user.getEmail());
-
-    if (refreshToken.isEmpty()) {
-      String generatedRefreshToken = jwtService.generateRefreshToken();
-      RefreshTokenValidatorDto tokenValidatorDto =
-          new RefreshTokenValidatorDto(
-              generatedRefreshToken, user.getEmail(), user.getDeviceName());
-      refreshTokenService.save(tokenValidatorDto);
-    }
     return new LoginResponseDto(token, jwtService.getExpirationTime());
+  }
+
+  public void generateRefreshToken(String userEmail, String userDeviceName) {
+    String generatedRefreshToken = jwtService.generateRefreshToken();
+    RefreshTokenValidatorDto tokenValidatorDto =
+        new RefreshTokenValidatorDto(
+            generatedRefreshToken, userEmail, userDeviceName);
+    refreshTokenService.save(tokenValidatorDto);
   }
 
   public LoginResponseDto newJwt(String refreshToken, String deviceName) {

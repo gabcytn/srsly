@@ -1,7 +1,6 @@
 package me.gabcytn.srsly.Controller;
 
 import jakarta.validation.Valid;
-import java.util.Optional;
 import me.gabcytn.srsly.DTO.LoginResponseDto;
 import me.gabcytn.srsly.DTO.LoginUserDto;
 import me.gabcytn.srsly.DTO.RefreshTokenRequestDto;
@@ -30,7 +29,11 @@ public class AuthController {
   public LoginResponseDto login(
       @RequestBody @Valid LoginUserDto user,
       @CookieValue(value = "X-REFRESH-TOKEN", required = false) String refreshToken) {
-    return authService.authenticate(user, Optional.ofNullable(refreshToken));
+    LoginResponseDto response = authService.authenticate(user);
+    if (refreshToken == null) {
+      authService.generateRefreshToken(user.getEmail(), user.getDeviceName());
+    }
+    return response;
   }
 
   @PostMapping("/refresh-token")
