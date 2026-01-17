@@ -89,12 +89,16 @@ public class JwtService {
 
   public String generateRefreshToken() {
     String refreshToken = hashString(generateRandomString());
+    sendRefreshTokenInResponseCookie(refreshToken);
+    return refreshToken;
+  }
+
+  private void sendRefreshTokenInResponseCookie(String refreshToken) {
     Cookie cookie = new Cookie("X-REFRESH-TOKEN", refreshToken);
     cookie.setHttpOnly(true);
     cookie.setPath("/");
     cookie.setMaxAge(3600);
     response.addCookie(cookie);
-    return refreshToken;
   }
 
   private String hashString(String text) {
