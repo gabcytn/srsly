@@ -3,6 +3,7 @@ package me.gabcytn.srsly.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.sql.Timestamp;
+import java.util.Set;
 import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,6 +33,12 @@ public class User {
 
   @JsonIgnore
   @UpdateTimestamp private Timestamp updatedAt;
+
+  @OneToMany(mappedBy = "user")
+  private Set<SrsProblem> srsProblems;
+
+  @OneToMany(mappedBy = "user")
+  private Set<Solution> solutions;
 
   public static User ofEmailAndPassword(String email, String password) {
     User user = new User();
