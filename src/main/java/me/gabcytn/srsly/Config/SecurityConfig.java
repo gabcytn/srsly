@@ -1,7 +1,7 @@
 package me.gabcytn.srsly.Config;
 
 import me.gabcytn.srsly.Filter.JwtFilter;
-import me.gabcytn.srsly.Service.UserDetailsService;
+import me.gabcytn.srsly.Service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,18 +20,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-  private final UserDetailsService userDetailsService;
+  private final UserDetailsServiceImpl userDetailsServiceImpl;
   private final JwtFilter jwtFilter;
 
-  public SecurityConfig(UserDetailsService userDetailsService, JwtFilter jwtFilter) {
-    this.userDetailsService = userDetailsService;
+  public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, JwtFilter jwtFilter) {
+    this.userDetailsServiceImpl = userDetailsServiceImpl;
     this.jwtFilter = jwtFilter;
   }
 
   @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider daoAuthenticationProvider =
-        new DaoAuthenticationProvider(userDetailsService);
+        new DaoAuthenticationProvider(userDetailsServiceImpl);
     daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
 
     return daoAuthenticationProvider;

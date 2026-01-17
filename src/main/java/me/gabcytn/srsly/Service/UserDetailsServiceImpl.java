@@ -6,13 +6,13 @@ import me.gabcytn.srsly.DTO.UserPrincipal;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class UserDetailsService
-    implements org.springframework.security.core.userdetails.UserDetailsService {
+public class UserDetailsServiceImpl implements UserDetailsService {
   private final UserRepository userRepository;
 
   @Override
