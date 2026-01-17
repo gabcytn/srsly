@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.Service.JwtService;
-import me.gabcytn.srsly.Service.UserDetailsService;
+import me.gabcytn.srsly.Service.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,7 +24,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 public class JwtFilter extends OncePerRequestFilter {
   private static final Logger LOGGER = LoggerFactory.getLogger(JwtFilter.class);
   private final JwtService jwtService;
-  private final UserDetailsService userDetailsService;
+  private final UserDetailsServiceImpl userDetailsServiceImpl;
   private final HandlerExceptionResolver handlerExceptionResolver;
 
   @Override
@@ -32,6 +32,11 @@ public class JwtFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     final String authorizationHeader = request.getHeader("Authorization");
+    if (request.getRequestURI().startsWith("/api/v1/auth")) {
+      LOGGER.info("Disregard filter. User is trying to authenticate.");
+      filterChain.doFilter(request, response);
+      return;
+    }
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
       LOGGER.info("No auth header / doesn't start with Bearer");
       filterChain.doFilter(request, response);
@@ -49,7 +54,7 @@ public class JwtFilter extends OncePerRequestFilter {
         return;
       }
 
-      UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+      UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(userEmail);
 
       // early return if token is invalid
       if (!jwtService.isTokenValid(token, userDetails)) {
@@ -65,8 +70,7 @@ public class JwtFilter extends OncePerRequestFilter {
       SecurityContextHolder.getContext().setAuthentication(authToken);
       filterChain.doFilter(request, response);
     } catch (Exception e) {
-      System.err.println("Error in jwt filter");
-      System.err.println(e.getMessage());
+      LOGGER.error(e.getMessage());
       handlerExceptionResolver.resolveException(request, response, null, e);
     }
   }
