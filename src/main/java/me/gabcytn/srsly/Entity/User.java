@@ -1,5 +1,6 @@
 package me.gabcytn.srsly.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -24,10 +25,12 @@ public class User {
 
   private String password;
 
+  @JsonIgnore
   @CreationTimestamp
   @Column(updatable = false)
   private Timestamp createdAt;
 
+  @JsonIgnore
   @UpdateTimestamp private Timestamp updatedAt;
 
   public static User ofEmailAndPassword(String email, String password) {
