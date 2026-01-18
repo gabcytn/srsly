@@ -5,11 +5,11 @@ import me.gabcytn.srsly.Auth.DTO.LoginResponseDto;
 import me.gabcytn.srsly.Auth.DTO.LoginUserDto;
 import me.gabcytn.srsly.Auth.DTO.RefreshTokenValidatorDto;
 import me.gabcytn.srsly.Auth.DTO.RegisterUserDto;
-import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Auth.Exception.DuplicateEmailException;
 import me.gabcytn.srsly.Auth.Exception.RefreshTokenException;
 import me.gabcytn.srsly.Auth.Exception.UnauthenticatedException;
 import me.gabcytn.srsly.Auth.Repository.UserRepository;
+import me.gabcytn.srsly.Entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +17,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -48,32 +50,27 @@ public class AuthService {
     return new LoginResponseDto(token, jwtService.getExpirationTime());
   }
 
-  // TODO: reuse method
   public void generateRefreshToken(String userEmail, String userDeviceName) {
-    String generatedRefreshToken = jwtService.generateRefreshToken();
+    String generatedRefreshToken = refreshTokenService.generateRefreshToken();
     RefreshTokenValidatorDto tokenValidatorDto =
-        new RefreshTokenValidatorDto(
-            generatedRefreshToken, userEmail, userDeviceName);
+        new RefreshTokenValidatorDto(generatedRefreshToken, userEmail, userDeviceName);
     refreshTokenService.save(tokenValidatorDto);
   }
 
-  public LoginResponseDto newJwt(String refreshToken, String deviceName) {
-    try {
-      RefreshTokenValidatorDto validator = refreshTokenService.find(refreshToken);
-      if (validator == null) throw new RefreshTokenException("Refresh token not found.");
-      if (!deviceName.equals(validator.getDeviceName()))
-        throw new RefreshTokenException("Stored device name does not match request's device name");
-      String jwt = jwtService.generateToken(validator.getEmail());
-
-      refreshTokenService.delete(refreshToken);
-      String generatedRefreshToken = jwtService.generateRefreshToken();
-      validator.setKey(generatedRefreshToken);
-      refreshTokenService.save(validator);
-      return new LoginResponseDto(jwt, jwtService.getExpirationTime());
-    } catch (Exception e) {
-      LOG.error("Error generating new JWT");
-      LOG.error(e.getMessage());
-      throw new RefreshTokenException(e.getMessage());
+  public LoginResponseDto newJwt(String refreshTokenKey, String requestDeviceName) {
+    Optional<RefreshTokenValidatorDto> optionalValidator = refreshTokenService.find(refreshTokenKey);
+    if (optionalValidator.isEmpty()) {
+      LOG.error("Null validator.");
+      throw new RefreshTokenException("Refresh token not found.");
     }
+    RefreshTokenValidatorDto validator = optionalValidator.get();
+    if (!requestDeviceName.equals(validator.getDeviceName())) {
+      LOG.error("Device names don't match.");
+      throw new RefreshTokenException("Stored device name does not match request's device name.");
+    }
+    refreshTokenService.delete(refreshTokenKey);
+    generateRefreshToken(validator.getEmail(), validator.getDeviceName());
+    String jwt = jwtService.generateToken(validator.getEmail());
+    return new LoginResponseDto(jwt, jwtService.getExpirationTime());
   }
 }
