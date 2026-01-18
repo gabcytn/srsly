@@ -4,14 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,17 +15,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class JwtService {
-  private final HttpServletResponse response;
-
   @Value("${security.jwt.secret-key}")
   private String secretKey;
 
   @Value("${security.jwt.expiration-time}")
   private long jwtExpiration;
-
-  public JwtService(HttpServletResponse response) {
-    this.response = response;
-  }
 
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
@@ -85,42 +72,5 @@ public class JwtService {
   private Key getSignInKey() {
     byte[] keyBytes = Decoders.BASE64.decode(secretKey);
     return Keys.hmacShaKeyFor(keyBytes);
-  }
-
-  public String generateRefreshToken() {
-    String refreshToken = hashString(generateRandomString());
-    sendRefreshTokenInResponseCookie(refreshToken);
-    return refreshToken;
-  }
-
-  private void sendRefreshTokenInResponseCookie(String refreshToken) {
-    Cookie cookie = new Cookie("X-REFRESH-TOKEN", refreshToken);
-    cookie.setHttpOnly(true);
-    cookie.setPath("/");
-    cookie.setMaxAge(3600);
-    response.addCookie(cookie);
-  }
-
-  private String hashString(String text) {
-    try {
-      MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-      byte[] hash = messageDigest.digest(text.getBytes(StandardCharsets.UTF_8));
-      return Base64.getEncoder().encodeToString(hash);
-    } catch (NoSuchAlgorithmException exception) {
-      System.err.println("Error generating refresh token");
-      System.err.println(exception.getMessage());
-      return "";
-    }
-  }
-
-  private String generateRandomString() {
-    byte[] byteArray = new byte[32];
-    SecureRandom secureRandom = new SecureRandom();
-    secureRandom.nextBytes(byteArray);
-    StringBuilder sb = new StringBuilder();
-    for (byte b : byteArray) {
-      sb.append(String.format("%02x", b));
-    }
-    return sb.toString();
   }
 }
