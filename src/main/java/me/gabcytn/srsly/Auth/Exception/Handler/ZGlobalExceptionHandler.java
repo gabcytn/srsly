@@ -10,6 +10,7 @@ public class ZGlobalExceptionHandler
 {
   @ExceptionHandler(Exception.class)
   public ProblemDetail handler(Exception exception) {
+    exception.printStackTrace();
     ProblemDetail errorDetail =
         ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
     errorDetail.setProperty("exception", exception.getClass().getName());
