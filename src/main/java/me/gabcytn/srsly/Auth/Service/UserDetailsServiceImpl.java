@@ -23,6 +23,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
       return new UserPrincipal(presentUser);
     }
 
-    throw new UsernameNotFoundException("Username/Email not found.");
+    throw new UsernameNotFoundException("Email not found.");
   }
 }
