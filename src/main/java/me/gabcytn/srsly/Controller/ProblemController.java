@@ -1,12 +1,13 @@
 package me.gabcytn.srsly.Controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.DTO.LeetCodeApiPied;
+import me.gabcytn.srsly.DTO.SolutionDto;
 import me.gabcytn.srsly.Service.ProblemService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -17,5 +18,12 @@ public class ProblemController {
   @GetMapping("/{id}")
   public LeetCodeApiPied getProblem(@PathVariable int id) {
     return problemService.getProblem(id);
+  }
+
+  @PostMapping("/{problemId}/solutions")
+  public ResponseEntity<Void> saveSolution(
+      @PathVariable int problemId, @RequestBody @Valid SolutionDto solution) {
+    problemService.saveSolutionToProblem(solution, problemId);
+    return new ResponseEntity<>(HttpStatus.CREATED);
   }
 }

@@ -37,10 +37,10 @@ public class SrsProblem {
   private Date nextAttemptAt;
 
   @ManyToOne
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
   @ManyToOne
-  @JoinColumn(name = "problem_id")
+  @JoinColumn(name = "problem_id", nullable = false)
   private Problem problem;
 }

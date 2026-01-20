@@ -2,11 +2,16 @@ package me.gabcytn.srsly.Entity;
 
 import jakarta.persistence.*;
 import java.util.Set;
+
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import me.gabcytn.srsly.DTO.LeetCodeApiPied;
 import me.gabcytn.srsly.Model.Difficulty;
 
 @NoArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "problems")
 public class Problem {
@@ -31,8 +36,8 @@ public class Problem {
   @ManyToMany
   @JoinTable(
       name = "problem_tags",
-      joinColumns = @JoinColumn(name = "problem_id"),
-      inverseJoinColumns = @JoinColumn(name = "tag_id"))
+      joinColumns = @JoinColumn(name = "problem_id", nullable = false),
+      inverseJoinColumns = @JoinColumn(name = "tag_id", nullable = false))
   private Set<Tag> tags;
 
   public Problem(int id, String title, String question, Difficulty difficulty, String url) {
