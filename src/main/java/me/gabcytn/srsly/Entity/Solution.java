@@ -20,17 +20,14 @@ public class Solution {
   @Column(nullable = false)
   private String code;
 
-  @Column(nullable = false)
   private String aiCritique;
-
-  @Column(nullable = false)
   private String note;
 
   @ManyToOne
-  @JoinColumn(name = "problem_id")
+  @JoinColumn(name = "problem_id", nullable = false)
   private Problem problem;
 
   @ManyToOne
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "user_id", nullable = false)
   private User user;
 }
