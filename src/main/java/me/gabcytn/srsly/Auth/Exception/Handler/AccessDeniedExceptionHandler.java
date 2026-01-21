@@ -2,13 +2,13 @@ package me.gabcytn.srsly.Auth.Exception.Handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.security.authentication.AccountStatusException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class AccessDeniedExceptionHandler {
-  @ExceptionHandler(AccountStatusException.class)
+  @ExceptionHandler(AccessDeniedException.class)
   public ProblemDetail handler() {
     return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Unauthorized access.");
   }
