@@ -1,4 +1,4 @@
-package me.gabcytn.srsly.Auth.Exception.Handler;
+package me.gabcytn.srsly.Exception.Handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;

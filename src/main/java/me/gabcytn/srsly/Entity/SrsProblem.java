@@ -1,13 +1,12 @@
 package me.gabcytn.srsly.Entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.gabcytn.srsly.Model.ProblemStatus;
-
-import java.sql.Date;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,10 +30,10 @@ public class SrsProblem {
   private int repetitions = 0;
 
   @Column(nullable = false)
-  private Date lastAttemptAt;
+  private LocalDate lastAttemptAt;
 
   @Column(nullable = false)
-  private Date nextAttemptAt;
+  private LocalDate nextAttemptAt;
 
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)

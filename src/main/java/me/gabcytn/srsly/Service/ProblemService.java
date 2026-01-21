@@ -5,8 +5,11 @@ import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.DTO.LeetCodeApiPied;
 import me.gabcytn.srsly.DTO.SolutionDto;
 import me.gabcytn.srsly.Entity.Problem;
+import me.gabcytn.srsly.Entity.User;
+import me.gabcytn.srsly.Exception.InitialEaseFactorException;
 import me.gabcytn.srsly.Proxy.LeetCodeQuestionProxy;
 import me.gabcytn.srsly.Repository.ProblemRepository;
+import me.gabcytn.srsly.Repository.SolutionRepository;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -17,6 +20,8 @@ public class ProblemService {
   private final LeetCodeQuestionProxy leetCodeQuestionProxy;
   private final SolutionService solutionService;
   private final UserService userService;
+  private final SolutionRepository solutionRepository;
+  private final SrsProblemService srsProblemService;
 
   public LeetCodeApiPied getProblem(int id) {
     Optional<Problem> nullableProblem = problemRepository.findById(id);
@@ -30,8 +35,17 @@ public class ProblemService {
   public void saveSolutionToProblem(SolutionDto solutionDto, int problemId) {
     Optional<Problem> nullableProblem = problemRepository.findById(problemId);
     Problem problem = nullableProblem.orElseGet(() -> fetchAndCacheLeetCodeProblem(problemId));
-    solutionService.save(
-        solutionDto.toSolutionEntity(problem, userService.getCurrentlyLoggedInUser()));
+    User user = userService.getCurrentlyLoggedInUser();
+    if (!solutionRepository.existsByProblemAndUser(problem, user)) {
+      saveInitialSrsProblem(problem, solutionDto);
+    }
+    solutionService.save(solutionDto.toSolutionEntity(problem, user));
+  }
+
+  private void saveInitialSrsProblem(Problem problem, SolutionDto solutionDto) {
+    if (solutionDto.getEaseFactor() == null)
+      throw new InitialEaseFactorException("This solution is the first one to this problem.");
+    srsProblemService.saveInitialSrsProblem(problem, solutionDto.getEaseFactor());
   }
 
   private Problem fetchAndCacheLeetCodeProblem(int id) {
