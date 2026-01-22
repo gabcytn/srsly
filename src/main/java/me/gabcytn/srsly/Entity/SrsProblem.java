@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import me.gabcytn.srsly.DTO.SrsProblemDto;
 import me.gabcytn.srsly.Model.ProblemStatus;
 
 @NoArgsConstructor
@@ -42,4 +43,14 @@ public class SrsProblem {
   @ManyToOne
   @JoinColumn(name = "problem_id", nullable = false)
   private Problem problem;
+
+  public SrsProblemDto toDto() {
+    SrsProblemDto dto = new SrsProblemDto();
+    dto.setProblem(problem.toApiPied());
+    dto.setStatus(status);
+    dto.setEaseFactor(easeFactor);
+    dto.setRepetitions(repetitions);
+    dto.setLastAttemptAt(lastAttemptAt);
+    return dto;
+  }
 }
