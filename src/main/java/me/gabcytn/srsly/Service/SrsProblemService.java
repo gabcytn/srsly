@@ -2,9 +2,13 @@ package me.gabcytn.srsly.Service;
 
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
+import me.gabcytn.srsly.DTO.PaginatedSrsProblem;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SrsProblem;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
@@ -26,6 +30,14 @@ public class SrsProblemService {
 
   public void save(SrsProblem srsProblem) {
     srsProblemRepository.save(srsProblem);
+  }
+
+  public PaginatedSrsProblem getTodayProblems(int page) {
+    Pageable pageable = PageRequest.of(page, 10);
+    Page<SrsProblem> paginatedSrsProblems =
+        srsProblemRepository.findByUserAndNextAttemptAt(
+            userService.getCurrentlyLoggedInUser(), LocalDate.now(), pageable);
+    return new PaginatedSrsProblem(paginatedSrsProblems);
   }
 
   private double newEaseFactor(int oldEaseFactor, int grade) {

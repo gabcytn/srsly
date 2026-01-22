@@ -1,35 +1,31 @@
 package me.gabcytn.srsly.DTO;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.gabcytn.srsly.DTO.View.Views;
-import me.gabcytn.srsly.Entity.Problem;
-import me.gabcytn.srsly.Model.Difficulty;
+import me.gabcytn.srsly.Model.ProblemStatus;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class LeetCodeApiPied {
+public class SrsProblemDto {
   @JsonView(Views.Summary.class)
-  private int questionFrontendId;
-
-  @JsonView(Views.Summary.class)
-  private String title;
-
-  @JsonView(Views.Detailed.class)
-  private String content;
+  private int easeFactor;
 
   @JsonView(Views.Summary.class)
-  private Difficulty difficulty;
+  private int repetitions;
 
   @JsonView(Views.Summary.class)
-  private String url;
+  private LocalDate lastAttemptAt;
 
-  public Problem toProblemEntity() {
-    return new Problem(questionFrontendId, title, content, difficulty, url);
-  }
+  @JsonView(Views.Summary.class)
+  private ProblemStatus status;
+
+  @JsonView(Views.Summary.class)
+  private LeetCodeApiPied problem;
 }
