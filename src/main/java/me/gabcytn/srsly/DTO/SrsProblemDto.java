@@ -14,8 +14,8 @@ import me.gabcytn.srsly.Model.ProblemStatus;
 @Getter
 @Setter
 public class SrsProblemDto {
-  @JsonView(Views.Summary.class)
-  private int easeFactor;
+  @JsonView(Views.Detailed.class)
+  private double grade;
 
   @JsonView(Views.Summary.class)
   private int repetitions;

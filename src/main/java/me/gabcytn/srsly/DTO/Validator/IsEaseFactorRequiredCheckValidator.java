@@ -22,7 +22,7 @@ public class IsEaseFactorRequiredCheckValidator
       return true;
     }
 
-    if (dto.getIsInitial() && dto.getEaseFactor() == null) {
+    if (dto.getIsInitial() && dto.getGrade() == null) {
       context.disableDefaultConstraintViolation();
       context
           .buildConstraintViolationWithTemplate(
@@ -32,7 +32,7 @@ public class IsEaseFactorRequiredCheckValidator
       return false;
     }
 
-    if (!dto.getIsInitial() && dto.getEaseFactor() != null) {
+    if (!dto.getIsInitial() && dto.getGrade() != null) {
       context.disableDefaultConstraintViolation();
       context
           .buildConstraintViolationWithTemplate(

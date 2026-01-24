@@ -11,11 +11,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "solutions")
+@Table(
+    name = "solutions",
+    indexes = {
+      @Index(name = "idx_problem", columnList = "problem_id"),
+      @Index(name = "idx_user", columnList = "user_id")
+    })
 public class Solution {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private int id;
+
+  @Column(nullable = false)
+  private String title;
 
   @Column(nullable = false)
   private String code;

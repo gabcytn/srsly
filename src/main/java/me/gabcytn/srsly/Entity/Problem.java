@@ -15,7 +15,12 @@ import me.gabcytn.srsly.Model.Difficulty;
 @Entity
 @Table(name = "problems")
 public class Problem {
-  @Id private int id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private int id;
+
+  @Column(nullable = false, unique = true)
+  private int frontendId;
 
   @Column(nullable = false)
   private String title;
@@ -41,7 +46,7 @@ public class Problem {
   private Set<Tag> tags;
 
   public Problem(int id, String title, String question, Difficulty difficulty, String url) {
-    this.id = id;
+    this.frontendId = id;
     this.title = title;
     this.question = question;
     this.difficulty = difficulty;
@@ -49,6 +54,6 @@ public class Problem {
   }
 
   public LeetCodeApiPied toApiPied() {
-    return new LeetCodeApiPied(id, title, question, difficulty, url);
+    return new LeetCodeApiPied(frontendId, title, question, difficulty, url);
   }
 }
