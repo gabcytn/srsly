@@ -22,9 +22,10 @@ public class SolutionDto {
   @NotNull(message = "Is initial is required.")
   private Boolean isInitial;
 
+  private Integer grade;
+
   private String aiCritique;
   private String note;
-  private Integer easeFactor;
 
   public Solution toSolutionEntity(Problem problem, User user) {
     Solution s = new Solution();

@@ -43,9 +43,9 @@ public class ProblemService {
   }
 
   private void saveInitialSrsProblem(Problem problem, SolutionDto solutionDto) {
-    if (solutionDto.getEaseFactor() == null)
+    if (solutionDto.getGrade() == null)
       throw new InitialEaseFactorException("This solution is the first one to this problem.");
-    srsProblemService.saveInitialSrsProblem(problem, solutionDto.getEaseFactor());
+    srsProblemService.saveInitialSrsProblem(problem, solutionDto.getGrade());
   }
 
   private Problem fetchAndCacheLeetCodeProblem(int id) {
