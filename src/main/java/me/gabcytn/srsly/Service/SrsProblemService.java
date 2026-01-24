@@ -17,9 +17,9 @@ public class SrsProblemService {
   private final SrsProblemRepository srsProblemRepository;
   private final UserService userService;
 
-  public void saveInitialSrsProblem(Problem problem, int easeFactor) {
+  public void saveInitialSrsProblem(Problem problem, int grade) {
     SrsProblem srsProblem = new SrsProblem();
-    srsProblem.setEaseFactor(easeFactor);
+    srsProblem.setEaseFactor(newEaseFactor(2.5, grade));
     srsProblem.setLastAttemptAt(LocalDate.now());
     srsProblem.setNextAttemptAt(LocalDate.now().plusDays(1));
     srsProblem.setUser(userService.getCurrentlyLoggedInUser());
@@ -40,7 +40,7 @@ public class SrsProblemService {
     return new PaginatedSrsProblem(paginatedSrsProblems);
   }
 
-  private double newEaseFactor(int oldEaseFactor, int grade) {
+  private double newEaseFactor(double oldEaseFactor, int grade) {
     return Math.max(oldEaseFactor + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02)), 1.3);
   }
 }
