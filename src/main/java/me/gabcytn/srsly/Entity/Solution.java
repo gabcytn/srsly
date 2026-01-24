@@ -25,10 +25,12 @@ public class Solution {
   @Column(nullable = false)
   private String title;
 
-  @Column(nullable = false)
+  @Column(nullable = false, columnDefinition = "TEXT")
   private String code;
 
+  @Column(columnDefinition = "TEXT")
   private String aiCritique;
+  @Column(columnDefinition = "TEXT")
   private String note;
 
   @ManyToOne

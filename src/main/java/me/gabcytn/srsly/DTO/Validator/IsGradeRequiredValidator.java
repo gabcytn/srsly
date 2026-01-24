@@ -2,15 +2,15 @@ package me.gabcytn.srsly.DTO.Validator;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import me.gabcytn.srsly.DTO.Annotation.IsEaseFactorRequiredCheck;
+import me.gabcytn.srsly.DTO.Annotation.IsGradeRequired;
 import me.gabcytn.srsly.DTO.SolutionDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IsEaseFactorRequiredCheckValidator
-    implements ConstraintValidator<IsEaseFactorRequiredCheck, Object> {
+public class IsGradeRequiredValidator
+    implements ConstraintValidator<IsGradeRequired, Object> {
   private static final Logger LOGGER =
-      LoggerFactory.getLogger(IsEaseFactorRequiredCheckValidator.class);
+      LoggerFactory.getLogger(IsGradeRequiredValidator.class);
 
   @Override
   public boolean isValid(Object obj, ConstraintValidatorContext context) {
@@ -26,8 +26,8 @@ public class IsEaseFactorRequiredCheckValidator
       context.disableDefaultConstraintViolation();
       context
           .buildConstraintViolationWithTemplate(
-              "Ease factor is required for initial solutions")
-          .addPropertyNode("easeFactor")
+              "Grade is required for initial solutions")
+          .addPropertyNode("grade")
           .addConstraintViolation();
       return false;
     }
@@ -36,8 +36,8 @@ public class IsEaseFactorRequiredCheckValidator
       context.disableDefaultConstraintViolation();
       context
           .buildConstraintViolationWithTemplate(
-              "Ease factor must be null for non-initial solutions")
-          .addPropertyNode("easeFactor")
+              "Grade must be null for non-initial solutions")
+          .addPropertyNode("grade")
           .addConstraintViolation();
       return false;
     }
