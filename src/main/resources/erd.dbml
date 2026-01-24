@@ -1,0 +1,56 @@
+Table users {
+  id uuid [primary key, not null]
+  email varchar(255) [unique, not null]
+  password varchar(255) [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table problems {
+  id int [primary key, not null]
+  frontend_id int [unique, not null]
+  difficulty varchar(255) [not null, check: `ANY ARRAY(['Easy', 'Medium', 'Hard'])`]
+  question text [not null]
+  title varchar(255) [not null]
+  url varchar(255) [not null]
+}
+
+Table solutions {
+  id integer [primary key, not null]
+  problem_id int [ref: > problems.id, not null]
+  user_id uuid [ref: > users.id, not null]
+  title varchar [not null]
+  code text [not null]
+  note text [null]
+  ai_critique text [null]
+}
+
+Table srs_problems {
+  id int [primary key, not null]
+  problem_id int [ref: > problems.id, not null]
+  user_id uuid [ref: > users.id, not null]
+  status varchar(255) [not null, check: `ANY ARRAY(['NEW', 'LEARNING', 'REVIEWING', 'MASTERED'])`]
+  repetitions int [not null]
+  previous_interval int [not null]
+  ease_factor numeric(1, 2) [not null]
+  last_attempt_at date [not null]
+  next_attempt_at date [not null]
+}
+
+Table tags {
+  id integer [primary key]
+  name varchar(255) [unique, not null]
+}
+
+Table problem_tags {
+  problem_id int [ref: > problems.id, not null]
+  tag_id int [ref: > tags.id, not null]
+}
+
+Table attempts {
+  id int [primary key, not null]
+  problem_id int [ref: > problems.id, not null]
+  user_id uuid [ref: > users.id, not null]
+  grade int [not null, check: `ANY ARRAY([0, 1, 2, 3, 4])`]
+  attempted_at date [not null]
+}
