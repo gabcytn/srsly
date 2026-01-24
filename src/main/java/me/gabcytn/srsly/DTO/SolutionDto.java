@@ -1,11 +1,12 @@
 package me.gabcytn.srsly.DTO;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import me.gabcytn.srsly.DTO.Annotation.IsEaseFactorRequiredCheck;
+import me.gabcytn.srsly.DTO.Annotation.IsGradeRequired;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.Solution;
 import me.gabcytn.srsly.Entity.User;
@@ -14,10 +15,15 @@ import me.gabcytn.srsly.Entity.User;
 @NoArgsConstructor
 @Getter
 @Setter
-@IsEaseFactorRequiredCheck
+@IsGradeRequired
 public class SolutionDto {
   @NotNull(message = "Code solution is required.")
+  @NotBlank(message = "Title must not be blank.")
   private String code;
+
+  @NotNull(message = "Title is required.")
+  @NotBlank(message = "Title must not be blank.")
+  private String title;
 
   @NotNull(message = "Is initial is required.")
   private Boolean isInitial;
@@ -30,6 +36,7 @@ public class SolutionDto {
   public Solution toSolutionEntity(Problem problem, User user) {
     Solution s = new Solution();
     s.setCode(code);
+    s.setTitle(title);
     s.setAiCritique(aiCritique);
     s.setNote(note);
     s.setProblem(problem);

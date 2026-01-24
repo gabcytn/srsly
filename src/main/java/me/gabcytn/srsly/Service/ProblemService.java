@@ -33,7 +33,7 @@ public class ProblemService {
   }
 
   public void saveSolutionToProblem(SolutionDto solutionDto, int problemId) {
-    Optional<Problem> nullableProblem = problemRepository.findById(problemId);
+    Optional<Problem> nullableProblem = problemRepository.findByFrontendId(problemId);
     Problem problem = nullableProblem.orElseGet(() -> fetchAndCacheLeetCodeProblem(problemId));
     User user = userService.getCurrentlyLoggedInUser();
     if (!solutionRepository.existsByProblemAndUser(problem, user)) {
@@ -43,8 +43,10 @@ public class ProblemService {
   }
 
   private void saveInitialSrsProblem(Problem problem, SolutionDto solutionDto) {
-    if (solutionDto.getGrade() == null)
-      throw new InitialEaseFactorException("This solution is the first one to this problem.");
+    if (solutionDto.getGrade() == null) {
+      throw new InitialEaseFactorException(
+          "Incorrect request body. Initial is set to false but data says otherwise.");
+    }
     srsProblemService.saveInitialSrsProblem(problem, solutionDto.getGrade());
   }
 
