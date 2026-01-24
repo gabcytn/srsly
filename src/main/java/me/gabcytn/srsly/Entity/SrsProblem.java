@@ -24,11 +24,14 @@ public class SrsProblem {
   @Column(nullable = false)
   private ProblemStatus status = ProblemStatus.NEW;
 
-  @Column(nullable = false)
-  private int easeFactor = 2;
+  @Column(nullable = false, columnDefinition = "DECIMAL(1, 2)")
+  private double easeFactor = 2.5;
 
   @Column(nullable = false)
-  private int repetitions = 0;
+  private int repetitions = 1;
+
+  @Column(nullable = false)
+  private int previousInterval = 1;
 
   @Column(nullable = false)
   private LocalDate lastAttemptAt;
@@ -48,7 +51,6 @@ public class SrsProblem {
     SrsProblemDto dto = new SrsProblemDto();
     dto.setProblem(problem.toApiPied());
     dto.setStatus(status);
-    dto.setEaseFactor(easeFactor);
     dto.setRepetitions(repetitions);
     dto.setLastAttemptAt(lastAttemptAt);
     return dto;
