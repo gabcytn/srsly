@@ -6,7 +6,7 @@ import me.gabcytn.srsly.DTO.LeetCodeApiPied;
 import me.gabcytn.srsly.DTO.SolutionDto;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.User;
-import me.gabcytn.srsly.Exception.InitialEaseFactorException;
+import me.gabcytn.srsly.Exception.InitialSolutionException;
 import me.gabcytn.srsly.Proxy.LeetCodeQuestionProxy;
 import me.gabcytn.srsly.Repository.ProblemRepository;
 import me.gabcytn.srsly.Repository.SolutionRepository;
@@ -36,18 +36,13 @@ public class ProblemService {
     Optional<Problem> nullableProblem = problemRepository.findByFrontendId(problemId);
     Problem problem = nullableProblem.orElseGet(() -> fetchAndCacheLeetCodeProblem(problemId));
     User user = userService.getCurrentlyLoggedInUser();
-    if (!solutionRepository.existsByProblemAndUser(problem, user)) {
-      saveInitialSrsProblem(problem, solutionDto);
-    }
-    solutionService.save(solutionDto.toSolutionEntity(problem, user));
-  }
 
-  private void saveInitialSrsProblem(Problem problem, SolutionDto solutionDto) {
-    if (solutionDto.getGrade() == null) {
-      throw new InitialEaseFactorException(
-          "Incorrect request body. Initial is set to false but data says otherwise.");
-    }
-    srsProblemService.saveInitialSrsProblem(problem, solutionDto.getGrade());
+    Boolean isSolutionExisting = solutionRepository.existsByProblemAndUser(problem, user);
+    if (!isSolutionExisting && !solutionDto.getIsInitial() || isSolutionExisting && solutionDto.getIsInitial())
+      throw new InitialSolutionException("Incorrect request body. Initial value is incorrect.");
+    else if (!isSolutionExisting && solutionDto.getIsInitial())
+      srsProblemService.saveInitialSrsProblem(problem, solutionDto.getGrade());
+    solutionService.save(solutionDto.toSolutionEntity(problem, user));
   }
 
   private Problem fetchAndCacheLeetCodeProblem(int id) {
