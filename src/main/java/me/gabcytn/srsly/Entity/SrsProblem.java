@@ -24,7 +24,7 @@ public class SrsProblem {
   @Column(nullable = false)
   private ProblemStatus status = ProblemStatus.NEW;
 
-  @Column(nullable = false, columnDefinition = "DECIMAL(1, 2)")
+  @Column(nullable = false, columnDefinition = "NUMERIC(3, 2)")
   private double easeFactor = 2.5;
 
   @Column(nullable = false)

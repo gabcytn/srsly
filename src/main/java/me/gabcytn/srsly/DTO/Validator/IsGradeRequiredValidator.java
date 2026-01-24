@@ -26,7 +26,7 @@ public class IsEaseFactorRequiredCheckValidator
       context.disableDefaultConstraintViolation();
       context
           .buildConstraintViolationWithTemplate(
-              "Ease factor is required for initial solutions")
+              "Grade is required for initial solutions")
           .addPropertyNode("easeFactor")
           .addConstraintViolation();
       return false;
@@ -36,7 +36,7 @@ public class IsEaseFactorRequiredCheckValidator
       context.disableDefaultConstraintViolation();
       context
           .buildConstraintViolationWithTemplate(
-              "Ease factor must be null for non-initial solutions")
+              "Grade must be null for non-initial solutions")
           .addPropertyNode("easeFactor")
           .addConstraintViolation();
       return false;
