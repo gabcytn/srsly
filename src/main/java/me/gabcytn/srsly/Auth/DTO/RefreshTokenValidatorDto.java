@@ -20,5 +20,6 @@ public class RefreshTokenValidatorDto
     this.key = key;
     this.email = email;
     this.deviceName = deviceName;
+    this.expiresAt = 604800L;
   }
 }
