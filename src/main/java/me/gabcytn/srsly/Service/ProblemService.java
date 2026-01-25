@@ -6,7 +6,6 @@ import me.gabcytn.srsly.DTO.LeetCodeApiPied;
 import me.gabcytn.srsly.DTO.SolutionDto;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.User;
-import me.gabcytn.srsly.Exception.InitialSolutionException;
 import me.gabcytn.srsly.Proxy.LeetCodeQuestionProxy;
 import me.gabcytn.srsly.Repository.ProblemRepository;
 import me.gabcytn.srsly.Repository.SolutionRepository;
@@ -37,11 +36,9 @@ public class ProblemService {
     Problem problem = nullableProblem.orElseGet(() -> fetchAndCacheLeetCodeProblem(problemId));
     User user = userService.getCurrentlyLoggedInUser();
 
-    Boolean isSolutionExisting = solutionRepository.existsByProblemAndUser(problem, user);
-    if (!isSolutionExisting && !solutionDto.getIsInitial() || isSolutionExisting && solutionDto.getIsInitial())
-      throw new InitialSolutionException("Incorrect request body. Initial value is incorrect.");
-    else if (!isSolutionExisting && solutionDto.getIsInitial())
-      srsProblemService.saveInitialSrsProblem(problem, solutionDto.getGrade());
+    if (!solutionRepository.existsByProblemAndUser(problem, user)) {
+      srsProblemService.saveInitialSrsProblem(problem);
+    }
     solutionService.save(solutionDto.toSolutionEntity(problem, user));
   }
 

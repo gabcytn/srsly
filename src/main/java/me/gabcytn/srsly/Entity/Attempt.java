@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
+@Table(name = "attempts")
 public class Attempt {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
