@@ -17,7 +17,7 @@ public class SrsProblemService {
   private final SrsProblemRepository srsProblemRepository;
   private final UserService userService;
 
-  public void saveInitialSrsProblem(Problem problem) {
+  public void saveInitial(Problem problem) {
     SrsProblem srsProblem = new SrsProblem();
     srsProblem.setEaseFactor(2.5);
     srsProblem.setLastAttemptAt(LocalDate.now());
