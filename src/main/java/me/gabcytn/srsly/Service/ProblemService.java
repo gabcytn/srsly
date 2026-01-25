@@ -2,7 +2,7 @@ package me.gabcytn.srsly.Service;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import me.gabcytn.srsly.DTO.LeetCodeApiPied;
+import me.gabcytn.srsly.DTO.ProblemDto;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Proxy.LeetCodeQuestionProxy;
 import me.gabcytn.srsly.Repository.ProblemRepository;
@@ -21,16 +21,16 @@ public class ProblemService {
 	}
 
   private Problem fetchAndCacheLeetCodeProblem(int id) {
-    LeetCodeApiPied apiResponse = fetchApi(id);
+    ProblemDto apiResponse = fetchApi(id);
     sanitizeQuestionContent(apiResponse);
     return problemRepository.save(apiResponse.toProblemEntity());
   }
 
-  private LeetCodeApiPied fetchApi(int id) {
+  private ProblemDto fetchApi(int id) {
     return leetCodeQuestionProxy.getProblem(id);
   }
 
-  private void sanitizeQuestionContent(LeetCodeApiPied problem) {
+  private void sanitizeQuestionContent(ProblemDto problem) {
     problem.setContent(htmlSanitizer.sanitize(problem.getContent()));
   }
 }

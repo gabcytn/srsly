@@ -13,7 +13,8 @@ import me.gabcytn.srsly.Model.Difficulty;
 @NoArgsConstructor
 @Getter
 @Setter
-public class LeetCodeApiPied {
+public class ProblemDto
+{
   @JsonView(Views.Summary.class)
   private int questionFrontendId;
 
