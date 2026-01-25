@@ -58,7 +58,7 @@ public class SrsProblemService {
     } else if (repetitions == 2) {
       interval = 6;
     } else {
-      interval *= (int) updatedEaseFactor;
+      interval = (int) Math.round(interval * updatedEaseFactor);
     }
 
     if (interval >= 60 && repetitions >= 4) {
