@@ -2,14 +2,14 @@ package me.gabcytn.srsly.DTO.Annotation.Validator;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import me.gabcytn.srsly.Controller.ReviewedProblem;
 import me.gabcytn.srsly.DTO.Annotation.IsGradeValid;
 
-public class IsGradeValidAnnotationValidator implements ConstraintValidator<IsGradeValid, Object> {
+public class IsGradeValidAnnotationValidator implements ConstraintValidator<IsGradeValid, Integer> {
   @Override
-  public boolean isValid(Object o, ConstraintValidatorContext constraintValidatorContext) {
-    if (!(o instanceof ReviewedProblem(int grade))) return false;
-
+  public boolean isValid(Integer grade, ConstraintValidatorContext constraintValidatorContext) {
+    if (grade == null) {
+      return true;
+    }
     return grade >= 0 && grade <= 5;
   }
 }
