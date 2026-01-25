@@ -1,14 +1,14 @@
 package me.gabcytn.srsly.Controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.PaginatedSrsProblem;
 import me.gabcytn.srsly.DTO.View.Views;
 import me.gabcytn.srsly.Service.SrsProblemService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
 @RestController
@@ -21,5 +21,12 @@ public class SrsProblemController {
   public PaginatedSrsProblem getTodayProblems(
       @RequestParam(name = "page", required = false, defaultValue = "0") Integer page) {
     return srsProblemService.getTodayProblems(page);
+  }
+
+  @PostMapping("/{id}")
+  public ResponseEntity<Void> save(
+      @PathVariable int id, @RequestBody @Valid ReviewedProblem reviewedProblem) {
+    srsProblemService.saveSubsequent(id, reviewedProblem.grade());
+    return new ResponseEntity<>(HttpStatus.CREATED);
   }
 }
