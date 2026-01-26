@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.PaginatedSrsProblem;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SrsProblem;
+import me.gabcytn.srsly.Exception.EarlyReviewException;
+import me.gabcytn.srsly.Exception.SrsNotFound;
 import me.gabcytn.srsly.Model.ProblemStatus;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
 import org.slf4j.Logger;
@@ -36,8 +38,9 @@ public class SrsProblemService {
   public void saveSubsequent(int id, int grade) {
     Optional<SrsProblem> optionalSrsProblem = srsProblemRepository.findById(id);
     if (optionalSrsProblem.isEmpty()) {
-      LOGGER.error("Invalid SRS. Problem has not been attempted before.");
-      throw new RuntimeException(); // TODO: create custom exception
+      throw new SrsNotFound("Problem has not been solved. Come up with a solution first.");
+    } else if (optionalSrsProblem.get().getNextAttemptAt().isBefore(LocalDate.now())) {
+      throw new EarlyReviewException();
     }
 
     SrsProblem srsProblem = optionalSrsProblem.get();
