@@ -1,6 +1,7 @@
 package me.gabcytn.srsly.Service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.PaginatedSrsProblem;
@@ -37,9 +38,10 @@ public class SrsProblemService {
 
   public void saveSubsequent(int id, int grade) {
     Optional<SrsProblem> optionalSrsProblem = srsProblemRepository.findById(id);
+    LocalDate dateNow = LocalDate.now();
     if (optionalSrsProblem.isEmpty()) {
       throw new SrsNotFound("Problem has not been solved. Come up with a solution first.");
-    } else if (optionalSrsProblem.get().getNextAttemptAt().isBefore(LocalDate.now())) {
+    } else if (optionalSrsProblem.get().getNextAttemptAt().isBefore(dateNow)) {
       throw new EarlyReviewException();
     }
 
@@ -50,6 +52,9 @@ public class SrsProblemService {
     }
 
     double updatedEaseFactor = calculateEaseFactor(srsProblem.getEaseFactor(), grade);
+    if (dateNow.isAfter(srsProblem.getNextAttemptAt()) && grade == 5) {
+      updatedEaseFactor += 0.05;
+    }
     srsProblem.setEaseFactor(updatedEaseFactor);
     srsProblem.setRepetitions(srsProblem.getRepetitions() + 1);
 
@@ -61,7 +66,8 @@ public class SrsProblemService {
     } else if (repetitions == 2) {
       interval = 6;
     } else {
-      interval = (int) Math.round(interval * updatedEaseFactor);
+      double timingMultiplier = this.getTimingMultiplier(srsProblem, dateNow);
+      interval = (int) Math.round(interval * updatedEaseFactor * timingMultiplier);
     }
 
     if (interval >= 60 && repetitions >= 4) {
@@ -72,9 +78,8 @@ public class SrsProblemService {
       srsProblem.setStatus(ProblemStatus.LEARNING);
     }
 
-    LocalDate now = LocalDate.now();
-    srsProblem.setLastAttemptAt(now);
-    srsProblem.setNextAttemptAt(now.plusDays(interval));
+    srsProblem.setLastAttemptAt(dateNow);
+    srsProblem.setNextAttemptAt(dateNow.plusDays(interval));
     srsProblem.setInterval(interval);
 
     this.save(srsProblem);
@@ -103,5 +108,15 @@ public class SrsProblemService {
 
   private double calculateEaseFactor(double oldEaseFactor, int grade) {
     return Math.max(oldEaseFactor + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02)), 1.3);
+  }
+
+  private double getTimingMultiplier(SrsProblem problem, LocalDate dateNow) {
+    double timingMultiplier = 1;
+    if (dateNow.isAfter(problem.getNextAttemptAt())) {
+      long delay = ChronoUnit.DAYS.between(problem.getNextAttemptAt(), dateNow.plusDays(1));
+      double ratio = (double) delay / problem.getInterval();
+      timingMultiplier += (ratio * 0.4);
+    }
+    return timingMultiplier;
   }
 }
