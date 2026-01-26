@@ -6,7 +6,7 @@ import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import me.gabcytn.srsly.DTO.LeetCodeApiPied;
+import me.gabcytn.srsly.DTO.ProblemDto;
 import me.gabcytn.srsly.Model.Difficulty;
 
 @NoArgsConstructor
@@ -53,7 +53,7 @@ public class Problem {
     this.url = url;
   }
 
-  public LeetCodeApiPied toApiPied() {
-    return new LeetCodeApiPied(frontendId, title, question, difficulty, url);
+  public ProblemDto toApiPied() {
+    return new ProblemDto(frontendId, title, question, difficulty, url);
   }
 }

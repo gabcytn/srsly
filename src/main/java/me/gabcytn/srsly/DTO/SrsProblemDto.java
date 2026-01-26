@@ -27,5 +27,5 @@ public class SrsProblemDto {
   private ProblemStatus status;
 
   @JsonView(Views.Summary.class)
-  private LeetCodeApiPied problem;
+  private ProblemDto problem;
 }

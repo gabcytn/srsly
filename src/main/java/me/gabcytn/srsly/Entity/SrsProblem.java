@@ -28,10 +28,10 @@ public class SrsProblem {
   private double easeFactor = 2.5;
 
   @Column(nullable = false)
-  private int repetitions = 1;
+  private int repetitions = 0;
 
   @Column(nullable = false)
-  private int previousInterval = 1;
+  private int interval = 0;
 
   @Column(nullable = false)
   private LocalDate lastAttemptAt;
