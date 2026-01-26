@@ -9,6 +9,7 @@ import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SrsProblem;
 import me.gabcytn.srsly.Exception.EarlyReviewException;
 import me.gabcytn.srsly.Exception.SrsNotFound;
+import me.gabcytn.srsly.Model.Difficulty;
 import me.gabcytn.srsly.Model.ProblemStatus;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
 import org.slf4j.Logger;
@@ -17,6 +18,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import static me.gabcytn.srsly.Model.Difficulty.Easy;
+import static me.gabcytn.srsly.Model.Difficulty.Medium;
 
 @AllArgsConstructor
 @Service
@@ -27,7 +31,7 @@ public class SrsProblemService {
 
   public void saveInitial(Problem problem) {
     SrsProblem srsProblem = new SrsProblem();
-    srsProblem.setEaseFactor(2.5);
+    srsProblem.setEaseFactor(initialEaseFactor(problem.getDifficulty()));
     srsProblem.setLastAttemptAt(LocalDate.now());
     srsProblem.setNextAttemptAt(LocalDate.now().plusDays(1));
     srsProblem.setUser(userService.getCurrentlyLoggedInUser());
@@ -108,6 +112,16 @@ public class SrsProblemService {
 
   private double calculateEaseFactor(double oldEaseFactor, int grade) {
     return Math.max(oldEaseFactor + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02)), 1.3);
+  }
+
+  private double initialEaseFactor(Difficulty difficulty) {
+    if (difficulty == Easy) {
+      return 2.6;
+    } else if (difficulty == Medium) {
+      return 2.4;
+    } else {
+      return 2.2;
+    }
   }
 
   private double getTimingMultiplier(SrsProblem problem, LocalDate dateNow) {

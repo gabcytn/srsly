@@ -25,7 +25,7 @@ public class SrsProblem {
   private ProblemStatus status = ProblemStatus.NEW;
 
   @Column(nullable = false)
-  private double easeFactor = 2.5;
+  private double easeFactor;
 
   @Column(nullable = false)
   private int repetitions = 0;
