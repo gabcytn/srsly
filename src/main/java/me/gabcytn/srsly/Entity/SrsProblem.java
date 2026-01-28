@@ -1,16 +1,16 @@
 package me.gabcytn.srsly.Entity;
 
+import static me.gabcytn.srsly.Model.Difficulty.Easy;
+import static me.gabcytn.srsly.Model.Difficulty.Medium;
+
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import me.gabcytn.srsly.DTO.SrsProblemDto;
 import me.gabcytn.srsly.Model.ProblemStatus;
 
 @NoArgsConstructor
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Setter
 @Getter
 @Entity
@@ -20,32 +20,51 @@ public class SrsProblem {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private int id;
 
+  @NonNull
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private ProblemStatus status = ProblemStatus.NEW;
+  private ProblemStatus status;
 
+  @NonNull
   @Column(nullable = false)
-  private double easeFactor;
+  private Double easeFactor;
 
+  @NonNull
   @Column(nullable = false)
-  private int repetitions = 0;
+  private Integer repetitions;
 
+  @NonNull
   @Column(nullable = false)
-  private int interval = 0;
+  private Integer interval;
 
+  @NonNull
   @Column(nullable = false)
   private LocalDate lastAttemptAt;
 
+  @NonNull
   @Column(nullable = false)
   private LocalDate nextAttemptAt;
 
+  @NonNull
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
+  @NonNull
   @ManyToOne
   @JoinColumn(name = "problem_id", nullable = false)
   private Problem problem;
+
+  public static SrsProblem ofInitial(User user, Problem problem) {
+    double easeFactor;
+    if (problem.getDifficulty().equals(Easy)) easeFactor = 2.6;
+    else if (problem.getDifficulty().equals(Medium)) easeFactor = 2.4;
+    else easeFactor = 2.2;
+
+    LocalDate dateNow = LocalDate.now();
+    return new SrsProblem(
+        ProblemStatus.NEW, easeFactor, 0, 1, dateNow, dateNow.plusDays(1), user, problem);
+  }
 
   public SrsProblemDto toDto() {
     SrsProblemDto dto = new SrsProblemDto();
