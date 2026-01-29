@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SolutionRepository extends CrudRepository<Solution, Integer> {
 	Boolean existsByProblemAndUser(Problem problem, User user);
+	Integer countByProblemAndUser(Problem problem, User user);
 }

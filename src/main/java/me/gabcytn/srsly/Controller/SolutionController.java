@@ -2,6 +2,7 @@ package me.gabcytn.srsly.Controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import me.gabcytn.srsly.DTO.InitialSolutionDto;
 import me.gabcytn.srsly.DTO.SolutionDto;
 import me.gabcytn.srsly.Service.SolutionService;
 import org.springframework.http.HttpStatus;
@@ -17,9 +18,14 @@ public class SolutionController {
   @PostMapping("/problems/{problemId}/solutions")
   public ResponseEntity<Void> save(
       @PathVariable int problemId, @RequestBody @Valid SolutionDto solutionDto) {
-    solutionService.saveToProblem(solutionDto, problemId);
+    solutionService.saveSubsequentToProblem(solutionDto, problemId);
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
-  // TODO: get paginated solutions to a problem
+  @PostMapping("/problems/{problemId}/solutions/initial")
+  public ResponseEntity<Void> initialSolution(
+      @PathVariable int problemId, @RequestBody @Valid InitialSolutionDto initialSolutionDto) {
+    solutionService.saveInitialToProblem(initialSolutionDto, problemId);
+    return new ResponseEntity<>(HttpStatus.CREATED);
+  }
 }
