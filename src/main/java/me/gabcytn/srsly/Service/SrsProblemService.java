@@ -1,14 +1,20 @@
 package me.gabcytn.srsly.Service;
 
+import static me.gabcytn.srsly.Model.Confidence.*;
+import static me.gabcytn.srsly.Model.Difficulty.*;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import me.gabcytn.srsly.DTO.InitialSolutionDto;
 import me.gabcytn.srsly.DTO.PaginatedSrsProblem;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SrsProblem;
+import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Exception.EarlyReviewException;
 import me.gabcytn.srsly.Exception.SrsNotFound;
+import me.gabcytn.srsly.Model.Confidence;
 import me.gabcytn.srsly.Model.ProblemStatus;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
 import org.slf4j.Logger;
@@ -25,15 +31,24 @@ public class SrsProblemService {
   private final SrsProblemRepository srsProblemRepository;
   private final UserService userService;
 
-  public void saveInitial(Problem problem) {
-    SrsProblem srsProblem = new SrsProblem();
-    srsProblem.setEaseFactor(2.5);
-    srsProblem.setLastAttemptAt(LocalDate.now());
-    srsProblem.setNextAttemptAt(LocalDate.now().plusDays(1));
-    srsProblem.setUser(userService.getCurrentlyLoggedInUser());
-    srsProblem.setProblem(problem);
+  public void saveInitial(InitialSolutionDto initialSolution, Problem problem, User user) {
+    int reps = initialReps(initialSolution.repetitions());
+    if (reps == 0) {
+      this.save(SrsProblem.ofInitial(user, problem));
+      return;
+    }
 
-    this.save(srsProblem);
+    LocalDate dateNow = LocalDate.now();
+    LocalDate lastReview = initialSolution.lastReviewedAt();
+    double easeFactor = initialEaseFactor(initialSolution.confidence(), problem);
+    int initialInterval = initialInterval(reps, easeFactor);
+    int interval = (int) Math.min(initialInterval, dateDifference(lastReview, dateNow));
+    LocalDate nextReview = lastReview.plusDays(interval);
+
+    ProblemStatus status = reps <= 2 ? ProblemStatus.LEARNING : ProblemStatus.REVIEWING;
+
+    this.save(
+        new SrsProblem(status, easeFactor, reps, interval, lastReview, nextReview, user, problem));
   }
 
   public void saveSubsequent(int id, int grade) {
@@ -41,7 +56,7 @@ public class SrsProblemService {
     LocalDate dateNow = LocalDate.now();
     if (optionalSrsProblem.isEmpty()) {
       throw new SrsNotFound("Problem has not been solved. Come up with a solution first.");
-    } else if (optionalSrsProblem.get().getNextAttemptAt().isBefore(dateNow)) {
+    } else if (dateNow.isBefore(optionalSrsProblem.get().getNextAttemptAt())) {
       throw new EarlyReviewException();
     }
 
@@ -106,6 +121,30 @@ public class SrsProblemService {
     return new PaginatedSrsProblem(paginatedSrsProblems);
   }
 
+  private double initialEaseFactor(Confidence confidence, Problem problem) {
+    double easeFactor = 2.4;
+    if (confidence == LOW) easeFactor -= 0.2;
+    else if (confidence == HIGH) easeFactor += 0.2;
+
+    if (problem.getDifficulty() == Easy) easeFactor += 0.1;
+    else if (problem.getDifficulty() == Hard) easeFactor -= 0.1;
+
+    return Math.min(easeFactor, 2.6);
+  }
+
+  private int initialReps(int repetitions) {
+    int reps = repetitions;
+    if (reps == 3) reps = 2;
+    else if (reps >= 4) reps = 3;
+    return reps;
+  }
+
+  private int initialInterval(int repetitions, double easeFactor) {
+    if (repetitions == 0 || repetitions == 1) return 1;
+    else if (repetitions == 2) return 6;
+    else return (int) Math.round(6 * Math.pow(easeFactor, repetitions - 2));
+  }
+
   private double calculateEaseFactor(double oldEaseFactor, int grade) {
     return Math.max(oldEaseFactor + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02)), 1.3);
   }
@@ -113,10 +152,14 @@ public class SrsProblemService {
   private double getTimingMultiplier(SrsProblem problem, LocalDate dateNow) {
     double timingMultiplier = 1;
     if (dateNow.isAfter(problem.getNextAttemptAt())) {
-      long delay = ChronoUnit.DAYS.between(problem.getNextAttemptAt(), dateNow.plusDays(1));
+      long delay = dateDifference(problem.getNextAttemptAt(), dateNow.plusDays(1));
       double ratio = (double) delay / problem.getInterval();
       timingMultiplier += (ratio * 0.4);
     }
     return timingMultiplier;
+  }
+
+  private long dateDifference(LocalDate from, LocalDate to) {
+    return ChronoUnit.DAYS.between(from, to);
   }
 }

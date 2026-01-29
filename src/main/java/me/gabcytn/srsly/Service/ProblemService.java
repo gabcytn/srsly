@@ -16,7 +16,7 @@ public class ProblemService {
   private final LeetCodeQuestionProxy leetCodeQuestionProxy;
 
   public Problem findByFrontendId(int frontendId) {
-    Optional<Problem> nullableProblem = problemRepository.findById(frontendId);
+    Optional<Problem> nullableProblem = problemRepository.findByFrontendId(frontendId);
 		return nullableProblem.orElseGet(() -> fetchAndCacheLeetCodeProblem(frontendId));
 	}
 
