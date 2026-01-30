@@ -9,6 +9,7 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.InitialSolutionDto;
 import me.gabcytn.srsly.DTO.PaginatedSrsProblem;
+import me.gabcytn.srsly.Entity.Attempt;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SrsProblem;
 import me.gabcytn.srsly.Entity.User;
@@ -30,11 +31,13 @@ public class SrsProblemService {
   private static final Logger LOGGER = LoggerFactory.getLogger(SrsProblemService.class);
   private final SrsProblemRepository srsProblemRepository;
   private final UserService userService;
+  private final AttemptService attemptService;
 
   public void saveInitial(InitialSolutionDto initialSolution, Problem problem, User user) {
     int reps = initialReps(initialSolution.repetitions());
     if (reps == 0) {
-      this.save(SrsProblem.ofInitial(user, problem));
+      SrsProblem srsProblem = this.save(SrsProblem.ofInitial(user, problem));
+      attemptService.save(Attempt.fromSrsProblem(srsProblem));
       return;
     }
 
@@ -47,8 +50,9 @@ public class SrsProblemService {
 
     ProblemStatus status = reps <= 2 ? ProblemStatus.LEARNING : ProblemStatus.REVIEWING;
 
-    this.save(
+    SrsProblem srsProblem = this.save(
         new SrsProblem(status, easeFactor, reps, interval, lastReview, nextReview, user, problem));
+    attemptService.save(Attempt.fromSrsProblem(srsProblem));
   }
 
   public void saveSubsequent(int id, int grade) {
@@ -97,7 +101,8 @@ public class SrsProblemService {
     srsProblem.setNextAttemptAt(dateNow.plusDays(interval));
     srsProblem.setInterval(interval);
 
-    this.save(srsProblem);
+    SrsProblem savedProblem = this.save(srsProblem);
+    attemptService.save(Attempt.fromSrsProblem(savedProblem, grade));
   }
 
   private void reviewFailed(SrsProblem srsProblem) {
@@ -106,11 +111,12 @@ public class SrsProblemService {
     srsProblem.setInterval(1);
     srsProblem.setStatus(ProblemStatus.LEARNING);
     srsProblem.setNextAttemptAt(LocalDate.now().plusDays(1));
-    this.save(srsProblem);
+    SrsProblem savedProblem = this.save(srsProblem);
+    attemptService.save(Attempt.fromSrsProblem(savedProblem));
   }
 
-  public void save(SrsProblem srsProblem) {
-    srsProblemRepository.save(srsProblem);
+  public SrsProblem save(SrsProblem srsProblem) {
+    return srsProblemRepository.save(srsProblem);
   }
 
   public PaginatedSrsProblem getTodayProblems(int page) {
