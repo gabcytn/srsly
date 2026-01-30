@@ -1,35 +1,63 @@
 package me.gabcytn.srsly.Entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.time.LocalDate;
+import lombok.*;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
 @Table(name = "attempts")
 public class Attempt {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private int id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long id;
 
-	@Column(nullable = false)
-	private int grade;
+  @NonNull
+  @Column(nullable = false)
+  private Double easeFactor;
 
-	@Column(nullable = false)
-	private LocalDate attemptedAt;
+  private Integer grade;
 
-	@ManyToOne
-	@JoinColumn(name = "problem_id", nullable = false)
-	private Problem problem;
+  @NonNull
+  @Column(nullable = false)
+  private LocalDate attemptedAt;
 
-	@ManyToOne
-	@JoinColumn(name = "user_id", nullable = false)
-	private User user;
+  @NonNull
+  @ManyToOne
+  @JoinColumn(name = "problem_id", nullable = false)
+  private Problem problem;
+
+  @NonNull
+  @ManyToOne
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
+
+  public Attempt(
+      Double easeFactor, Integer grade, LocalDate attemptedAt, Problem problem, User user) {
+    this.easeFactor = easeFactor;
+    this.grade = grade;
+    this.attemptedAt = attemptedAt;
+    this.problem = problem;
+    this.user = user;
+  }
+
+  public static Attempt fromSrsProblem(SrsProblem problem) {
+    return new Attempt(
+        problem.getEaseFactor(),
+        problem.getLastAttemptAt(),
+        problem.getProblem(),
+        problem.getUser());
+  }
+
+  public static Attempt fromSrsProblem(SrsProblem problem, int grade) {
+    return new Attempt(
+        problem.getEaseFactor(),
+        grade,
+        problem.getLastAttemptAt(),
+        problem.getProblem(),
+        problem.getUser());
+  }
 }
