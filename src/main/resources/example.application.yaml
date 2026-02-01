@@ -10,11 +10,17 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  ai:
+    google:
+      genai:
+        api-key: <api-key>
+    retry:
+      max-attempts: 2
 
 security:
   jwt:
-    secret-key:
-    expiration-time:
+    secret-key: <secret-key>
+    expiration-time: <expiration-time>
 
 
 

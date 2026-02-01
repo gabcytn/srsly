@@ -4,13 +4,17 @@ import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.InitialSolutionDto;
 import me.gabcytn.srsly.DTO.SolutionDto;
 import me.gabcytn.srsly.Entity.Problem;
+import me.gabcytn.srsly.Entity.Solution;
 import me.gabcytn.srsly.Entity.User;
+import me.gabcytn.srsly.Exception.GenericNotFoundException;
 import me.gabcytn.srsly.Exception.SolutionException;
 import me.gabcytn.srsly.Repository.SolutionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -46,5 +50,14 @@ public class SolutionService {
     }
     srsProblemService.saveInitial(initialSolutionDto, problem, user);
     solutionRepository.save(initialSolutionDto.solutionDto().toSolutionEntity(problem, user));
+  }
+
+  public Solution findById(int id) {
+    Optional<Solution> solution = solutionRepository.findById(id);
+    if (solution.isPresent()) {
+      return solution.get();
+    }
+
+    throw new GenericNotFoundException("Solution not found.");
   }
 }
