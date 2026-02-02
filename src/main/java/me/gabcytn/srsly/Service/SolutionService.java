@@ -1,5 +1,7 @@
 package me.gabcytn.srsly.Service;
 
+import java.util.List;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.InitialSolutionDto;
 import me.gabcytn.srsly.DTO.SolutionDto;
@@ -13,8 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -63,5 +63,12 @@ public class SolutionService {
 
   public void save(Solution solution) {
     solutionRepository.save(solution);
+  }
+
+  public List<Solution> getSolutions(int problemId) {
+    Problem problem = problemService.findByFrontendId(problemId);
+    User user = userService.getCurrentlyLoggedInUser();
+
+    return solutionRepository.findAllByProblemAndUser(problem, user);
   }
 }

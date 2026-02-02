@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.gabcytn.srsly.AI.AiCritique;
+import me.gabcytn.srsly.DTO.SolutionDto;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -44,4 +45,8 @@ public class Solution {
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
+
+  public SolutionDto toDto() {
+    return new SolutionDto(code, title, aiCritique, note);
+  }
 }
