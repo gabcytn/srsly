@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import me.gabcytn.srsly.AI.AiCritique;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.Solution;
 import me.gabcytn.srsly.Entity.User;
@@ -23,12 +24,14 @@ public class SolutionDto {
   @NotBlank(message = "Title must not be blank.")
   private String title;
 
+  private AiCritique aiCritique;
   private String note;
 
   public Solution toSolutionEntity(Problem problem, User user) {
     Solution s = new Solution();
     s.setCode(code);
     s.setTitle(title);
+    s.setAiCritique(aiCritique);
     s.setNote(note);
     s.setProblem(problem);
     s.setUser(user);
