@@ -12,28 +12,28 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class AiService {
-	private final ChatModel chatModel;
-	private final SolutionService solutionService;
+  private final ChatModel chatModel;
+  private final SolutionService solutionService;
 
-	public AiCritique critique(int solutionId) {
-		Solution solution = solutionService.findById(solutionId);
-		String problemDescription = Jsoup.parse(solution.getProblem().getQuestion()).text();
-		String model = "gemini-2.5-flash-lite";
-		AiCritique response =
-				ChatClient.create(chatModel)
-						.prompt()
-						.options(GoogleGenAiChatOptions.builder().model(model).build())
-						.system(
-								"""
+  public AiCritique critique(int solutionId) {
+    Solution solution = solutionService.findById(solutionId);
+    String problemDescription = Jsoup.parse(solution.getProblem().getQuestion()).text();
+    String model = "gemini-2.5-flash-lite";
+    AiCritique response =
+        ChatClient.create(chatModel)
+            .prompt()
+            .options(GoogleGenAiChatOptions.builder().model(model).build())
+            .system(
+                """
 				You are a senior software engineer and algorithm reviewer.
 				Your task is to analyze a given LeetCode solution and evaluate it objectively.
 				Do not assume correctness. Verify it.
 				Be strict, technical, and concise.
 				""")
-						.user(
-								u ->
-										u.text(
-														"""
+            .user(
+                u ->
+                    u.text(
+                            """
 				You are given:
 				1. The LeetCode problem description
 				2. The submitted solution code
@@ -49,13 +49,13 @@ public class AiService {
 					- "problem": "{problem}",
 					- "solution": "{solution}"
 				""")
-												.param("problem", problemDescription)
-												.param("solution", solution.getCode()))
-						.call()
-						.entity(AiCritique.class);
+                        .param("problem", problemDescription)
+                        .param("solution", solution.getCode()))
+            .call()
+            .entity(AiCritique.class);
 
-		solution.setAiCritique(response);
-		solutionService.save(solution);
-		return response;
-	}
+    solution.setAiCritique(response);
+    solutionService.save(solution);
+    return response;
+  }
 }
