@@ -2,7 +2,7 @@ package me.gabcytn.srsly.AI;
 
 import me.gabcytn.srsly.AI.Response.*;
 
-public record AiResponse(
+public record AiCritique(
     Summary summary,
     Correctness correctness,
     Complexity complexity,

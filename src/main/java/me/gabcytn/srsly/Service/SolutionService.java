@@ -36,7 +36,7 @@ public class SolutionService {
     if (solutionRepository.countByProblemAndUser(problem, user) >= 5) {
       throw new SolutionException("Unable to save more than 5 solutions to a problem");
     }
-    solutionRepository.save(solutionDto.toSolutionEntity(problem, user));
+    this.save(solutionDto.toSolutionEntity(problem, user));
   }
 
   @Transactional
@@ -49,7 +49,7 @@ public class SolutionService {
           "Unable to save non-initial solution. User must hit 'POST /solutions' for already solved problems.");
     }
     srsProblemService.saveInitial(initialSolutionDto, problem, user);
-    solutionRepository.save(initialSolutionDto.solutionDto().toSolutionEntity(problem, user));
+    this.save(initialSolutionDto.solutionDto().toSolutionEntity(problem, user));
   }
 
   public Solution findById(int id) {
@@ -59,5 +59,9 @@ public class SolutionService {
     }
 
     throw new GenericNotFoundException("Solution not found.");
+  }
+
+  public void save(Solution solution) {
+    solutionRepository.save(solution);
   }
 }

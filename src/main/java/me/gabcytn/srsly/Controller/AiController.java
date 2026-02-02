@@ -1,7 +1,7 @@
 package me.gabcytn.srsly.Controller;
 
 import lombok.RequiredArgsConstructor;
-import me.gabcytn.srsly.AI.AiResponse;
+import me.gabcytn.srsly.AI.AiCritique;
 import me.gabcytn.srsly.Entity.Solution;
 import me.gabcytn.srsly.Service.SolutionService;
 import org.jsoup.Jsoup;
@@ -21,11 +21,11 @@ public class AiController {
   private final SolutionService solutionService;
 
   @GetMapping("/{solutionId}/ai")
-  public AiResponse index(@PathVariable int solutionId) {
+  public AiCritique index(@PathVariable int solutionId) {
     Solution solution = solutionService.findById(solutionId);
 		String problemDescription = Jsoup.parse(solution.getProblem().getQuestion()).text();
     String model = "gemini-2.5-flash-lite";
-    AiResponse response =
+    AiCritique response =
         ChatClient.create(chatModel)
             .prompt()
             .options(GoogleGenAiChatOptions.builder().model(model).build())
@@ -58,9 +58,10 @@ public class AiController {
                         .param("problem", problemDescription)
                         .param("solution", solution.getCode()))
             .call()
-            .entity(AiResponse.class);
+            .entity(AiCritique.class);
 
-		// TODO: save AiResponse in solutions table
+		solution.setAiCritique(response);
+		solutionService.save(solution);
     return response;
   }
 }
