@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import me.gabcytn.srsly.AI.AiCritique;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,8 +31,9 @@ public class Solution {
   @Column(nullable = false, columnDefinition = "TEXT")
   private String code;
 
-  @Column(columnDefinition = "TEXT")
-  private String aiCritique;
+  @JdbcTypeCode(SqlTypes.JSON)
+  private AiCritique aiCritique;
+
   @Column(columnDefinition = "TEXT")
   private String note;
 
