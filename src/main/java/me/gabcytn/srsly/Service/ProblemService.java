@@ -26,7 +26,7 @@ public class ProblemService {
   private Problem fetchAndCacheLeetCodeProblem(int id) {
     ProblemDto apiResponse = fetchApi(id);
     sanitizeQuestionContent(apiResponse);
-    List<Tag> tags = tagService.save(apiResponse.getTopicTags());
+    List<Tag> tags = tagService.saveAll(apiResponse.getTopicTags());
     return problemRepository.save(apiResponse.toProblemEntity(tags));
   }
 
