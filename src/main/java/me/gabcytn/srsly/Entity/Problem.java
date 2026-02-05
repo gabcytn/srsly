@@ -1,12 +1,14 @@
 package me.gabcytn.srsly.Entity;
 
 import jakarta.persistence.*;
+import java.util.List;
 import java.util.Set;
-
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.gabcytn.srsly.DTO.ProblemDto;
+import me.gabcytn.srsly.DTO.TagDto;
 import me.gabcytn.srsly.Model.Difficulty;
 
 @NoArgsConstructor
@@ -45,15 +47,21 @@ public class Problem {
       inverseJoinColumns = @JoinColumn(name = "tag_id", nullable = false))
   private Set<Tag> tags;
 
-  public Problem(int id, String title, String question, Difficulty difficulty, String url) {
+  public Problem(
+      int id, String title, String question, Difficulty difficulty, Set<Tag> tags, String url) {
     this.frontendId = id;
     this.title = title;
     this.question = question;
     this.difficulty = difficulty;
+    this.tags = tags;
     this.url = url;
   }
 
   public ProblemDto toApiPied() {
-    return new ProblemDto(frontendId, title, question, difficulty, url);
+    return new ProblemDto(frontendId, title, question, difficulty, getTagNames(), url);
+  }
+
+  private List<TagDto> getTagNames() {
+    return tags.stream().map(i -> new TagDto(i.getName())).collect(Collectors.toList());
   }
 }
