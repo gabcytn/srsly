@@ -1,20 +1,20 @@
 package me.gabcytn.srsly.DTO;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.util.HashSet;
+import java.util.List;
+import lombok.*;
 import me.gabcytn.srsly.DTO.View.Views;
 import me.gabcytn.srsly.Entity.Problem;
+import me.gabcytn.srsly.Entity.Tag;
 import me.gabcytn.srsly.Model.Difficulty;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class ProblemDto
-{
+@ToString
+public class ProblemDto {
   @JsonView(Views.Summary.class)
   private int questionFrontendId;
 
@@ -28,9 +28,12 @@ public class ProblemDto
   private Difficulty difficulty;
 
   @JsonView(Views.Summary.class)
+  private List<TagDto> topicTags;
+
+  @JsonView(Views.Summary.class)
   private String url;
 
-  public Problem toProblemEntity() {
-    return new Problem(questionFrontendId, title, content, difficulty, url);
+  public Problem toProblemEntity(List<Tag> tags) {
+    return new Problem(questionFrontendId, title, content, difficulty, new HashSet<>(tags), url);
   }
 }
