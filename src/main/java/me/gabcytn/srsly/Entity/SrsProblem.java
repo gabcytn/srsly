@@ -14,7 +14,12 @@ import me.gabcytn.srsly.Model.ProblemStatus;
 @Setter
 @Getter
 @Entity
-@Table(name = "srs_problems")
+@Table(
+    name = "srs_problems",
+    indexes = {
+      @Index(name = "srs_idx_problem", columnList = "problem_id"),
+      @Index(name = "srs_idx_user", columnList = "user_id")
+    })
 public class SrsProblem {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)

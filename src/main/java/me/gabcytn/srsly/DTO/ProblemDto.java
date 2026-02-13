@@ -9,27 +9,36 @@ import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.Tag;
 import me.gabcytn.srsly.Model.Difficulty;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @ToString
 public class ProblemDto {
+  @NonNull
   @JsonView(Views.Summary.class)
-  private int questionFrontendId;
+  private Integer questionFrontendId;
 
+  @NonNull
   @JsonView(Views.Summary.class)
   private String title;
 
+  @NonNull
   @JsonView(Views.Detailed.class)
   private String content;
 
+  @JsonView(Views.Detailed.class)
+  private Boolean isSolved;
+
+  @NonNull
   @JsonView(Views.Summary.class)
   private Difficulty difficulty;
 
+  @NonNull
   @JsonView(Views.Summary.class)
   private List<TagDto> topicTags;
 
+  @NonNull
   @JsonView(Views.Summary.class)
   private String url;
 
