@@ -1,10 +1,10 @@
 package me.gabcytn.srsly.Auth.Service;
 
+import java.util.Optional;
 import lombok.AllArgsConstructor;
-import me.gabcytn.srsly.Auth.DTO.LoginResponseDto;
-import me.gabcytn.srsly.Auth.DTO.LoginUserDto;
+import me.gabcytn.srsly.Auth.DTO.AuthUserDto;
+import me.gabcytn.srsly.Auth.DTO.JwtResponse;
 import me.gabcytn.srsly.Auth.DTO.RefreshTokenValidatorDto;
-import me.gabcytn.srsly.Auth.DTO.RegisterUserDto;
 import me.gabcytn.srsly.Auth.Exception.DuplicateEmailException;
 import me.gabcytn.srsly.Auth.Exception.RefreshTokenException;
 import me.gabcytn.srsly.Auth.Exception.UnauthenticatedException;
@@ -18,8 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 @AllArgsConstructor
 public class AuthService {
@@ -30,16 +28,17 @@ public class AuthService {
   private final JwtService jwtService;
   private final RefreshTokenService refreshTokenService;
 
-  public void signup(RegisterUserDto user) {
+  public JwtResponse signup(AuthUserDto user) {
     if (userRepository.existsByEmail(user.getEmail())) {
       throw new DuplicateEmailException();
     }
     User toSave =
         User.ofEmailAndPassword(user.getEmail(), passwordEncoder.encode(user.getPassword()));
     userRepository.save(toSave);
+    return this.authenticate(user);
   }
 
-  public LoginResponseDto authenticate(LoginUserDto user) {
+  public JwtResponse authenticate(AuthUserDto user) {
     Authentication authToken =
         new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
     Authentication authentication = authenticationManager.authenticate(authToken);
@@ -47,7 +46,7 @@ public class AuthService {
     if (!authentication.isAuthenticated()) throw new UnauthenticatedException("User not found");
 
     String token = jwtService.generateToken(user.getEmail());
-    return new LoginResponseDto(token, jwtService.getExpirationTime());
+    return new JwtResponse(token, jwtService.getExpirationTime());
   }
 
   public void generateRefreshToken(String userEmail, String userDeviceName) {
@@ -57,8 +56,9 @@ public class AuthService {
     refreshTokenService.save(tokenValidatorDto);
   }
 
-  public LoginResponseDto newJwt(String refreshTokenKey, String requestDeviceName) {
-    Optional<RefreshTokenValidatorDto> optionalValidator = refreshTokenService.find(refreshTokenKey);
+  public JwtResponse newJwt(String refreshTokenKey, String requestDeviceName) {
+    Optional<RefreshTokenValidatorDto> optionalValidator =
+        refreshTokenService.find(refreshTokenKey);
     if (optionalValidator.isEmpty()) {
       LOG.error("Null validator.");
       throw new RefreshTokenException("Refresh token not found.");
@@ -71,6 +71,6 @@ public class AuthService {
     refreshTokenService.delete(refreshTokenKey);
     generateRefreshToken(validator.getEmail(), validator.getDeviceName());
     String jwt = jwtService.generateToken(validator.getEmail());
-    return new LoginResponseDto(jwt, jwtService.getExpirationTime());
+    return new JwtResponse(jwt, jwtService.getExpirationTime());
   }
 }
