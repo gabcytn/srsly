@@ -1,10 +1,9 @@
 package me.gabcytn.srsly.Auth.Controller;
 
 import jakarta.validation.Valid;
+import me.gabcytn.srsly.Auth.DTO.AuthUserDto;
 import me.gabcytn.srsly.Auth.DTO.LoginResponseDto;
-import me.gabcytn.srsly.Auth.DTO.LoginUserDto;
 import me.gabcytn.srsly.Auth.DTO.RefreshTokenRequestDto;
-import me.gabcytn.srsly.Auth.DTO.RegisterUserDto;
 import me.gabcytn.srsly.Auth.Service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +19,15 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public ResponseEntity<Void> register(@RequestBody @Valid RegisterUserDto user) {
-    authService.signup(user);
-    return new ResponseEntity<>(HttpStatus.CREATED);
+  public LoginResponseDto register(@RequestBody @Valid AuthUserDto user) {
+    LoginResponseDto response = authService.signup(user);
+    authService.generateRefreshToken(user.getEmail(), user.getDeviceName());
+    return response;
   }
 
   @PostMapping("/login")
   public LoginResponseDto login(
-      @RequestBody @Valid LoginUserDto user,
+      @RequestBody @Valid AuthUserDto user,
       @CookieValue(value = "X-REFRESH-TOKEN", required = false) String refreshToken) {
     LoginResponseDto response = authService.authenticate(user);
     if (refreshToken == null) {

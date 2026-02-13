@@ -1,10 +1,10 @@
 package me.gabcytn.srsly.Auth.Service;
 
+import java.util.Optional;
 import lombok.AllArgsConstructor;
+import me.gabcytn.srsly.Auth.DTO.AuthUserDto;
 import me.gabcytn.srsly.Auth.DTO.LoginResponseDto;
-import me.gabcytn.srsly.Auth.DTO.LoginUserDto;
 import me.gabcytn.srsly.Auth.DTO.RefreshTokenValidatorDto;
-import me.gabcytn.srsly.Auth.DTO.RegisterUserDto;
 import me.gabcytn.srsly.Auth.Exception.DuplicateEmailException;
 import me.gabcytn.srsly.Auth.Exception.RefreshTokenException;
 import me.gabcytn.srsly.Auth.Exception.UnauthenticatedException;
@@ -18,8 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 @AllArgsConstructor
 public class AuthService {
@@ -30,16 +28,17 @@ public class AuthService {
   private final JwtService jwtService;
   private final RefreshTokenService refreshTokenService;
 
-  public void signup(RegisterUserDto user) {
+  public LoginResponseDto signup(AuthUserDto user) {
     if (userRepository.existsByEmail(user.getEmail())) {
       throw new DuplicateEmailException();
     }
     User toSave =
         User.ofEmailAndPassword(user.getEmail(), passwordEncoder.encode(user.getPassword()));
     userRepository.save(toSave);
+    return this.authenticate(user);
   }
 
-  public LoginResponseDto authenticate(LoginUserDto user) {
+  public LoginResponseDto authenticate(AuthUserDto user) {
     Authentication authToken =
         new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
     Authentication authentication = authenticationManager.authenticate(authToken);
@@ -58,7 +57,8 @@ public class AuthService {
   }
 
   public LoginResponseDto newJwt(String refreshTokenKey, String requestDeviceName) {
-    Optional<RefreshTokenValidatorDto> optionalValidator = refreshTokenService.find(refreshTokenKey);
+    Optional<RefreshTokenValidatorDto> optionalValidator =
+        refreshTokenService.find(refreshTokenKey);
     if (optionalValidator.isEmpty()) {
       LOG.error("Null validator.");
       throw new RefreshTokenException("Refresh token not found.");

@@ -12,7 +12,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class LoginUserDto {
+public class AuthUserDto {
   @NotNull(message = "Email is required.")
   @NotBlank(message = "Email must not be blank.")
   @Email
