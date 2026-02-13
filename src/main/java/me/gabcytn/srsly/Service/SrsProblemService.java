@@ -18,8 +18,6 @@ import me.gabcytn.srsly.Exception.SrsNotFound;
 import me.gabcytn.srsly.Model.Confidence;
 import me.gabcytn.srsly.Model.ProblemStatus;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +26,6 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Service
 public class SrsProblemService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(SrsProblemService.class);
   private final SrsProblemRepository srsProblemRepository;
   private final UserService userService;
   private final AttemptService attemptService;
@@ -125,6 +122,10 @@ public class SrsProblemService {
         srsProblemRepository.findByUserAndNextAttemptAt(
             userService.getCurrentlyLoggedInUser(), LocalDate.now(), pageable);
     return new PaginatedSrsProblem(paginatedSrsProblems);
+  }
+
+  public Boolean existsByProblemAndUser(Problem problem, User user) {
+    return srsProblemRepository.existsByProblemAndUser(problem, user);
   }
 
   private double initialEaseFactor(Confidence confidence, Problem problem) {

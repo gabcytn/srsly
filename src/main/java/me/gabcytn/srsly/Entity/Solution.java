@@ -18,8 +18,8 @@ import org.hibernate.type.SqlTypes;
 @Table(
     name = "solutions",
     indexes = {
-      @Index(name = "idx_problem", columnList = "problem_id"),
-      @Index(name = "idx_user", columnList = "user_id")
+      @Index(name = "sol_idx_problem", columnList = "problem_id"),
+      @Index(name = "sol_idx_user", columnList = "user_id")
     })
 public class Solution {
   @Id
