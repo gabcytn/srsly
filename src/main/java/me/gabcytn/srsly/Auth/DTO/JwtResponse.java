@@ -9,7 +9,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class LoginResponseDto {
+public class JwtResponse
+{
   private String token;
   private long expiresIn;
 }

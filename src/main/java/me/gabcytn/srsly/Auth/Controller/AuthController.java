@@ -2,7 +2,7 @@ package me.gabcytn.srsly.Auth.Controller;
 
 import jakarta.validation.Valid;
 import me.gabcytn.srsly.Auth.DTO.AuthUserDto;
-import me.gabcytn.srsly.Auth.DTO.LoginResponseDto;
+import me.gabcytn.srsly.Auth.DTO.JwtResponse;
 import me.gabcytn.srsly.Auth.DTO.RefreshTokenRequestDto;
 import me.gabcytn.srsly.Auth.Service.AuthService;
 import org.springframework.http.HttpStatus;
@@ -19,17 +19,17 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public LoginResponseDto register(@RequestBody @Valid AuthUserDto user) {
-    LoginResponseDto response = authService.signup(user);
+  public JwtResponse register(@RequestBody @Valid AuthUserDto user) {
+    JwtResponse response = authService.signup(user);
     authService.generateRefreshToken(user.getEmail(), user.getDeviceName());
     return response;
   }
 
   @PostMapping("/login")
-  public LoginResponseDto login(
+  public JwtResponse login(
       @RequestBody @Valid AuthUserDto user,
       @CookieValue(value = "X-REFRESH-TOKEN", required = false) String refreshToken) {
-    LoginResponseDto response = authService.authenticate(user);
+    JwtResponse response = authService.authenticate(user);
     if (refreshToken == null) {
       authService.generateRefreshToken(user.getEmail(), user.getDeviceName());
     }
@@ -37,10 +37,10 @@ public class AuthController {
   }
 
   @PostMapping("/refresh-token")
-  public ResponseEntity<LoginResponseDto> refreshToken(
+  public ResponseEntity<JwtResponse> refreshToken(
       @RequestBody @Valid RefreshTokenRequestDto tokenRequest,
       @CookieValue(value = "X-REFRESH-TOKEN") String refreshToken) {
-    LoginResponseDto responseDto = authService.newJwt(refreshToken, tokenRequest.getDeviceName());
+    JwtResponse responseDto = authService.newJwt(refreshToken, tokenRequest.getDeviceName());
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 }
