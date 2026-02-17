@@ -2,6 +2,7 @@ package me.gabcytn.srsly.Auth.Config;
 
 import me.gabcytn.srsly.Auth.Filter.JwtFilter;
 import me.gabcytn.srsly.Auth.Service.UserDetailsServiceImpl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,10 +17,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+  @Value("${spring.application.frontend.url}")
+  private String FRONTEND_URL;
   private final UserDetailsServiceImpl userDetailsServiceImpl;
   private final JwtFilter jwtFilter;
 
@@ -41,6 +48,9 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
     return httpSecurity
         .csrf(AbstractHttpConfigurer::disable)
+        .cors(corsConfigurer -> {
+          corsConfigurer.configurationSource(this.corsConfigurationSource());
+        })
         .httpBasic(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
         .sessionManagement(
@@ -51,7 +61,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorizationManagerRequestMatcherRegistry -> {
               authorizationManagerRequestMatcherRegistry
-                  .requestMatchers("/api/v1/auth/**")
+                  .requestMatchers("/api/v1/public/**")
                   .permitAll()
                   .anyRequest()
                   .authenticated();
@@ -69,5 +79,17 @@ public class SecurityConfig {
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder(12);
+  }
+
+  private UrlBasedCorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration corsConfig = new CorsConfiguration();
+    corsConfig.setAllowedOrigins(List.of(this.FRONTEND_URL));
+    corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
+    corsConfig.addAllowedHeader("Content-Type");
+    corsConfig.setAllowCredentials(true);
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", corsConfig);
+    return source;
   }
 }
