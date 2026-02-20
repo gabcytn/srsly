@@ -32,6 +32,10 @@ public class RefreshTokenService {
     refreshTokenRepository.deleteById(key);
   }
 
+  public Boolean exists(String key) {
+    return refreshTokenRepository.existsById(key);
+  }
+
   public String generateRefreshToken() {
     String refreshToken = hashString(generateRandomString());
     sendRefreshTokenInResponseCookie(refreshToken);

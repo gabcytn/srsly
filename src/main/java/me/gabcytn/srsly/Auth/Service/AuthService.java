@@ -73,4 +73,8 @@ public class AuthService {
     String jwt = jwtService.generateToken(validator.getEmail());
     return new JwtResponse(jwt, jwtService.getExpirationTime());
   }
+
+  public void invalidateRefreshToken(String refreshToken) {
+    refreshTokenService.delete(refreshToken);
+  }
 }
