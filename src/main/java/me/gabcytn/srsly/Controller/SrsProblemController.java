@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.PaginatedSrsProblem;
+import me.gabcytn.srsly.DTO.ReviewedProblem;
 import me.gabcytn.srsly.DTO.View.Views;
 import me.gabcytn.srsly.Service.SrsProblemService;
 import org.springframework.http.HttpStatus;
