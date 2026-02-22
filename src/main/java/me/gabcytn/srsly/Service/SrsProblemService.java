@@ -119,7 +119,7 @@ public class SrsProblemService {
   public PaginatedSrsProblem getTodayProblems(int page) {
     Pageable pageable = PageRequest.of(page, 10);
     Page<SrsProblem> paginatedSrsProblems =
-        srsProblemRepository.findByUserAndNextAttemptAt(
+        srsProblemRepository.findByUserAndNextAttemptAtLessThanEqual(
             userService.getCurrentlyLoggedInUser(), LocalDate.now(), pageable);
     return new PaginatedSrsProblem(paginatedSrsProblems);
   }

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SrsProblemRepository extends JpaRepository<SrsProblem, Integer> {
-  Page<SrsProblem> findByUserAndNextAttemptAt(
+  Page<SrsProblem> findByUserAndNextAttemptAtLessThanEqual(
       User user, LocalDate date, Pageable pageable);
   Boolean existsByProblemAndUser(Problem problem, User user);
 }
