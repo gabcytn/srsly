@@ -24,6 +24,9 @@ public class SrsProblemDto {
   private LocalDate lastAttemptAt;
 
   @JsonView(Views.Summary.class)
+  private LocalDate nextAttemptAt;
+
+  @JsonView(Views.Summary.class)
   private ProblemStatus status;
 
   @JsonView(Views.Summary.class)

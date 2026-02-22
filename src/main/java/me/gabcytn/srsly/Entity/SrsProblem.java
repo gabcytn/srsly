@@ -77,6 +77,7 @@ public class SrsProblem {
     dto.setStatus(status);
     dto.setRepetitions(repetitions);
     dto.setLastAttemptAt(lastAttemptAt);
+    dto.setNextAttemptAt(nextAttemptAt);
     return dto;
   }
 }
