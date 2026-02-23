@@ -14,6 +14,7 @@ import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SrsProblem;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Exception.EarlyReviewException;
+import me.gabcytn.srsly.Exception.GenericNotFoundException;
 import me.gabcytn.srsly.Exception.SrsNotFound;
 import me.gabcytn.srsly.Model.Confidence;
 import me.gabcytn.srsly.Model.Difficulty;
@@ -126,13 +127,17 @@ public class SrsProblemService {
     User currentUser = userService.getCurrentlyLoggedInUser();
     LocalDate dateNow = LocalDate.now();
 
-    if ("all".equals(difficulty)) {
-      return getTodayProblemsWithoutDifficulty(titleSearch, currentUser, dateNow, pageable);
-    } else {
+    if (!"all".equals(difficulty)) {
       String formattedDifficulty = StringUtils.capitalize(difficulty.toLowerCase());
-      Difficulty diffEnum = Enum.valueOf(Difficulty.class, formattedDifficulty);
-      return getTodayProblemsWithDifficulty(diffEnum, titleSearch, currentUser, dateNow, pageable);
+      try {
+        Difficulty diffEnum = Enum.valueOf(Difficulty.class, formattedDifficulty);
+        return getTodayProblemsWithDifficulty(
+            diffEnum, titleSearch, currentUser, dateNow, pageable);
+      } catch (IllegalArgumentException e) {
+        throw new GenericNotFoundException("Invalid difficulty.");
+      }
     }
+    return getTodayProblemsWithoutDifficulty(titleSearch, currentUser, dateNow, pageable);
   }
 
   private PaginatedSrsProblem getTodayProblemsWithoutDifficulty(
