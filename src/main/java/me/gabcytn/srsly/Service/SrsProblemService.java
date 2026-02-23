@@ -16,11 +16,14 @@ import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Exception.EarlyReviewException;
 import me.gabcytn.srsly.Exception.SrsNotFound;
 import me.gabcytn.srsly.Model.Confidence;
+import me.gabcytn.srsly.Model.Difficulty;
 import me.gabcytn.srsly.Model.ProblemStatus;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
@@ -47,8 +50,10 @@ public class SrsProblemService {
 
     ProblemStatus status = reps <= 2 ? ProblemStatus.LEARNING : ProblemStatus.REVIEWING;
 
-    SrsProblem srsProblem = this.save(
-        new SrsProblem(status, easeFactor, reps, interval, lastReview, nextReview, user, problem));
+    SrsProblem srsProblem =
+        this.save(
+            new SrsProblem(
+                status, easeFactor, reps, interval, lastReview, nextReview, user, problem));
     attemptService.save(Attempt.fromSrsProblem(srsProblem));
   }
 
@@ -116,11 +121,50 @@ public class SrsProblemService {
     return srsProblemRepository.save(srsProblem);
   }
 
-  public PaginatedSrsProblem getTodayProblems(int page) {
-    Pageable pageable = PageRequest.of(page, 10);
-    Page<SrsProblem> paginatedSrsProblems =
-        srsProblemRepository.findByUserAndNextAttemptAtLessThanEqual(
-            userService.getCurrentlyLoggedInUser(), LocalDate.now(), pageable);
+  public PaginatedSrsProblem getTodayProblems(int page, String difficulty, String titleSearch) {
+    Pageable pageable = PageRequest.of(page, 5, Sort.by("nextAttemptAt"));
+    User currentUser = userService.getCurrentlyLoggedInUser();
+    LocalDate dateNow = LocalDate.now();
+
+    if ("all".equals(difficulty)) {
+      return getTodayProblemsWithoutDifficulty(titleSearch, currentUser, dateNow, pageable);
+    } else {
+      String formattedDifficulty = StringUtils.capitalize(difficulty.toLowerCase());
+      Difficulty diffEnum = Enum.valueOf(Difficulty.class, formattedDifficulty);
+      return getTodayProblemsWithDifficulty(diffEnum, titleSearch, currentUser, dateNow, pageable);
+    }
+  }
+
+  private PaginatedSrsProblem getTodayProblemsWithoutDifficulty(
+      String titleSearch, User user, LocalDate dateNow, Pageable pageable) {
+    Page<SrsProblem> paginatedSrsProblems;
+
+    if (titleSearch != null) {
+      paginatedSrsProblems =
+          srsProblemRepository
+              .findByUserAndNextAttemptAtLessThanEqualAndProblem_TitleContainingIgnoreCase(
+                  user, dateNow, titleSearch, pageable);
+    } else {
+      paginatedSrsProblems =
+          srsProblemRepository.findByUserAndNextAttemptAtLessThanEqual(user, dateNow, pageable);
+    }
+
+    return new PaginatedSrsProblem(paginatedSrsProblems);
+  }
+
+  private PaginatedSrsProblem getTodayProblemsWithDifficulty(
+      Difficulty difficulty, String titleSearch, User user, LocalDate dateNow, Pageable pageable) {
+    Page<SrsProblem> paginatedSrsProblems;
+    if (titleSearch != null) {
+      paginatedSrsProblems =
+          srsProblemRepository
+              .findByUserAndNextAttemptAtLessThanEqualAndProblem_TitleContainingIgnoreCaseAndProblem_Difficulty(
+                  user, dateNow, titleSearch, difficulty, pageable);
+    } else {
+      paginatedSrsProblems =
+          srsProblemRepository.findByUserAndNextAttemptAtLessThanEqualAndProblem_Difficulty(
+              user, dateNow, difficulty, pageable);
+    }
     return new PaginatedSrsProblem(paginatedSrsProblems);
   }
 

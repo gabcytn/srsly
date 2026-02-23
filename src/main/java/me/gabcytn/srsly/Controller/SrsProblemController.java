@@ -20,8 +20,10 @@ public class SrsProblemController {
   @GetMapping
   @JsonView(Views.Summary.class)
   public PaginatedSrsProblem getTodayProblems(
-      @RequestParam(name = "page", required = false, defaultValue = "0") Integer page) {
-    return srsProblemService.getTodayProblems(page);
+      @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+      @RequestParam(name = "difficulty", required = false, defaultValue = "all") String difficulty,
+      @RequestParam(name = "title", required = false) String titleSearch) {
+    return srsProblemService.getTodayProblems(page, difficulty, titleSearch);
   }
 
   @PostMapping("/{id}")
