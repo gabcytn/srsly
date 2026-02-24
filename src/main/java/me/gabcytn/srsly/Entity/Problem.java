@@ -15,7 +15,12 @@ import me.gabcytn.srsly.Model.Difficulty;
 @Getter
 @Setter
 @Entity
-@Table(name = "problems")
+@Table(
+    name = "problems",
+    indexes = {
+      @Index(name = "idx_problem_title", columnList = "title"),
+      @Index(name = "idx_problem_difficulty", columnList = "difficulty")
+    })
 public class Problem {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
