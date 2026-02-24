@@ -3,7 +3,6 @@ package me.gabcytn.srsly.Repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SrsProblem;
 import me.gabcytn.srsly.Entity.User;
@@ -41,7 +40,7 @@ public interface SrsProblemRepository extends JpaRepository<SrsProblem, Integer>
           AND srs2.user.id = :userId
     )
 """)
-  List<Problem> findProblemIdsNotSolvedByUser(@Param("userId") UUID userId);
+  List<Problem> findProblemsNotSolvedByUser(@Param("userId") UUID userId);
 
   Boolean existsByProblemAndUser(Problem problem, User user);
 }

@@ -3,32 +3,43 @@ package me.gabcytn.srsly.Service;
 import java.util.*;
 import me.gabcytn.srsly.DTO.ProblemDto;
 import me.gabcytn.srsly.Entity.Problem;
+import me.gabcytn.srsly.Entity.SuggestedProblems;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
+import me.gabcytn.srsly.Repository.SuggestedProblemsRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProblemSuggestionService {
   private final SrsProblemRepository srsProblemRepository;
   private final UserService userService;
+  private final SuggestedProblemsRepository suggestedProblemsRepository;
 
   public ProblemSuggestionService(
-      SrsProblemRepository srsProblemRepository, UserService userService) {
+      SrsProblemRepository srsProblemRepository,
+      UserService userService,
+      SuggestedProblemsRepository suggestedProblemsRepository) {
     this.srsProblemRepository = srsProblemRepository;
     this.userService = userService;
+    this.suggestedProblemsRepository = suggestedProblemsRepository;
   }
 
   public List<ProblemDto> getSuggestions() {
     User user = userService.getCurrentlyLoggedInUser();
-    List<Problem> srsProblems = srsProblemRepository.findProblemIdsNotSolvedByUser(user.getId());
+
+    Optional<SuggestedProblems> cachedProblems = suggestedProblemsRepository.findById(user.getId());
+    if (cachedProblems.isPresent()) {
+      return cachedProblems.get().getProblems();
+    }
 
     List<ProblemDto> problemList = new ArrayList<>();
-    srsProblems.forEach(problem -> problemList.add(problem.toApiPied()));
+    srsProblemRepository
+        .findProblemsNotSolvedByUser(user.getId())
+        .forEach(problem -> problemList.add(problem.toApiPied()));
 
-    if (problemList.size() <= 5) {
-      return problemList;
-    }
-    return getFiveRandomProblemsFromList(problemList);
+    List<ProblemDto> result = getFiveRandomProblemsFromList(problemList);
+    suggestedProblemsRepository.save(new SuggestedProblems(user.getId(), result));
+    return result;
   }
 
   private <T> List<T> getFiveRandomProblemsFromList(List<T> list) {
