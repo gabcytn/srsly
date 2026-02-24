@@ -3,6 +3,7 @@ package me.gabcytn.srsly.Service;
 import static me.gabcytn.srsly.Model.Confidence.*;
 import static me.gabcytn.srsly.Model.Difficulty.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -46,7 +47,9 @@ public class SrsProblemService {
     LocalDate lastReview = initialSolution.lastReviewedAt();
     double easeFactor = initialEaseFactor(initialSolution.confidence(), problem);
     int initialInterval = initialInterval(reps, easeFactor);
-    int interval = (int) Math.min(initialInterval, dateDifference(lastReview, dateNow));
+    long dateDifference = dateDifference(lastReview, dateNow);
+    if (dateDifference == 0) dateDifference++;
+    int interval = (int) Math.min(initialInterval, dateDifference);
     LocalDate nextReview = lastReview.plusDays(interval);
 
     ProblemStatus status = reps <= 2 ? ProblemStatus.LEARNING : ProblemStatus.REVIEWING;
@@ -178,14 +181,17 @@ public class SrsProblemService {
   }
 
   private double initialEaseFactor(Confidence confidence, Problem problem) {
-    double easeFactor = 2.4;
-    if (confidence == LOW) easeFactor -= 0.2;
-    else if (confidence == HIGH) easeFactor += 0.2;
+    BigDecimal easeFactor = BigDecimal.valueOf(2.4);
+    BigDecimal ZERO_POINT_TWO = BigDecimal.valueOf(0.2);
+    BigDecimal ZERO_POINT_ONE = BigDecimal.valueOf(0.1);
 
-    if (problem.getDifficulty() == Easy) easeFactor += 0.1;
-    else if (problem.getDifficulty() == Hard) easeFactor -= 0.1;
+    if (confidence == LOW) easeFactor = easeFactor.subtract(ZERO_POINT_TWO);
+    else if (confidence == HIGH) easeFactor = easeFactor.add(ZERO_POINT_TWO);
 
-    return Math.min(easeFactor, 2.6);
+    if (problem.getDifficulty() == Easy) easeFactor = easeFactor.add(ZERO_POINT_ONE);
+    else if (problem.getDifficulty() == Hard) easeFactor = easeFactor.subtract(ZERO_POINT_ONE);
+
+    return Math.min(easeFactor.doubleValue(), 2.6);
   }
 
   private int initialReps(int repetitions) {
@@ -202,7 +208,22 @@ public class SrsProblemService {
   }
 
   private double calculateEaseFactor(double oldEaseFactor, int grade) {
-    return Math.max(oldEaseFactor + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02)), 1.3);
+    BigDecimal ONE_POINT_THREE = BigDecimal.valueOf(1.3);
+    BigDecimal ZERO_POINT_ONE = BigDecimal.valueOf(0.1);
+    BigDecimal ZERO_POINT_ZERO_EIGHT = BigDecimal.valueOf(0.08);
+    BigDecimal ZERO_POINT_ZERO_TWO = BigDecimal.valueOf(0.02);
+    BigDecimal FIVE = BigDecimal.valueOf(5);
+
+    BigDecimal gradeBD = BigDecimal.valueOf(grade);
+    BigDecimal gradeDiff = FIVE.subtract(gradeBD);
+
+    BigDecimal inner = ZERO_POINT_ZERO_EIGHT.add(gradeDiff.multiply(ZERO_POINT_ZERO_TWO));
+
+    BigDecimal adjustment = ZERO_POINT_ONE.subtract(gradeDiff.multiply(inner));
+
+    BigDecimal result = BigDecimal.valueOf(oldEaseFactor).add(adjustment);
+
+    return result.max(ONE_POINT_THREE).doubleValue();
   }
 
   private double getTimingMultiplier(SrsProblem problem, LocalDate dateNow) {

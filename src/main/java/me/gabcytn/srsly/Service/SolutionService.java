@@ -25,7 +25,9 @@ public class SolutionService {
     Problem problem = problemService.findByFrontendId(problemId);
     User user = userService.getCurrentlyLoggedInUser();
 
-    if (solutionRepository.countByProblemAndUser(problem, user) >= 5) {
+    if (!solutionRepository.existsByProblemAndUser(problem, user)) {
+      throw new SolutionException("Initial solutions must hit 'POST /solutions/initial' first");
+    } else if (solutionRepository.countByProblemAndUser(problem, user) >= 5) {
       throw new SolutionException("Unable to save more than 5 solutions to a problem");
     }
     this.save(solutionDto.toSolutionEntity(problem, user));
@@ -40,6 +42,8 @@ public class SolutionService {
           "Unable to save non-initial solution. User must hit 'POST /solutions' for already solved problems.");
     }
     srsProblemService.saveInitial(initialSolutionDto, problem, user);
+    if (initialSolutionDto.solutionDto() != null)
+      this.save(initialSolutionDto.solutionDto().toSolutionEntity(problem, user));
   }
 
   public Solution findById(int id) {
