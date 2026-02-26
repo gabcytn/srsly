@@ -25,7 +25,7 @@ public class SolutionService {
     Problem problem = problemService.findByFrontendId(problemId);
     User user = userService.getCurrentlyLoggedInUser();
 
-    if (!solutionRepository.existsByProblemAndUser(problem, user)) {
+    if (!srsProblemService.existsByProblemAndUser(problem, user)) {
       throw new SolutionException("Initial solutions must hit 'POST /solutions/initial' first");
     } else if (solutionRepository.countByProblemAndUser(problem, user) >= 5) {
       throw new SolutionException("Unable to save more than 5 solutions to a problem");
