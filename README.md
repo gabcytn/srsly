@@ -74,6 +74,38 @@ srsly:
 
 ---
 
+## How to run
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/gabcytn/srsly.git
+   cd srsly
+
+2. Configure application.yaml
+   ```bash
+   cd src/main/resources
+   cp example.application.yaml application.yaml
+   ```
+   - Create postgres DB
+   ```bash
+   sudo -i -u postgres psql
+   ```
+   ```postgres
+   CREATE DATABASE srsly
+   ```
+   - Put DB username/password in `spring.datasource.username/password`
+   - Generate JWT Secret key
+   ```bash
+   openssl rand -hex 32
+   ```
+   - Paste output to `security.jwt.secret-key`
+   - Generate API key at [AIStudio](https://aistudio.google.com)
+   - Paste output to `spring.ai.google.genai.api-key`
+  
+3. Run application
+   ```bash
+   ./mvnw spring-boot:run
+
 ## Status
 
 Actively building client-side app [here](https://github.com/gabcytn/srsly-client)
