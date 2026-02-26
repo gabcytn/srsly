@@ -2,7 +2,7 @@
 
 **srsly** is a spaced-repetition system (SRS) for LeetCode-style problems — inspired by the SM-2 algorithm used in **Anki**, but designed specifically for long-term retention of coding interview questions.
 
-Instead of endlessly grinding new problems, srsly helps you retain the ones you've already solved.
+Instead of endlessly grinding new problems, srsly helps you retain the ones you've already solved. Seriously.
 
 ---
 
@@ -50,7 +50,7 @@ srsly:
 
 - SM-2 inspired review scheduling
 - Adaptive interval recalculation
-- Early review penalty handling
+- Late review reward handling
 - Retention-focused design
 - AI-powered solution critiques
 - Problem history tracking
@@ -76,4 +76,4 @@ srsly:
 
 ## Status
 
-Actively building client-side app.
+Actively building client-side app [here](https://github.com/gabcytn/srsly-client)
