@@ -1,15 +1,16 @@
 spring:
   application:
     name: srsly
+    frontend:
+      url: http://localhost:5173
   datasource:
-    url: jdbc:postgresql://localhost:5432/<db_name>
+    url: jdbc:postgresql://localhost:5432/srsly
     username:
     password:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
   ai:
     google:
       genai:
@@ -20,7 +21,8 @@ spring:
 security:
   jwt:
     secret-key: <secret-key>
-    expiration-time: <expiration-time>
+    expiration-time: 300000
 
-
-
+openfeign:
+  client:
+    url: https://leetcode-api-pied.vercel.app
