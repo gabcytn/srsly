@@ -24,7 +24,7 @@ import org.hibernate.type.SqlTypes;
 public class Solution {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  private Long id;
 
   @Column(nullable = false)
   private String title;
@@ -47,6 +47,6 @@ public class Solution {
   private User user;
 
   public SolutionDto toDto() {
-    return new SolutionDto(code, title, aiCritique, note);
+    return new SolutionDto(id, code, title, aiCritique, note);
   }
 }

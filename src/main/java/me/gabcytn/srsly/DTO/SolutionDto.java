@@ -16,6 +16,8 @@ import me.gabcytn.srsly.Entity.User;
 @Getter
 @Setter
 public class SolutionDto {
+  private Long id;
+
   @NotNull(message = "Code solution is required.")
   @NotBlank(message = "Title must not be blank.")
   private String code;
