@@ -8,6 +8,7 @@ import me.gabcytn.srsly.DTO.SolutionDto;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.Solution;
 import me.gabcytn.srsly.Entity.User;
+import me.gabcytn.srsly.Exception.AiException;
 import me.gabcytn.srsly.Exception.GenericNotFoundException;
 import me.gabcytn.srsly.Exception.SolutionException;
 import me.gabcytn.srsly.Repository.SolutionRepository;
@@ -68,5 +69,16 @@ public class SolutionService {
 
   public Boolean existsByProblemAndUser(Problem problem, User user) {
     return solutionRepository.existsByProblemAndUser(problem, user);
+  }
+
+  public void update(Solution solution, SolutionDto dto) {
+    if (solution.getAiCritique() != null && !solution.getCode().equals(dto.getCode())) {
+      throw new AiException("Code cannot be modified once an AI critique has been completed.");
+    }
+
+    solution.setNote(dto.getNote());
+    solution.setCode(dto.getCode());
+
+    save(solution);
   }
 }

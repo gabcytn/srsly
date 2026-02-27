@@ -35,4 +35,9 @@ public class SolutionController {
   public List<SolutionDto> getSolutions(@PathVariable int problemId) {
     return solutionService.getSolutions(problemId).stream().map(Solution::toDto).toList();
   }
+
+  @PatchMapping("/solutions/{id}")
+  public void update(@PathVariable long id, @RequestBody @Valid SolutionDto solutionDto) {
+    solutionService.update(solutionService.findById(id), solutionDto);
+  }
 }
