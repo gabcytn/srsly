@@ -15,7 +15,7 @@ public class AiController {
   private final AiService aiService;
 
   @GetMapping("/{solutionId}/ai")
-  public AiCritique index(@PathVariable int solutionId) {
+  public AiCritique index(@PathVariable long solutionId) {
     return aiService.critique(solutionId);
   }
 }

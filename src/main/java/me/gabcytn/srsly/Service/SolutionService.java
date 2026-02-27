@@ -46,7 +46,7 @@ public class SolutionService {
       this.save(initialSolutionDto.solutionDto().toSolutionEntity(problem, user));
   }
 
-  public Solution findById(int id) {
+  public Solution findById(long id) {
     Optional<Solution> solution = solutionRepository.findById(id);
     if (solution.isPresent()) {
       return solution.get();
