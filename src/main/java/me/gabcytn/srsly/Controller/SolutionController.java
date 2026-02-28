@@ -3,6 +3,7 @@ package me.gabcytn.srsly.Controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import me.gabcytn.srsly.DTO.EditSolution;
 import me.gabcytn.srsly.DTO.InitialSolutionDto;
 import me.gabcytn.srsly.DTO.SolutionDto;
 import me.gabcytn.srsly.Entity.Solution;
@@ -37,7 +38,7 @@ public class SolutionController {
   }
 
   @PatchMapping("/solutions/{id}")
-  public void update(@PathVariable long id, @RequestBody @Valid SolutionDto solutionDto) {
+  public void update(@PathVariable long id, @RequestBody @Valid EditSolution solutionDto) {
     solutionService.update(solutionService.findById(id), solutionDto);
   }
 }

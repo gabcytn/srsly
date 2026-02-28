@@ -3,6 +3,7 @@ package me.gabcytn.srsly.Service;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import me.gabcytn.srsly.DTO.EditSolution;
 import me.gabcytn.srsly.DTO.InitialSolutionDto;
 import me.gabcytn.srsly.DTO.SolutionDto;
 import me.gabcytn.srsly.Entity.Problem;
@@ -71,13 +72,13 @@ public class SolutionService {
     return solutionRepository.existsByProblemAndUser(problem, user);
   }
 
-  public void update(Solution solution, SolutionDto dto) {
-    if (solution.getAiCritique() != null && !solution.getCode().equals(dto.getCode())) {
+  public void update(Solution solution, EditSolution dto) {
+    if (solution.getAiCritique() != null && !solution.getCode().equals(dto.code())) {
       throw new AiException("Code cannot be modified once an AI critique has been completed.");
     }
 
-    solution.setNote(dto.getNote());
-    solution.setCode(dto.getCode());
+    solution.setNote(dto.note());
+    solution.setCode(dto.code());
 
     save(solution);
   }
