@@ -31,6 +31,13 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Service
 public class SrsProblemService {
+  private static final BigDecimal ZERO_POINT_TWO = BigDecimal.valueOf(0.2);
+  private static final BigDecimal ZERO_POINT_ONE = BigDecimal.valueOf(0.1);
+  private static final BigDecimal ONE_POINT_THREE = BigDecimal.valueOf(1.3);
+  private static final BigDecimal ZERO_POINT_ZERO_EIGHT = BigDecimal.valueOf(0.08);
+  private static final BigDecimal ZERO_POINT_ZERO_TWO = BigDecimal.valueOf(0.02);
+  private static final BigDecimal FIVE = BigDecimal.valueOf(5);
+
   private final SrsProblemRepository srsProblemRepository;
   private final UserService userService;
   private final AttemptService attemptService;
@@ -72,7 +79,7 @@ public class SrsProblemService {
 
     SrsProblem srsProblem = optionalSrsProblem.get();
     if (grade < 3) {
-      this.reviewFailed(srsProblem);
+      this.reviewFailed(srsProblem, grade);
       return;
     }
 
@@ -111,14 +118,19 @@ public class SrsProblemService {
     attemptService.save(Attempt.fromSrsProblem(savedProblem, grade));
   }
 
-  private void reviewFailed(SrsProblem srsProblem) {
+  private void reviewFailed(SrsProblem srsProblem, int grade) {
+    BigDecimal easeFactor = BigDecimal.valueOf(srsProblem.getEaseFactor());
+    BigDecimal failedEaseFactor = easeFactor.subtract(ZERO_POINT_TWO);
+
+    LocalDate now = LocalDate.now();
+    srsProblem.setEaseFactor(failedEaseFactor.max(ONE_POINT_THREE).doubleValue());
     srsProblem.setRepetitions(0);
-    srsProblem.setEaseFactor(Math.max(srsProblem.getEaseFactor() - 0.2, 1.3));
     srsProblem.setInterval(1);
     srsProblem.setStatus(ProblemStatus.LEARNING);
-    srsProblem.setNextAttemptAt(LocalDate.now().plusDays(1));
+    srsProblem.setLastAttemptAt(now);
+    srsProblem.setNextAttemptAt(now.plusDays(1));
     SrsProblem savedProblem = this.save(srsProblem);
-    attemptService.save(Attempt.fromSrsProblem(savedProblem));
+    attemptService.save(Attempt.fromSrsProblem(savedProblem, grade));
   }
 
   public SrsProblem save(SrsProblem srsProblem) {
@@ -186,8 +198,6 @@ public class SrsProblemService {
 
   private double initialEaseFactor(Confidence confidence, Problem problem) {
     BigDecimal easeFactor = BigDecimal.valueOf(2.4);
-    BigDecimal ZERO_POINT_TWO = BigDecimal.valueOf(0.2);
-    BigDecimal ZERO_POINT_ONE = BigDecimal.valueOf(0.1);
 
     if (confidence == LOW) easeFactor = easeFactor.subtract(ZERO_POINT_TWO);
     else if (confidence == HIGH) easeFactor = easeFactor.add(ZERO_POINT_TWO);
@@ -212,12 +222,6 @@ public class SrsProblemService {
   }
 
   private double calculateEaseFactor(double oldEaseFactor, int grade) {
-    BigDecimal ONE_POINT_THREE = BigDecimal.valueOf(1.3);
-    BigDecimal ZERO_POINT_ONE = BigDecimal.valueOf(0.1);
-    BigDecimal ZERO_POINT_ZERO_EIGHT = BigDecimal.valueOf(0.08);
-    BigDecimal ZERO_POINT_ZERO_TWO = BigDecimal.valueOf(0.02);
-    BigDecimal FIVE = BigDecimal.valueOf(5);
-
     BigDecimal gradeBD = BigDecimal.valueOf(grade);
     BigDecimal gradeDiff = FIVE.subtract(gradeBD);
 

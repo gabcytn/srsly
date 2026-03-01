@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
+import lombok.Setter;
 import me.gabcytn.srsly.DTO.View.Views;
 import me.gabcytn.srsly.Entity.SrsProblem;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,10 @@ public class PaginatedSrsProblem {
 
   @JsonView(Views.Summary.class)
   private final Sort sort;
+
+  @Setter
+  @JsonView(Views.Summary.class)
+  private int solvedCount;
 
   public PaginatedSrsProblem(Page<SrsProblem> pagedSrsProblem) {
     List<SrsProblemDto> problemDtoList = new ArrayList<>();

@@ -9,7 +9,12 @@ import lombok.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "attempts")
+@Table(
+    name = "attempts",
+    indexes = {
+      @Index(name = "idx_attempt_date", columnList = "attempted_at"),
+      @Index(name = "idx_attempt_user", columnList = "user_id")
+    })
 public class Attempt {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
