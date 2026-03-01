@@ -180,6 +180,10 @@ public class SrsProblemService {
     return srsProblemRepository.existsByProblemAndUser(problem, user);
   }
 
+  public Optional<SrsProblem> findByProblemAndUser(Problem problem, User user) {
+    return srsProblemRepository.findByProblemAndUser(problem, user);
+  }
+
   private double initialEaseFactor(Confidence confidence, Problem problem) {
     BigDecimal easeFactor = BigDecimal.valueOf(2.4);
     BigDecimal ZERO_POINT_TWO = BigDecimal.valueOf(0.2);

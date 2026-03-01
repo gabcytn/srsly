@@ -1,6 +1,8 @@
 package me.gabcytn.srsly.DTO;
 
 import com.fasterxml.jackson.annotation.JsonView;
+
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import lombok.*;
@@ -29,6 +31,12 @@ public class ProblemDto {
 
   @JsonView(Views.Detailed.class)
   private Boolean isSolved;
+
+  @JsonView(Views.Detailed.class)
+  private int srsId;
+
+  @JsonView(Views.Detailed.class)
+  private LocalDate nextAttemptAt;
 
   @NonNull
   @JsonView(Views.Summary.class)
