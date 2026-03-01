@@ -73,6 +73,7 @@ public class SrsProblem {
 
   public SrsProblemDto toDto() {
     SrsProblemDto dto = new SrsProblemDto();
+    dto.setId(id);
     dto.setProblem(problem.toApiPied());
     dto.setStatus(status);
     dto.setRepetitions(repetitions);

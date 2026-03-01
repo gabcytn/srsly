@@ -14,6 +14,9 @@ import me.gabcytn.srsly.Model.ProblemStatus;
 @Getter
 @Setter
 public class SrsProblemDto {
+  @JsonView(Views.Summary.class)
+  private int id;
+
   @JsonView(Views.Detailed.class)
   private double grade;
 
