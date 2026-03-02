@@ -31,7 +31,7 @@ public class SrsProblemController {
     PaginatedSrsProblem response =
         srsProblemService.getTodayProblems(page, difficulty, titleSearch);
     Integer solvedTodayCount =
-        attemptService.countByAttemptedAtAndUser(
+        attemptService.countSolvedTodayExcludingInitial(
             LocalDate.now(), userService.getCurrentlyLoggedInUser());
     response.setSolvedCount(solvedTodayCount);
     return response;

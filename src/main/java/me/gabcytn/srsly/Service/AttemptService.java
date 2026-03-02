@@ -16,7 +16,7 @@ public class AttemptService {
     attemptRepository.save(attempt);
   }
 
-  public Integer countByAttemptedAtAndUser(LocalDate lastAttemptAt, User user) {
-    return attemptRepository.countByAttemptedAtAndUser(lastAttemptAt, user);
+  public Integer countSolvedTodayExcludingInitial(LocalDate lastAttemptAt, User user) {
+    return attemptRepository.countByAttemptedAtAndUserAndGradeIsNotNull(lastAttemptAt, user);
   }
 }

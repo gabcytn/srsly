@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AttemptRepository extends ListCrudRepository<Attempt, Long> {
-  Integer countByAttemptedAtAndUser(LocalDate attemptedAt, User user);
+  Integer countByAttemptedAtAndUserAndGradeIsNotNull(LocalDate attemptedAt, User user);
 }
