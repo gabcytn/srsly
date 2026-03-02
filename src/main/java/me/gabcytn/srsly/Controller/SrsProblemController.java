@@ -5,8 +5,10 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.PaginatedSrsProblem;
+import me.gabcytn.srsly.DTO.ReviewProgress;
 import me.gabcytn.srsly.DTO.ReviewedProblem;
 import me.gabcytn.srsly.DTO.View.Views;
+import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Service.AttemptService;
 import me.gabcytn.srsly.Service.SrsProblemService;
 import me.gabcytn.srsly.Service.UserService;
@@ -28,13 +30,17 @@ public class SrsProblemController {
       @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
       @RequestParam(name = "difficulty", required = false, defaultValue = "all") String difficulty,
       @RequestParam(name = "title", required = false) String titleSearch) {
-    PaginatedSrsProblem response =
-        srsProblemService.getTodayProblems(page, difficulty, titleSearch);
-    Integer solvedTodayCount =
-        attemptService.countSolvedTodayExcludingInitial(
-            LocalDate.now(), userService.getCurrentlyLoggedInUser());
-    response.setSolvedCount(solvedTodayCount);
-    return response;
+    return srsProblemService.getTodayProblems(page, difficulty, titleSearch);
+  }
+
+  @GetMapping("/progress")
+  public ReviewProgress progress() {
+    LocalDate now = LocalDate.now();
+    User user = userService.getCurrentlyLoggedInUser();
+    Integer solvedTodayCount = attemptService.countSolvedTodayExcludingInitial(now, user);
+    Integer toSolveCount = srsProblemService.countOfProblemsToSolveByDate(now);
+
+    return new ReviewProgress(toSolveCount, solvedTodayCount);
   }
 
   @PostMapping("/{id}")

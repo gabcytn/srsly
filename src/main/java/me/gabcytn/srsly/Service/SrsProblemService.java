@@ -196,6 +196,10 @@ public class SrsProblemService {
     return srsProblemRepository.findByProblemAndUser(problem, user);
   }
 
+  public Integer countOfProblemsToSolveByDate(LocalDate date) {
+    return srsProblemRepository.countByNextAttemptAt(date);
+  }
+
   private double initialEaseFactor(Confidence confidence, Problem problem) {
     BigDecimal easeFactor = BigDecimal.valueOf(2.4);
 

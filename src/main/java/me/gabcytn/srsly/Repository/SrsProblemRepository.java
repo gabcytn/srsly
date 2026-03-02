@@ -46,4 +46,6 @@ public interface SrsProblemRepository extends JpaRepository<SrsProblem, Integer>
   Boolean existsByProblemAndUser(Problem problem, User user);
 
   Optional<SrsProblem> findByProblemAndUser(Problem problem, User user);
+
+  Integer countByNextAttemptAt(LocalDate date);
 }
