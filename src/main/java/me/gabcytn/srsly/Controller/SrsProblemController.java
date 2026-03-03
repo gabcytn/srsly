@@ -37,10 +37,10 @@ public class SrsProblemController {
   public ReviewProgress progress() {
     LocalDate now = LocalDate.now();
     User user = userService.getCurrentlyLoggedInUser();
-    Integer solvedTodayCount = attemptService.countSolvedTodayExcludingInitial(now, user);
-    Integer toSolveCount = srsProblemService.countOfProblemsToSolveByDate(now);
+    Integer solvedTodayCount = attemptService.countSolvedTodayExcludingInitial(user);
+    Integer unsolvedCount = srsProblemService.countOfProblemsToSolveByDate(now);
 
-    return new ReviewProgress(toSolveCount, solvedTodayCount);
+    return new ReviewProgress(unsolvedCount, solvedTodayCount);
   }
 
   @PostMapping("/{id}")
