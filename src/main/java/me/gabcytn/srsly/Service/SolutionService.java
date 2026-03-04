@@ -77,6 +77,7 @@ public class SolutionService {
       throw new AiException("Code cannot be modified once an AI critique has been completed.");
     }
 
+    solution.setTitle(dto.title());
     solution.setNote(dto.note());
     solution.setCode(dto.code());
 
