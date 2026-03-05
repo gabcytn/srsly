@@ -197,7 +197,8 @@ public class SrsProblemService {
   }
 
   public Integer countOfProblemsToSolveToday() {
-    return srsProblemRepository.countByNextAttemptAtLessThanEqual(LocalDate.now());
+    User user = userService.getCurrentlyLoggedInUser();
+    return srsProblemRepository.countByNextAttemptAtLessThanEqualAndUser(LocalDate.now(), user);
   }
 
   private double initialEaseFactor(Confidence confidence, Problem problem) {

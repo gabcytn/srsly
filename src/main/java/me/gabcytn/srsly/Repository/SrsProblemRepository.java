@@ -47,5 +47,5 @@ public interface SrsProblemRepository extends JpaRepository<SrsProblem, Integer>
 
   Optional<SrsProblem> findByProblemAndUser(Problem problem, User user);
 
-  Integer countByNextAttemptAtLessThanEqual(LocalDate date);
+  Integer countByNextAttemptAtLessThanEqualAndUser(LocalDate date, User user);
 }
