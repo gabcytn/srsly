@@ -19,10 +19,10 @@ public class SolutionController {
   private final SolutionService solutionService;
 
   @PostMapping("/problems/{problemId}/solutions")
-  public ResponseEntity<Solution> save(
+  public ResponseEntity<SolutionDto> save(
       @PathVariable int problemId, @RequestBody @Valid SolutionDto solutionDto) {
     Solution s = solutionService.saveToProblem(solutionDto, problemId);
-    return new ResponseEntity<>(s, HttpStatus.CREATED);
+    return new ResponseEntity<>(s.toDto(), HttpStatus.CREATED);
   }
 
   @PostMapping("/problems/{problemId}/solutions/initial")
