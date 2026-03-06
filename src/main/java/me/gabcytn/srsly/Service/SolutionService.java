@@ -24,7 +24,7 @@ public class SolutionService {
   private final SrsProblemService srsProblemService;
   private final UserService userService;
 
-  public void saveSubsequentToProblem(SolutionDto solutionDto, int problemId) {
+  public Solution saveToProblem(SolutionDto solutionDto, int problemId) {
     Problem problem = problemService.findByFrontendId(problemId);
     User user = userService.getCurrentlyLoggedInUser();
 
@@ -33,7 +33,7 @@ public class SolutionService {
     } else if (solutionRepository.countByProblemAndUser(problem, user) >= 5) {
       throw new SolutionException("Unable to save more than 5 solutions to a problem");
     }
-    this.save(solutionDto.toSolutionEntity(problem, user));
+    return this.save(solutionDto.toSolutionEntity(problem, user));
   }
 
   public void saveInitialToProblem(InitialSolutionDto initialSolutionDto, int problemId) {
@@ -58,8 +58,8 @@ public class SolutionService {
     throw new GenericNotFoundException("Solution not found.");
   }
 
-  public void save(Solution solution) {
-    solutionRepository.save(solution);
+  public Solution save(Solution solution) {
+    return solutionRepository.save(solution);
   }
 
   public List<Solution> getSolutions(int problemId) {
@@ -88,7 +88,7 @@ public class SolutionService {
 
     save(solution);
   }
-  
+
   public void delete(long id) {
     User user = userService.getCurrentlyLoggedInUser();
     Solution solution = findById(id);
