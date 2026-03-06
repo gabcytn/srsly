@@ -10,6 +10,7 @@ import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.Solution;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Exception.AiException;
+import me.gabcytn.srsly.Exception.GenericForbiddenException;
 import me.gabcytn.srsly.Exception.GenericNotFoundException;
 import me.gabcytn.srsly.Exception.SolutionException;
 import me.gabcytn.srsly.Repository.SolutionRepository;
@@ -72,9 +73,13 @@ public class SolutionService {
     return solutionRepository.existsByProblemAndUser(problem, user);
   }
 
-  public void update(Solution solution, EditSolution dto) {
+  public void update(long id, EditSolution dto) {
+    User user = userService.getCurrentlyLoggedInUser();
+    Solution solution = findById(id);
     if (solution.getAiCritique() != null && !solution.getCode().equals(dto.code())) {
       throw new AiException("Code cannot be modified once an AI critique has been completed.");
+    } else if (!solution.getUser().getId().equals(user.getId())) {
+      throw new GenericForbiddenException("Access denied to solution.");
     }
 
     solution.setTitle(dto.title());
@@ -82,5 +87,14 @@ public class SolutionService {
     solution.setCode(dto.code());
 
     save(solution);
+  }
+  
+  public void delete(long id) {
+    User user = userService.getCurrentlyLoggedInUser();
+    Solution solution = findById(id);
+    if (!solution.getUser().getId().equals(user.getId())) {
+      throw new GenericForbiddenException("Access denied to solution.");
+    }
+    solutionRepository.deleteById(id);
   }
 }

@@ -39,6 +39,11 @@ public class SolutionController {
 
   @PatchMapping("/solutions/{id}")
   public void update(@PathVariable long id, @RequestBody @Valid EditSolution solutionDto) {
-    solutionService.update(solutionService.findById(id), solutionDto);
+    solutionService.update(id, solutionDto);
+  }
+
+  @DeleteMapping("/solutions/{id}")
+  public void delete(@PathVariable long id) {
+    solutionService.delete(id);
   }
 }

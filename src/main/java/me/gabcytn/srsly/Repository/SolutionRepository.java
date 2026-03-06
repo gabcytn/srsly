@@ -14,4 +14,6 @@ public interface SolutionRepository extends ListCrudRepository<Solution, Long> {
   Integer countByProblemAndUser(Problem problem, User user);
 
   List<Solution> findAllByProblemAndUser(Problem problem, User user);
+
+  void deleteById(Long id);
 }
