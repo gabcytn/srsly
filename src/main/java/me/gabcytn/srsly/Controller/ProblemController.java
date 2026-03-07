@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
+import me.gabcytn.srsly.DTO.PaginatedProblemDto;
 import me.gabcytn.srsly.DTO.ProblemDto;
 import me.gabcytn.srsly.DTO.View.Views;
 import me.gabcytn.srsly.Entity.Problem;
@@ -23,6 +24,12 @@ public class ProblemController {
   private final UserService userService;
   private final SrsProblemService srsProblemService;
   private final ProblemSuggestionService problemSuggestionService;
+
+  @GetMapping
+  @JsonView(Views.Summary.class)
+  public PaginatedProblemDto getAll(@RequestParam(name = "page", required = false, defaultValue = "0") int page) {
+    return problemService.getAll(page);
+  }
 
   @GetMapping("/suggested")
   @JsonView(Views.Summary.class)
