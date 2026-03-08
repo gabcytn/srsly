@@ -5,9 +5,12 @@ import static me.gabcytn.srsly.Model.Difficulty.Medium;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.*;
 import me.gabcytn.srsly.DTO.SrsProblemDto;
 import me.gabcytn.srsly.Model.ProblemStatus;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @NoArgsConstructor
 @RequiredArgsConstructor
@@ -59,6 +62,12 @@ public class SrsProblem {
   @ManyToOne
   @JoinColumn(name = "problem_id", nullable = false)
   private Problem problem;
+
+  @CreationTimestamp
+  @Column(updatable = false)
+  private LocalDateTime createdAt;
+
+  @UpdateTimestamp private LocalDateTime updatedAt;
 
   public static SrsProblem ofInitial(User user, Problem problem) {
     double easeFactor;

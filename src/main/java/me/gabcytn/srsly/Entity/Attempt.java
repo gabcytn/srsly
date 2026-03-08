@@ -2,7 +2,10 @@ package me.gabcytn.srsly.Entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 @RequiredArgsConstructor
 @NoArgsConstructor
@@ -39,6 +42,10 @@ public class Attempt {
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
+
+  @CreationTimestamp
+  @Column(updatable = false)
+  private LocalDateTime createdAt;
 
   public Attempt(
       Double easeFactor, Integer grade, LocalDate attemptedAt, Problem problem, User user) {
