@@ -2,11 +2,11 @@ spring:
   application:
     name: srsly
     frontend:
-      url: http://localhost:5173
+      url: ${SRSLY_FRONTEND_URL}
   datasource:
-    url: jdbc:postgresql://localhost:5432/srsly
-    username:
-    password:
+    url: jdbc:postgresql://${DB_ADDRESS}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -14,14 +14,14 @@ spring:
   ai:
     google:
       genai:
-        api-key: <api-key>
+        api-key: ${GEMINI_API_KEY}
     retry:
       max-attempts: 2
 
 security:
   jwt:
-    secret-key: <secret-key>
-    expiration-time: 300000
+    secret-key: ${JWT_SECRET_KEY}
+    expiration-time: 3600000
 
 openfeign:
   client:

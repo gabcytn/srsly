@@ -41,12 +41,12 @@ srsly:
 
 - **Spring Boot** — Backend API
 - **PostgreSQL** — Persistent storage
-- **Redis** — Caching & scheduling optimizations
+- **Redis** — Caching
 - **OpenAI API** — Solution critique & feedback
 
 ---
 
-## 🔍 Key Features
+## Key Features
 
 - SM-2 inspired review scheduling
 - Adaptive interval recalculation
@@ -54,15 +54,6 @@ srsly:
 - Retention-focused design
 - AI-powered solution critiques
 - Problem history tracking
-
----
-
-## Architecture (High-Level)
-
-- Spring Boot REST API
-- Postgres for durable storage
-- Redis for refresh token rotations
-- Optional AI critique layer for deeper feedback
 
 ---
 
@@ -80,27 +71,36 @@ srsly:
    ```bash
    git clone https://github.com/gabcytn/srsly.git
    cd srsly
-
-2. Configure application.yaml
+   
+2. Configure environment variables
+   ```bash
+   export SRSLY_FRONTEND_URL=http://localhost:5173
+   export DB_ADDRESS=localhost
+   export DB_PORT=5432
+   export DB_NAME=<your-db>
+   export DB_USERNAME=<your-username>
+   export DB_PASSWORD=<your-password>
+   export JWT_SECRET_KEY=
+   export GEMINI_API_KEY=
+   ```
    ```bash
    cd src/main/resources
-   cp example.application.yaml application.yaml
    ```
    - Create postgres DB
    ```bash
    sudo -i -u postgres psql
    ```
    ```postgres
-   CREATE DATABASE srsly
+   CREATE DATABASE <your-db>
    ```
-   - Put DB username/password in `spring.datasource.username/password`
+   - Put DB username/password in `env`
    - Generate JWT Secret key
    ```bash
    openssl rand -hex 32
    ```
-   - Paste output to `security.jwt.secret-key`
+   - Paste output to `env`
    - Generate API key at [AIStudio](https://aistudio.google.com)
-   - Paste output to `spring.ai.google.genai.api-key`
+   - Paste output to `env`
   
 3. Run application
    ```bash
