@@ -157,6 +157,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<finalName>srsly</finalName>
 	</build>
 
 </project>
