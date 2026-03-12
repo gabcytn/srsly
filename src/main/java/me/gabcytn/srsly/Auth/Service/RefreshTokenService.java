@@ -46,6 +46,8 @@ public class RefreshTokenService {
     Cookie cookie = new Cookie("X-REFRESH-TOKEN", refreshToken);
     cookie.setHttpOnly(true);
     cookie.setPath("/");
+    cookie.setSecure(true);
+    cookie.setAttribute("SameSite", "None");
     cookie.setMaxAge(604800);
     response.addCookie(cookie);
   }
