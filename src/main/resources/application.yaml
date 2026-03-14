@@ -17,6 +17,21 @@ spring:
         api-key: ${GEMINI_API_KEY}
     retry:
       max-attempts: 2
+  mail:
+    host: email-smtp.${AWS_SES_REGION}.amazonaws.com
+    port: 587
+    username: ${AWS_SES_USERNAME}
+    password: ${AWS_SES_PASSWORD}
+    protocol: smtp
+    properties:
+      mail:
+        debug: true
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
 
 security:
   jwt:
