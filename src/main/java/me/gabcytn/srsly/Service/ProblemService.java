@@ -3,10 +3,12 @@ package me.gabcytn.srsly.Service;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.gabcytn.srsly.DTO.PaginatedProblemDto;
 import me.gabcytn.srsly.DTO.ProblemDto;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.Tag;
+import me.gabcytn.srsly.Exception.GenericNotFoundException;
 import me.gabcytn.srsly.Proxy.LeetCodeQuestionProxy;
 import me.gabcytn.srsly.Repository.ProblemRepository;
 import org.springframework.data.domain.Page;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ProblemService {
@@ -36,7 +39,12 @@ public class ProblemService {
   }
 
   private ProblemDto fetchApi(int id) {
-    return leetCodeQuestionProxy.getProblem(id);
+    try {
+      return leetCodeQuestionProxy.getProblem(id);
+    } catch (Exception e) {
+      log.error("Error fetching problem from API with message: {}", e.getMessage());
+      throw new GenericNotFoundException("Problem not found.");
+    }
   }
 
   private void sanitizeQuestionContent(ProblemDto problem) {
