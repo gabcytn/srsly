@@ -3,8 +3,8 @@ package me.gabcytn.srsly.Controller;
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.AI.AiCritique;
 import me.gabcytn.srsly.Service.AiService;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AiController {
   private final AiService aiService;
 
-  @GetMapping("/{solutionId}/ai")
+  @PostMapping("/{solutionId}/ai")
   public AiCritique index(@PathVariable long solutionId) {
     return aiService.critique(solutionId);
   }
