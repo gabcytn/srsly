@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import me.gabcytn.srsly.DTO.UserProblemToSolveCount;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SrsProblem;
 import me.gabcytn.srsly.Entity.User;
@@ -48,4 +49,12 @@ public interface SrsProblemRepository extends JpaRepository<SrsProblem, Integer>
   Optional<SrsProblem> findByProblemAndUser(Problem problem, User user);
 
   Integer countByNextAttemptAtLessThanEqualAndUser(LocalDate date, User user);
+
+  @Query(
+"""
+    SELECT u.email, COUNT(srs.id) FROM SrsProblem srs
+    JOIN srs.user u WHERE srs.nextAttemptAt <= :date GROUP BY u.email
+""")
+  List<UserProblemToSolveCount> findUserWithToSolveCountByNextAttemptAtLessThanEqual(
+      @Param("date") LocalDate nextAttemptAt);
 }
