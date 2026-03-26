@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class MailNotificationScheduler {
-	private final MailService mailService;
+  private final MailService mailService;
 
-	@Scheduled(cron = "0 0 7 * * *", zone = "Asia/Manila")
-	public void sendEmail() {
-		log.info("Sending email to users...");
-		mailService.sendMailReminder();
-	}
+  @Scheduled(cron = "0 0 7 * * *", zone = "Asia/Manila")
+  public void sendEmail() {
+    log.info("Sending email to users...");
+    mailService.sendMailReminder();
+  }
 }
