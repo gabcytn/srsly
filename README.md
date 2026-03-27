@@ -108,4 +108,4 @@ srsly:
 
 ## Links
 
-Access the [API](https://srs-ly.app) or use the [web app](https://srsly-client.vercel.app)
+Access the [API](https://srs-ly.app) or use the [web app](https://client.srs-ly.app)
