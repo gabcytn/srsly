@@ -19,13 +19,11 @@ public class MailReminderService {
   private final UserService userService;
 
   public void subscribe() {
-    User user = userService.getCurrentlyLoggedInUser();
-    user.setIsSubscribedToMailReminders(true);
+    setUserToReceiveMailReminders(true);
   }
 
   public void unsubscribe() {
-    User user = userService.getCurrentlyLoggedInUser();
-    user.setIsSubscribedToMailReminders(false);
+    setUserToReceiveMailReminders(false);
   }
 
   @Async
@@ -34,6 +32,12 @@ public class MailReminderService {
     List<UserProblemToSolveCount> userProblemCount =
         srsProblemRepository.findUserWithToSolveCountByNextAttemptAtLessThanEqual(now);
     userProblemCount.forEach(this::sendSimpleMessage);
+  }
+
+  private void setUserToReceiveMailReminders(boolean toReceive) {
+    User user = userService.getCurrentlyLoggedInUser();
+    user.setIsSubscribedToMailReminders(toReceive);
+    userService.save(user);
   }
 
   private void sendSimpleMessage(UserProblemToSolveCount dto) {
