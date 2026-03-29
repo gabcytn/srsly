@@ -9,7 +9,6 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -28,6 +27,8 @@ public class User {
 
   @Column(name = "is_email_verified")
   private Boolean isEmailVerified;
+
+  private Boolean isSubscribedToMailReminders = false;
 
   @JsonIgnore
   @CreationTimestamp

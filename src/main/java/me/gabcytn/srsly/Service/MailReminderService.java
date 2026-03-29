@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.DTO.UserProblemToSolveCount;
+import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -12,11 +13,30 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
-public class MailService {
+public class MailReminderService {
   private final JavaMailSender mailSender;
   private final SrsProblemRepository srsProblemRepository;
+  private final UserService userService;
 
-  public void sendSimpleMessage(UserProblemToSolveCount dto) {
+  public void subscribe() {
+    User user = userService.getCurrentlyLoggedInUser();
+    user.setIsSubscribedToMailReminders(true);
+  }
+
+  public void unsubscribe() {
+    User user = userService.getCurrentlyLoggedInUser();
+    user.setIsSubscribedToMailReminders(false);
+  }
+
+  @Async
+  public void sendMailReminder() {
+    LocalDate now = LocalDate.now();
+    List<UserProblemToSolveCount> userProblemCount =
+        srsProblemRepository.findUserWithToSolveCountByNextAttemptAtLessThanEqual(now);
+    userProblemCount.forEach(this::sendSimpleMessage);
+  }
+
+  private void sendSimpleMessage(UserProblemToSolveCount dto) {
     SimpleMailMessage message = new SimpleMailMessage();
     message.setFrom("cayetanogabriel03@gmail.com");
     message.setTo(dto.userEmail());
@@ -31,13 +51,5 @@ public class MailService {
             + "Stay consistent and keep your streak going.\n\n"
             + "— srsly");
     mailSender.send(message);
-  }
-
-  @Async
-  public void sendMailReminder() {
-    LocalDate now = LocalDate.now();
-    List<UserProblemToSolveCount> userProblemCount =
-        srsProblemRepository.findUserWithToSolveCountByNextAttemptAtLessThanEqual(now);
-    userProblemCount.forEach(this::sendSimpleMessage);
   }
 }
