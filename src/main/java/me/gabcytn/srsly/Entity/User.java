@@ -26,13 +26,15 @@ public class User {
 
   private String password;
 
+  @Column(name = "is_email_verified")
+  private Boolean isEmailVerified;
+
   @JsonIgnore
   @CreationTimestamp
   @Column(updatable = false)
   private Timestamp createdAt;
 
-  @JsonIgnore
-  @UpdateTimestamp private Timestamp updatedAt;
+  @JsonIgnore @UpdateTimestamp private Timestamp updatedAt;
 
   @OneToMany(mappedBy = "user")
   private Set<SrsProblem> srsProblems;

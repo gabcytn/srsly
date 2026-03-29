@@ -21,13 +21,26 @@ public class UserService {
     try {
       UserPrincipal principal =
           (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-      Optional<User> user = userRepository.findByEmail(principal.getUsername());
-      if (user.isEmpty())
-        throw new UsernameNotFoundException("User { " + principal.getUsername() + " } not found.");
-      return user.get();
+      return findByEmail(principal.getUsername());
     } catch (ClassCastException e) {
       LOGGER.error("Failed to cast to me.gabcytn.srsly.Auth.DTO.UserPrincipal");
       throw new RuntimeException(e.getMessage());
     }
+  }
+
+  public User findByEmail(String email) {
+    Optional<User> user = userRepository.findByEmail(email);
+    if (user.isEmpty()) {
+      throw new UsernameNotFoundException("User { " + email + " } not found.");
+    }
+    return user.get();
+  }
+
+  public User save(User user) {
+    return userRepository.save(user);
+  }
+
+  public Boolean existsByEmail(String email) {
+    return userRepository.existsByEmail(email);
   }
 }

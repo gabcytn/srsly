@@ -106,6 +106,6 @@ srsly:
    ```bash
    ./mvnw spring-boot:run
 
-## Status
+## Links
 
-Actively building client-side app [here](https://github.com/gabcytn/srsly-client)
+Access the [API](https://srs-ly.app) or use the [web app](https://client.srs-ly.app)
