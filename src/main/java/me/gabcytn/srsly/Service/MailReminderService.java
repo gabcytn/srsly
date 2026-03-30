@@ -3,20 +3,28 @@ package me.gabcytn.srsly.Service;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import me.gabcytn.srsly.Auth.Service.EmailJwtService;
 import me.gabcytn.srsly.DTO.UserProblemToSolveCount;
 import me.gabcytn.srsly.Entity.User;
+import me.gabcytn.srsly.Exception.InvalidEmailVerificationTokenException;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
 public class MailReminderService {
+  @Value("${spring.application.frontend.url}")
+  private String APP_URL;
+
   private final JavaMailSender mailSender;
   private final SrsProblemRepository srsProblemRepository;
   private final UserService userService;
+  private final EmailJwtService jwtService;
 
   public void subscribe() {
     setUserToReceiveMailReminders(true);
@@ -26,12 +34,49 @@ public class MailReminderService {
     setUserToReceiveMailReminders(false);
   }
 
+  public void sendVerificationEmail() {
+    User user = userService.getCurrentlyLoggedInUser();
+    String verificationToken = jwtService.generateToken(user.getEmail());
+    String body =
+        "click this link to verify your email: "
+            + APP_URL
+            + "/verification?token="
+            + verificationToken;
+    sendSimpleMessage(user.getEmail(), "Email Verification", body);
+  }
+
+  public void verifyEmail(String token) {
+    User user = userService.getCurrentlyLoggedInUser();
+    UserDetails userDetails = userService.loadUserByUsername(user.getEmail());
+    boolean isTokenValid = jwtService.isTokenValid(token, userDetails);
+
+    if (!isTokenValid) {
+      throw new InvalidEmailVerificationTokenException();
+    }
+
+    user.setIsEmailVerified(Boolean.TRUE);
+    userService.save(user);
+  }
+
   @Async
   public void sendMailReminder() {
     LocalDate now = LocalDate.now();
     List<UserProblemToSolveCount> userProblemCount =
         srsProblemRepository.findUserWithToSolveCountByNextAttemptAtLessThanEqual(now);
-    userProblemCount.forEach(this::sendSimpleMessage);
+    userProblemCount.forEach(
+        e -> {
+          String body =
+              "Hi "
+                  + e.userEmail()
+                  + ",\n\n"
+                  + "You have "
+                  + e.count()
+                  + " problem(s) to review today.\n"
+                  + "Stay consistent and keep your streak going.\n\n"
+                  + "— srsly";
+          String subject = "You have " + e.count() + " problems to review today";
+          sendSimpleMessage(e.userEmail(), subject, body);
+        });
   }
 
   private void setUserToReceiveMailReminders(boolean toReceive) {
@@ -40,20 +85,12 @@ public class MailReminderService {
     userService.save(user);
   }
 
-  private void sendSimpleMessage(UserProblemToSolveCount dto) {
+  private void sendSimpleMessage(String to, String subject, String body) {
     SimpleMailMessage message = new SimpleMailMessage();
     message.setFrom("cayetanogabriel03@gmail.com");
-    message.setTo(dto.userEmail());
-    message.setSubject("You have " + dto.count() + " problems to review today");
-    message.setText(
-        "Hi "
-            + dto.userEmail()
-            + ",\n\n"
-            + "You have "
-            + dto.count()
-            + " problem(s) to review today.\n"
-            + "Stay consistent and keep your streak going.\n\n"
-            + "— srsly");
+    message.setTo(to);
+    message.setSubject(subject);
+    message.setText(body);
     mailSender.send(message);
   }
 }

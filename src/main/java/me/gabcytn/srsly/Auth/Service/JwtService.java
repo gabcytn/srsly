@@ -17,32 +17,30 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class JwtService {
-  @Value("${security.jwt.secret-key}")
-  private String secretKey;
+  enum Type {
+    AUTHENTICATION,
+    EMAIL_VERIFICATION
+  }
+
+  protected Type JWT_TYPE = Type.AUTHENTICATION;
+
+  @Value("${security.jwt.auth-secret-key}")
+  protected String secretKey;
 
   @Value("${security.jwt.expiration-time}")
   private long jwtExpiration;
 
   public String extractUsername(String token) {
-    String claim = extractClaim(token, Claims::getSubject);
-    log.info("Claims::getSubject -> {}", claim);
-    return claim;
+    return extractClaim(token, Claims::getSubject);
   }
 
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);
-    log.info("claims -> {}", claims);
-    T val = claimsResolver.apply(claims);
-    log.info("date -> {}", val);
-    return val;
-  }
-
-  public String generateEmailVerificationToken(String email) {
-    return generateToken(new HashMap<>(Map.of("type", "email_verification")), email);
+    return claimsResolver.apply(claims);
   }
 
   public String generateToken(String username) {
-    return generateToken(new HashMap<>(Map.of("type", "authentication")), username);
+    return generateToken(new HashMap<>(Map.of("type", JWT_TYPE)), username);
   }
 
   public String generateToken(Map<String, Object> extraClaims, String username) {
@@ -63,20 +61,18 @@ public class JwtService {
         .compact();
   }
 
-  public boolean isEmailVerificationTokenValid(String token, UserDetails userDetails) {
-    final String email = extractUsername(token);
-    String tokenType = extractClaim(token, claims -> claims.get("type", String.class));
-    if (tokenType.equals("email_verification")) {
-      return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
-    }
-
-    log.error("Invalid email verification token type.");
-    return false;
-  }
-
   public boolean isTokenValid(String token, UserDetails userDetails) {
     final String username = extractUsername(token);
-    return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    final String tokenType = extractClaim(token, claims -> claims.get("type", String.class));
+    try {
+      Type type = Type.valueOf(tokenType);
+      return username.equals(userDetails.getUsername())
+          && !isTokenExpired(token)
+          && type.equals(JWT_TYPE);
+    } catch (RuntimeException e) {
+      log.error("Error: {}", e.getMessage());
+      return false;
+    }
   }
 
   private boolean isTokenExpired(String token) {
