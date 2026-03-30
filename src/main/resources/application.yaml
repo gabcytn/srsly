@@ -4,9 +4,9 @@ spring:
     frontend:
       url: ${SRSLY_FRONTEND_URL}
   datasource:
-    url: jdbc:postgresql://${DB_ADDRESS}:${DB_PORT}/${DB_NAME}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${SRSLY_DB_ADDRESS}:${SRSLY_DB_PORT}/${SRSLY_DB_NAME}
+    username: ${SRSLY_DB_USERNAME}
+    password: ${SRSLY_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -14,14 +14,14 @@ spring:
   ai:
     google:
       genai:
-        api-key: ${GEMINI_API_KEY}
+        api-key: ${SRSLY_GEMINI_API_KEY}
     retry:
       max-attempts: 2
   mail:
-    host: email-smtp.${AWS_SES_REGION}.amazonaws.com
+    host: email-smtp.${SRSLY_AWS_SES_REGION}.amazonaws.com
     port: 587
-    username: ${AWS_SES_USERNAME}
-    password: ${AWS_SES_PASSWORD}
+    username: ${SRSLY_AWS_SES_USERNAME}
+    password: ${SRSLY_AWS_SES_PASSWORD}
     protocol: smtp
     properties:
       mail:
@@ -35,8 +35,9 @@ spring:
 
 security:
   jwt:
-    secret-key: ${JWT_SECRET_KEY}
-    expiration-time: 3600000
+    auth-secret-key: ${SRSLY_AUTH_JWT_SECRET_KEY}
+    email-secret-key: ${SRSLY_EMAIL_JWT_SECRET_KEY}
+    expiration-time: 900000
 
 openfeign:
   client:
