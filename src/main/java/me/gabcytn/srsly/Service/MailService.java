@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
-public class MailReminderService {
+public class MailService {
   @Value("${spring.application.frontend.url}")
   private String APP_URL;
 
