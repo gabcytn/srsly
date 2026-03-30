@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.Auth.Service.EmailJwtService;
 import me.gabcytn.srsly.DTO.UserProblemToSolveCount;
 import me.gabcytn.srsly.Entity.User;
+import me.gabcytn.srsly.Exception.EmailAlreadyVerifiedException;
 import me.gabcytn.srsly.Exception.InvalidEmailVerificationTokenException;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +37,9 @@ public class MailReminderService {
 
   public void sendVerificationEmail() {
     User user = userService.getCurrentlyLoggedInUser();
+    if (user.getIsEmailVerified()) {
+      throw new EmailAlreadyVerifiedException();
+    }
     String verificationToken = jwtService.generateToken(user.getEmail());
     String body =
         "click this link to verify your email: "
