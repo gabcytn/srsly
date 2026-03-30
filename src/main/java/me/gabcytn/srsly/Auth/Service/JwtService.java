@@ -9,10 +9,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class JwtService {
   @Value("${security.jwt.secret-key}")
@@ -22,16 +24,25 @@ public class JwtService {
   private long jwtExpiration;
 
   public String extractUsername(String token) {
-    return extractClaim(token, Claims::getSubject);
+    String claim = extractClaim(token, Claims::getSubject);
+    log.info("Claims::getSubject -> {}", claim);
+    return claim;
   }
 
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);
-    return claimsResolver.apply(claims);
+    log.info("claims -> {}", claims);
+    T val = claimsResolver.apply(claims);
+    log.info("date -> {}", val);
+    return val;
+  }
+
+  public String generateEmailVerificationToken(String email) {
+    return generateToken(new HashMap<>(Map.of("type", "email_verification")), email);
   }
 
   public String generateToken(String username) {
-    return generateToken(new HashMap<>(), username);
+    return generateToken(new HashMap<>(Map.of("type", "authentication")), username);
   }
 
   public String generateToken(Map<String, Object> extraClaims, String username) {
@@ -50,6 +61,17 @@ public class JwtService {
         .expiration(new Date(System.currentTimeMillis() + expiration))
         .signWith(getSignInKey())
         .compact();
+  }
+
+  public boolean isEmailVerificationTokenValid(String token, UserDetails userDetails) {
+    final String email = extractUsername(token);
+    String tokenType = extractClaim(token, claims -> claims.get("type", String.class));
+    if (tokenType.equals("email_verification")) {
+      return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    log.error("Invalid email verification token type.");
+    return false;
   }
 
   public boolean isTokenValid(String token, UserDetails userDetails) {

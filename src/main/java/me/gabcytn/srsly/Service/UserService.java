@@ -5,8 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.gabcytn.srsly.Auth.DTO.UserPrincipal;
 import me.gabcytn.srsly.Auth.Repository.UserRepository;
+import me.gabcytn.srsly.Auth.Service.JwtService;
+import me.gabcytn.srsly.Auth.Service.UserDetailsServiceImpl;
 import me.gabcytn.srsly.Entity.User;
+import me.gabcytn.srsly.Exception.InvalidEmailVerificationTokenException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +19,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
   private final UserRepository userRepository;
+  private final UserDetailsServiceImpl userDetailsServiceImpl;
+  private final JwtService jwtService;
 
   public User getCurrentlyLoggedInUser() {
     try {
@@ -41,5 +47,18 @@ public class UserService {
 
   public Boolean existsByEmail(String email) {
     return userRepository.existsByEmail(email);
+  }
+
+  public void verifyEmail(String token) {
+    User user = getCurrentlyLoggedInUser();
+    UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(user.getEmail());
+    boolean isTokenValid = jwtService.isEmailVerificationTokenValid(token, userDetails);
+
+    if (isTokenValid) {
+      user.setIsEmailVerified(Boolean.TRUE);
+      save(user);
+    }
+
+    throw new InvalidEmailVerificationTokenException();
   }
 }
