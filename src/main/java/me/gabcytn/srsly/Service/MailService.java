@@ -3,6 +3,7 @@ package me.gabcytn.srsly.Service;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import me.gabcytn.srsly.Auth.DTO.UserPrincipal;
 import me.gabcytn.srsly.Auth.Service.EmailJwtService;
 import me.gabcytn.srsly.DTO.UserProblemToSolveCount;
 import me.gabcytn.srsly.Entity.User;
@@ -35,6 +36,7 @@ public class MailService {
     setUserToReceiveMailReminders(false);
   }
 
+  @Async
   public void sendVerificationEmail() {
     User user = userService.getCurrentlyLoggedInUser();
     if (user.getIsEmailVerified()) {
@@ -50,11 +52,12 @@ public class MailService {
   }
 
   public void verifyEmail(String token) {
-    User user = userService.getCurrentlyLoggedInUser();
-    UserDetails userDetails = userService.loadUserByUsername(user.getEmail());
-    boolean isTokenValid = jwtService.isTokenValid(token, userDetails);
+    String email = userService.getCurrentUserEmail();
 
-    if (!isTokenValid) {
+    User user = userService.findByEmail(email);
+    UserDetails userDetails = new UserPrincipal(user);
+
+    if (!jwtService.isTokenValid(token, userDetails)) {
       throw new InvalidEmailVerificationTokenException();
     }
 
