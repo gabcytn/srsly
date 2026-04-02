@@ -1,8 +1,11 @@
 package me.gabcytn.srsly.Service;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.gabcytn.srsly.Auth.DTO.UserPrincipal;
 import me.gabcytn.srsly.Auth.Service.EmailJwtService;
 import me.gabcytn.srsly.DTO.UserProblemToSolveCount;
@@ -13,15 +16,21 @@ import me.gabcytn.srsly.Repository.SrsProblemRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class MailService {
   @Value("${spring.application.frontend.url}")
   private String APP_URL;
+
+  private final TemplateEngine templateEngine;
 
   private final JavaMailSender mailSender;
   private final SrsProblemRepository srsProblemRepository;
@@ -36,19 +45,15 @@ public class MailService {
     setUserToReceiveMailReminders(false);
   }
 
-  @Async
   public void sendVerificationEmail() {
     User user = userService.getCurrentUser();
     if (user.getIsEmailVerified()) {
       throw new EmailAlreadyVerifiedException();
     }
     String verificationToken = jwtService.generateToken(user.getEmail());
-    String body =
-        "click this link to verify your email: "
-            + APP_URL
-            + "/verification?token="
-            + verificationToken;
-    sendSimpleMessage(user.getEmail(), "Email Verification", body);
+    Context ctx = new Context();
+    ctx.setVariable("verificationUrl", APP_URL + "/verification?token=" + verificationToken);
+    sendHtmlMessage(user.getEmail(), "Email Verification", "verify-email", ctx);
   }
 
   public void verifyEmail(String token) {
@@ -72,17 +77,15 @@ public class MailService {
         srsProblemRepository.findUserWithToSolveCountByNextAttemptAtLessThanEqual(now);
     userProblemCount.forEach(
         e -> {
-          String body =
-              "Hi "
-                  + e.userEmail()
-                  + ",\n\n"
-                  + "You have "
-                  + e.count()
-                  + " problem(s) to review today.\n"
-                  + "Stay consistent and keep your streak going.\n\n"
-                  + "— srsly";
-          String subject = "You have " + e.count() + " problems to review today";
-          sendSimpleMessage(e.userEmail(), subject, body);
+          Context ctx = new Context();
+          ctx.setVariable("count", e.count());
+          ctx.setVariable("userEmail", e.userEmail());
+          ctx.setVariable("appUrl", APP_URL);
+          sendHtmlMessage(
+              e.userEmail(),
+              "You have " + e.count() + " problems to review today",
+              "review-reminder",
+              ctx);
         });
   }
 
@@ -90,6 +93,22 @@ public class MailService {
     User user = userService.getCurrentUser();
     user.setIsSubscribedToMailReminders(toReceive);
     userService.save(user);
+  }
+
+  private void sendHtmlMessage(String to, String subject, String template, Context ctx) {
+    MimeMessage message = mailSender.createMimeMessage();
+    try {
+      MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+      helper.setFrom("cayetanogabriel03@gmail.com");
+      helper.setTo(to);
+      helper.setSubject(subject);
+      String html = templateEngine.process(template, ctx);
+      helper.setText(html, true);
+      mailSender.send(message);
+    } catch (MessagingException e) {
+      log.error("MessagingException thrown while sending html emails");
+      throw new RuntimeException(e.getMessage());
+    }
   }
 
   private void sendSimpleMessage(String to, String subject, String body) {
