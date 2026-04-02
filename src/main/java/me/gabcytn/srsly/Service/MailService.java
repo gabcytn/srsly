@@ -30,8 +30,10 @@ public class MailService {
   @Value("${spring.application.frontend.url}")
   private String APP_URL;
 
-  private final TemplateEngine templateEngine;
+  @Value("${spring.mail.from}")
+  private String MAIL_FROM;
 
+  private final TemplateEngine templateEngine;
   private final JavaMailSender mailSender;
   private final SrsProblemRepository srsProblemRepository;
   private final UserService userService;
@@ -99,7 +101,7 @@ public class MailService {
     MimeMessage message = mailSender.createMimeMessage();
     try {
       MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-      helper.setFrom("cayetanogabriel03@gmail.com");
+      helper.setFrom(MAIL_FROM);
       helper.setTo(to);
       helper.setSubject(subject);
       String html = templateEngine.process(template, ctx);
