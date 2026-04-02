@@ -49,7 +49,7 @@ public class AuthService {
     String token = jwtService.generateToken(user.getEmail());
     JwtResponse jwt = new JwtResponse(token, jwtService.getExpirationTime());
     User userFromDb = userService.findByEmail(user.getEmail());
-    return new AuthResponse(userFromDb.getEmail(), userFromDb.getIsEmailVerified(), jwt);
+    return new AuthResponse(userFromDb.getEmail(), userFromDb.getEmailVerifiedAt() != null, jwt);
   }
 
   public void generateRefreshToken(String userEmail, String userDeviceName) {

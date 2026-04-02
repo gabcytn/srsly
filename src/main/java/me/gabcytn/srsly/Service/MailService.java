@@ -3,6 +3,7 @@ package me.gabcytn.srsly.Service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +50,7 @@ public class MailService {
 
   public void sendVerificationEmail() {
     User user = userService.getCurrentUser();
-    if (user.getIsEmailVerified()) {
+    if (user.getEmailVerifiedAt() != null) {
       throw new EmailAlreadyVerifiedException();
     }
     String verificationToken = jwtService.generateToken(user.getEmail());
@@ -68,7 +69,7 @@ public class MailService {
       throw new InvalidEmailVerificationTokenException();
     }
 
-    user.setIsEmailVerified(Boolean.TRUE);
+    user.setEmailVerifiedAt(LocalDateTime.now());
     userService.save(user);
   }
 

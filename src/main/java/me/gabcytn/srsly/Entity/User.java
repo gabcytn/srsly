@@ -3,6 +3,7 @@ package me.gabcytn.srsly.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 import lombok.*;
@@ -25,8 +26,7 @@ public class User {
 
   private String password;
 
-  @Column(name = "is_email_verified")
-  private Boolean isEmailVerified;
+  private LocalDateTime emailVerifiedAt;
 
   private Boolean isSubscribedToMailReminders = false;
 

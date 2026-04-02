@@ -53,7 +53,7 @@ public interface SrsProblemRepository extends JpaRepository<SrsProblem, Integer>
   @Query(
 """
     SELECT u.email, COUNT(srs.id) FROM SrsProblem srs
-    JOIN srs.user u WHERE srs.nextAttemptAt <= :date AND u.isEmailVerified = true GROUP BY u.email
+    JOIN srs.user u WHERE srs.nextAttemptAt <= :date AND u.emailVerifiedAt IS NOT NULL GROUP BY u.email
 """)
   List<UserProblemToSolveCount> findUserWithToSolveCountByNextAttemptAtLessThanEqual(
       @Param("date") LocalDate nextAttemptAt);
