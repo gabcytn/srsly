@@ -139,7 +139,7 @@ public class SrsProblemService {
 
   public PaginatedSrsProblem getTodayProblems(int page, String difficulty, String titleSearch) {
     Pageable pageable = PageRequest.of(page, 5, Sort.by("nextAttemptAt"));
-    User currentUser = userService.getCurrentlyLoggedInUser();
+    User currentUser = userService.getCurrentUser();
     LocalDate dateNow = LocalDate.now();
 
     if (!"all".equals(difficulty)) {
@@ -197,7 +197,7 @@ public class SrsProblemService {
   }
 
   public Integer countOfProblemsToSolveToday() {
-    User user = userService.getCurrentlyLoggedInUser();
+    User user = userService.getCurrentUser();
     return srsProblemRepository.countByNextAttemptAtLessThanEqualAndUser(LocalDate.now(), user);
   }
 

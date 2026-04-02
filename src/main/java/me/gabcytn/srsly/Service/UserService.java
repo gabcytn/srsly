@@ -29,7 +29,7 @@ public class UserService {
     return getCurrentUserPrincipal().getUsername();
   }
 
-  public User getCurrentlyLoggedInUser() {
+  public User getCurrentUser() {
     return findByEmail(getCurrentUserEmail());
   }
 

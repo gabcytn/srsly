@@ -38,7 +38,7 @@ public class MailService {
 
   @Async
   public void sendVerificationEmail() {
-    User user = userService.getCurrentlyLoggedInUser();
+    User user = userService.getCurrentUser();
     if (user.getIsEmailVerified()) {
       throw new EmailAlreadyVerifiedException();
     }
@@ -87,7 +87,7 @@ public class MailService {
   }
 
   private void setUserToReceiveMailReminders(boolean toReceive) {
-    User user = userService.getCurrentlyLoggedInUser();
+    User user = userService.getCurrentUser();
     user.setIsSubscribedToMailReminders(toReceive);
     userService.save(user);
   }

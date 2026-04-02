@@ -3,7 +3,6 @@ package me.gabcytn.srsly.Controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.DTO.PaginatedProblemDto;
 import me.gabcytn.srsly.DTO.ProblemDto;
@@ -27,7 +26,8 @@ public class ProblemController {
 
   @GetMapping
   @JsonView(Views.Summary.class)
-  public PaginatedProblemDto getAll(@RequestParam(name = "page", required = false, defaultValue = "0") int page) {
+  public PaginatedProblemDto getAll(
+      @RequestParam(name = "page", required = false, defaultValue = "0") int page) {
     return problemService.getAll(page);
   }
 
@@ -41,14 +41,16 @@ public class ProblemController {
   @JsonView(Views.Detailed.class)
   public ProblemDto getProblem(@PathVariable int id) {
     Problem problem = problemService.findByFrontendId(id);
-    Optional<SrsProblem> found = srsProblemService.findByProblemAndUser(problem, userService.getCurrentlyLoggedInUser());
+    Optional<SrsProblem> found =
+        srsProblemService.findByProblemAndUser(problem, userService.getCurrentUser());
 
     ProblemDto dto = problem.toApiPied();
     dto.setIsSolved(found.isPresent());
-		found.ifPresent(srsProblem -> {
-      dto.setSrsId(srsProblem.getId());
-      dto.setNextAttemptAt(srsProblem.getNextAttemptAt());
-    });
+    found.ifPresent(
+        srsProblem -> {
+          dto.setSrsId(srsProblem.getId());
+          dto.setNextAttemptAt(srsProblem.getNextAttemptAt());
+        });
     return dto;
   }
 }

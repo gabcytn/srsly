@@ -2,7 +2,6 @@ package me.gabcytn.srsly.Service;
 
 import java.util.*;
 import me.gabcytn.srsly.DTO.ProblemDto;
-import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SuggestedProblems;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
@@ -25,7 +24,7 @@ public class ProblemSuggestionService {
   }
 
   public List<ProblemDto> getSuggestions() {
-    User user = userService.getCurrentlyLoggedInUser();
+    User user = userService.getCurrentUser();
 
     Optional<SuggestedProblems> cachedProblems = suggestedProblemsRepository.findById(user.getId());
     if (cachedProblems.isPresent()) {

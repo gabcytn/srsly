@@ -26,7 +26,7 @@ public class SolutionService {
 
   public Solution saveToProblem(SolutionDto solutionDto, int problemId) {
     Problem problem = problemService.findByFrontendId(problemId);
-    User user = userService.getCurrentlyLoggedInUser();
+    User user = userService.getCurrentUser();
 
     if (!srsProblemService.existsByProblemAndUser(problem, user)) {
       throw new SolutionException("Initial solutions must hit 'POST /solutions/initial' first");
@@ -38,11 +38,12 @@ public class SolutionService {
 
   public void saveInitialToProblem(InitialSolutionDto initialSolutionDto, int problemId) {
     Problem problem = problemService.findByFrontendId(problemId);
-    User user = userService.getCurrentlyLoggedInUser();
+    User user = userService.getCurrentUser();
 
     if (this.existsByProblemAndUser(problem, user)) {
       throw new SolutionException(
-          "Unable to save non-initial solution. User must hit 'POST /solutions' for already solved problems.");
+          "Unable to save non-initial solution. User must hit 'POST /solutions' for already solved"
+              + " problems.");
     }
     srsProblemService.saveInitial(initialSolutionDto, problem, user);
     if (initialSolutionDto.solutionDto() != null)
@@ -64,7 +65,7 @@ public class SolutionService {
 
   public List<Solution> getSolutions(int problemId) {
     Problem problem = problemService.findByFrontendId(problemId);
-    User user = userService.getCurrentlyLoggedInUser();
+    User user = userService.getCurrentUser();
 
     return solutionRepository.findAllByProblemAndUser(problem, user);
   }
@@ -74,7 +75,7 @@ public class SolutionService {
   }
 
   public void update(long id, EditSolution dto) {
-    User user = userService.getCurrentlyLoggedInUser();
+    User user = userService.getCurrentUser();
     Solution solution = findById(id);
     if (solution.getAiCritique() != null && !solution.getCode().equals(dto.code())) {
       throw new AiException("Code cannot be modified once an AI critique has been completed.");
@@ -90,7 +91,7 @@ public class SolutionService {
   }
 
   public void delete(long id) {
-    User user = userService.getCurrentlyLoggedInUser();
+    User user = userService.getCurrentUser();
     Solution solution = findById(id);
     if (!solution.getUser().getId().equals(user.getId())) {
       throw new GenericForbiddenException("Access denied to solution.");

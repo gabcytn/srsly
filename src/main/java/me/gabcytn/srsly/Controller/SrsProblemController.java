@@ -2,7 +2,6 @@ package me.gabcytn.srsly.Controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
-import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.PaginatedSrsProblem;
 import me.gabcytn.srsly.DTO.ReviewProgress;
@@ -35,7 +34,7 @@ public class SrsProblemController {
 
   @GetMapping("/progress")
   public ReviewProgress progress() {
-    User user = userService.getCurrentlyLoggedInUser();
+    User user = userService.getCurrentUser();
     Integer solvedTodayCount = attemptService.countSolvedTodayExcludingInitial(user);
     Integer unsolvedCount = srsProblemService.countOfProblemsToSolveToday();
 
