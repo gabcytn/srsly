@@ -8,8 +8,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailJwtService extends JwtService {
 
-  public EmailJwtService(@Value("${security.jwt.email-secret-key}") String secretKey) {
+  public EmailJwtService(
+      @Value("${security.jwt.secret.email}") String secretKey,
+      @Value("${security.jwt.expiration.email}") Long expirationTime) {
     this.secretKey = secretKey;
+    this.jwtExpiration = expirationTime;
     this.JWT_TYPE = Type.EMAIL_VERIFICATION;
   }
 }

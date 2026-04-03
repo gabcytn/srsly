@@ -36,9 +36,12 @@ spring:
 
 security:
   jwt:
-    auth-secret-key: ${SRSLY_AUTH_JWT_SECRET_KEY}
-    email-secret-key: ${SRSLY_EMAIL_JWT_SECRET_KEY}
-    expiration-time: 900000
+    secret:
+      auth: ${SRSLY_AUTH_JWT_SECRET_KEY}
+      email: ${SRSLY_EMAIL_JWT_SECRET_KEY}
+    expiration:
+      auth: 900000
+      email: 1800000
 
 openfeign:
   client:

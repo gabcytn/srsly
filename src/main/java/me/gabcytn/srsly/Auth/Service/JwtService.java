@@ -24,11 +24,11 @@ public class JwtService {
 
   protected Type JWT_TYPE = Type.AUTHENTICATION;
 
-  @Value("${security.jwt.auth-secret-key}")
+  @Value("${security.jwt.secret.auth}")
   protected String secretKey;
 
-  @Value("${security.jwt.expiration-time}")
-  private long jwtExpiration;
+  @Value("${security.jwt.expiration.auth}")
+  protected long jwtExpiration;
 
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
