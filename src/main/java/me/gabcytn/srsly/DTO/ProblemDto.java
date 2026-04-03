@@ -1,7 +1,6 @@
 package me.gabcytn.srsly.DTO;
 
 import com.fasterxml.jackson.annotation.JsonView;
-
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -50,6 +49,6 @@ public class ProblemDto {
   private String url;
 
   public Problem toProblemEntity(List<Tag> tags) {
-    return new Problem(questionFrontendId, title, content, difficulty, new HashSet<>(tags), url);
+    return new Problem(questionFrontendId, title, content, difficulty, url, new HashSet<>(tags));
   }
 }

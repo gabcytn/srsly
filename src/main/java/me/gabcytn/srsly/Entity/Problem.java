@@ -7,9 +7,10 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import me.gabcytn.srsly.DTO.Difficulty;
+import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
 import me.gabcytn.srsly.DTO.ProblemDto;
 import me.gabcytn.srsly.DTO.TagDto;
-import me.gabcytn.srsly.DTO.Difficulty;
 
 @NoArgsConstructor
 @Getter
@@ -53,17 +54,21 @@ public class Problem {
   private Set<Tag> tags;
 
   public Problem(
-      int id, String title, String question, Difficulty difficulty, Set<Tag> tags, String url) {
+      int id, String title, String question, Difficulty difficulty, String url, Set<Tag> tags) {
     this.frontendId = id;
     this.title = title;
     this.question = question;
     this.difficulty = difficulty;
-    this.tags = tags;
     this.url = url;
+    this.tags = tags;
   }
 
   public ProblemDto toApiPied() {
     return new ProblemDto(frontendId, title, question, difficulty, getTagNames(), url);
+  }
+
+  public ProblemSummaryDto summarize() {
+    return new ProblemSummaryDto(frontendId, title, difficulty, getTagNames(), url);
   }
 
   private List<TagDto> getTagNames() {

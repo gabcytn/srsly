@@ -5,6 +5,8 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.gabcytn.srsly.DTO.PaginatedProblemDto;
+import me.gabcytn.srsly.DTO.Problem.ProblemDetailDto;
+import me.gabcytn.srsly.DTO.Problem.ReviewDetail;
 import me.gabcytn.srsly.DTO.ProblemDto;
 import me.gabcytn.srsly.Entity.*;
 import me.gabcytn.srsly.Exception.GenericNotFoundException;
@@ -29,20 +31,22 @@ public class ProblemService {
     return nullableProblem.orElseGet(() -> fetchAndCacheLeetCodeProblem(frontendId));
   }
 
-  public ProblemDto findDtoByFrontendId(int frontendId) {
+  public ProblemDetailDto findDtoByFrontendId(int frontendId) {
     Problem problem = findByFrontendId(frontendId);
     User user = userService.getCurrentUser();
     Optional<SrsProblem> optional = srsProblemService.findByProblemAndUser(problem, user);
 
-    ProblemDto dto = problem.toApiPied();
-    dto.setIsSolved(optional.isPresent());
-    optional.ifPresent(
-        srsProblem -> {
-          dto.setSrsId(srsProblem.getId());
-          dto.setNextAttemptAt(srsProblem.getNextAttemptAt());
-        });
+    ProblemDetailDto problemDetail = new ProblemDetailDto(problem.summarize());
+    problemDetail.setIsSolved(optional.isPresent());
 
-    return dto;
+    ReviewDetail reviewDetail = null;
+    if (optional.isPresent()) {
+      SrsProblem srsProblem = optional.get();
+      reviewDetail = new ReviewDetail(srsProblem.getId(), srsProblem.getNextAttemptAt());
+    }
+    problemDetail.setReviewDetail(reviewDetail);
+
+    return problemDetail;
   }
 
   private Problem fetchAndCacheLeetCodeProblem(int id) {

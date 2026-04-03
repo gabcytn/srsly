@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.DTO.PaginatedProblemDto;
+import me.gabcytn.srsly.DTO.Problem.ProblemDetailDto;
 import me.gabcytn.srsly.DTO.ProblemDto;
 import me.gabcytn.srsly.DTO.View.Views;
 import me.gabcytn.srsly.Service.ProblemService;
@@ -31,8 +32,7 @@ public class ProblemController {
   }
 
   @GetMapping("/{id}")
-  @JsonView(Views.Detailed.class)
-  public ProblemDto getProblem(@PathVariable int id) {
+  public ProblemDetailDto getProblem(@PathVariable int id) {
     return problemService.findDtoByFrontendId(id);
   }
 }
