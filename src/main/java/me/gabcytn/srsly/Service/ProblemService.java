@@ -6,15 +6,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.gabcytn.srsly.DTO.PaginatedProblemDto;
 import me.gabcytn.srsly.DTO.ProblemDto;
-import me.gabcytn.srsly.Entity.Problem;
-import me.gabcytn.srsly.Entity.Tag;
+import me.gabcytn.srsly.Entity.*;
 import me.gabcytn.srsly.Exception.GenericNotFoundException;
 import me.gabcytn.srsly.Proxy.LeetCodeQuestionProxy;
 import me.gabcytn.srsly.Repository.ProblemRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -24,11 +20,29 @@ public class ProblemService {
   private final ProblemRepository problemRepository;
   private final HtmlSanitizer htmlSanitizer;
   private final LeetCodeQuestionProxy leetCodeQuestionProxy;
+  private final SrsProblemService srsProblemService;
+  private final UserService userService;
   private final TagService tagService;
 
   public Problem findByFrontendId(int frontendId) {
     Optional<Problem> nullableProblem = problemRepository.findByFrontendId(frontendId);
     return nullableProblem.orElseGet(() -> fetchAndCacheLeetCodeProblem(frontendId));
+  }
+
+  public ProblemDto findDtoByFrontendId(int frontendId) {
+    Problem problem = findByFrontendId(frontendId);
+    User user = userService.getCurrentUser();
+    Optional<SrsProblem> optional = srsProblemService.findByProblemAndUser(problem, user);
+
+    ProblemDto dto = problem.toApiPied();
+    dto.setIsSolved(optional.isPresent());
+    optional.ifPresent(
+        srsProblem -> {
+          dto.setSrsId(srsProblem.getId());
+          dto.setNextAttemptAt(srsProblem.getNextAttemptAt());
+        });
+
+    return dto;
   }
 
   private Problem fetchAndCacheLeetCodeProblem(int id) {
