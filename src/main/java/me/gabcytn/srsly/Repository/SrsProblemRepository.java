@@ -8,7 +8,7 @@ import me.gabcytn.srsly.DTO.UserProblemToSolveCount;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SrsProblem;
 import me.gabcytn.srsly.Entity.User;
-import me.gabcytn.srsly.Model.Difficulty;
+import me.gabcytn.srsly.DTO.Difficulty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

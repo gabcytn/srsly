@@ -9,7 +9,6 @@ import lombok.*;
 import me.gabcytn.srsly.DTO.View.Views;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.Tag;
-import me.gabcytn.srsly.Model.Difficulty;
 
 @RequiredArgsConstructor
 @NoArgsConstructor

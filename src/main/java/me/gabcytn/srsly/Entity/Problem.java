@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.gabcytn.srsly.DTO.ProblemDto;
 import me.gabcytn.srsly.DTO.TagDto;
-import me.gabcytn.srsly.Model.Difficulty;
+import me.gabcytn.srsly.DTO.Difficulty;
 
 @NoArgsConstructor
 @Getter

@@ -37,10 +37,10 @@ public class User {
 
   @JsonIgnore @UpdateTimestamp private Timestamp updatedAt;
 
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   private Set<SrsProblem> srsProblems;
 
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   private Set<Solution> solutions;
 
   public static User ofEmailAndPassword(String email, String password) {

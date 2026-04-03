@@ -33,7 +33,7 @@ public class SolutionService {
     } else if (solutionRepository.countByProblemAndUser(problem, user) >= 5) {
       throw new SolutionException("Unable to save more than 5 solutions to a problem");
     }
-    return this.save(solutionDto.toSolutionEntity(problem, user));
+    return this.save(solutionDto.toEntity(problem, user));
   }
 
   public void saveInitialToProblem(InitialSolutionDto initialSolutionDto, int problemId) {
@@ -47,7 +47,7 @@ public class SolutionService {
     }
     srsProblemService.saveInitial(initialSolutionDto, problem, user);
     if (initialSolutionDto.solutionDto() != null)
-      this.save(initialSolutionDto.solutionDto().toSolutionEntity(problem, user));
+      this.save(initialSolutionDto.solutionDto().toEntity(problem, user));
   }
 
   public Solution findById(long id) {

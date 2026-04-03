@@ -1,14 +1,14 @@
 package me.gabcytn.srsly.Entity;
 
-import static me.gabcytn.srsly.Model.Difficulty.Easy;
-import static me.gabcytn.srsly.Model.Difficulty.Medium;
+import static me.gabcytn.srsly.DTO.Difficulty.Easy;
+import static me.gabcytn.srsly.DTO.Difficulty.Medium;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.*;
 import me.gabcytn.srsly.DTO.SrsProblemDto;
-import me.gabcytn.srsly.Model.ProblemStatus;
+import me.gabcytn.srsly.DTO.ProblemStatus;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 

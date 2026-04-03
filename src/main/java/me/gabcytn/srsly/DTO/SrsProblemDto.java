@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.gabcytn.srsly.DTO.View.Views;
-import me.gabcytn.srsly.Model.ProblemStatus;
 
 @AllArgsConstructor
 @NoArgsConstructor

@@ -29,7 +29,7 @@ public class SolutionDto {
   private AiCritique aiCritique;
   private String note;
 
-  public Solution toSolutionEntity(Problem problem, User user) {
+  public Solution toEntity(Problem problem, User user) {
     Solution s = new Solution();
     s.setCode(code);
     s.setTitle(title);

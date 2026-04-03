@@ -1,7 +1,7 @@
 package me.gabcytn.srsly.Service;
 
-import static me.gabcytn.srsly.Model.Confidence.*;
-import static me.gabcytn.srsly.Model.Difficulty.*;
+import static me.gabcytn.srsly.DTO.Confidence.*;
+import static me.gabcytn.srsly.DTO.Difficulty.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,9 +17,9 @@ import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Exception.EarlyReviewException;
 import me.gabcytn.srsly.Exception.GenericNotFoundException;
 import me.gabcytn.srsly.Exception.SrsNotFound;
-import me.gabcytn.srsly.Model.Confidence;
-import me.gabcytn.srsly.Model.Difficulty;
-import me.gabcytn.srsly.Model.ProblemStatus;
+import me.gabcytn.srsly.DTO.Confidence;
+import me.gabcytn.srsly.DTO.Difficulty;
+import me.gabcytn.srsly.DTO.ProblemStatus;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
