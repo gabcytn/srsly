@@ -75,32 +75,31 @@ srsly:
 2. Configure environment variables
    ```bash
    export SRSLY_FRONTEND_URL=http://localhost:5173
-   export DB_ADDRESS=localhost
-   export DB_PORT=5432
-   export DB_NAME=<your-db>
-   export DB_USERNAME=<your-username>
-   export DB_PASSWORD=<your-password>
-   export JWT_SECRET_KEY=
-   export GEMINI_API_KEY=
-   ```
-   ```bash
-   cd src/main/resources
+   export SRSLY_DB_ADDRESS=localhost
+   export SRSLY_DB_PORT=5432
+   export SRSLY_DB_NAME=srsly
+   export SRSLY_DB_USERNAME=
+   export SRSLY_DB_PASSWORD=
+   export SRSLY_GEMINI_API_KEY=
+   export SRSLY_AUTH_JWT_SECRET_KEY=
+   export SRSLY_EMAIL_JWT_SECRET_KEY=
+   export SRSLY_AWS_SES_IAM_USERNAME=
+   export SRSLY_AWS_SES_USERNAME=
+   export SRSLY_AWS_SES_PASSWORD=
+   export SRSLY_AWS_SES_REGION=
+   export SRSLY_MAIL_FROM=
    ```
    - Create postgres DB
    ```bash
    sudo -i -u postgres psql
+   CREATE DATABASE srsly
    ```
-   ```postgres
-   CREATE DATABASE <your-db>
-   ```
-   - Put DB username/password in `env`
-   - Generate JWT Secret key
+   - Generate JWT Secret key (twice, one for email and auth)
    ```bash
    openssl rand -hex 32
    ```
-   - Paste output to `env`
-   - Generate API key at [AIStudio](https://aistudio.google.com)
-   - Paste output to `env`
+   - Generate Gemini API key at [AIStudio](https://aistudio.google.com)
+   - Generate AWS keys at [AWS Management Console](https://aws.amazon.com/console/)
   
 3. Run application
    ```bash
