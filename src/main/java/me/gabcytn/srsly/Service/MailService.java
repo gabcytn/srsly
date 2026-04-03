@@ -15,7 +15,6 @@ import me.gabcytn.srsly.Exception.EmailAlreadyVerifiedException;
 import me.gabcytn.srsly.Exception.InvalidEmailVerificationTokenException;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -112,14 +111,5 @@ public class MailService {
       log.error("MessagingException thrown while sending html emails");
       throw new RuntimeException(e.getMessage());
     }
-  }
-
-  private void sendSimpleMessage(String to, String subject, String body) {
-    SimpleMailMessage message = new SimpleMailMessage();
-    message.setFrom("cayetanogabriel03@gmail.com");
-    message.setTo(to);
-    message.setSubject(subject);
-    message.setText(body);
-    mailSender.send(message);
   }
 }
