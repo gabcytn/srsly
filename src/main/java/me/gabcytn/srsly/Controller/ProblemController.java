@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.DTO.PaginatedProblemDto;
 import me.gabcytn.srsly.DTO.Problem.ProblemDetailDto;
-import me.gabcytn.srsly.DTO.ProblemDto;
+import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
 import me.gabcytn.srsly.DTO.View.Views;
 import me.gabcytn.srsly.Service.ProblemService;
 import me.gabcytn.srsly.Service.ProblemSuggestionService;
@@ -26,8 +26,7 @@ public class ProblemController {
   }
 
   @GetMapping("/suggested")
-  @JsonView(Views.Summary.class)
-  public List<ProblemDto> getSuggestedProblems() {
+  public List<ProblemSummaryDto> getSuggestedProblems() {
     return problemSuggestionService.getSuggestions();
   }
 
