@@ -7,10 +7,8 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import me.gabcytn.srsly.DTO.Difficulty;
+import me.gabcytn.srsly.DTO.*;
 import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
-import me.gabcytn.srsly.DTO.ProblemDto;
-import me.gabcytn.srsly.DTO.TagDto;
 
 @NoArgsConstructor
 @Getter
@@ -61,10 +59,6 @@ public class Problem {
     this.difficulty = difficulty;
     this.url = url;
     this.tags = tags;
-  }
-
-  public ProblemDto toApiPied() {
-    return new ProblemDto(frontendId, title, question, difficulty, getTagNames(), url);
   }
 
   public ProblemSummaryDto summarize() {

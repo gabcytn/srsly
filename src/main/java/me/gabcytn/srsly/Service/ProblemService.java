@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.gabcytn.srsly.DTO.LeetCodeProblemApiResponse;
 import me.gabcytn.srsly.DTO.PaginatedProblemDto;
 import me.gabcytn.srsly.DTO.Problem.ProblemDetailDto;
 import me.gabcytn.srsly.DTO.Problem.ReviewDetail;
-import me.gabcytn.srsly.DTO.ProblemDto;
 import me.gabcytn.srsly.Entity.*;
 import me.gabcytn.srsly.Exception.GenericNotFoundException;
 import me.gabcytn.srsly.Proxy.LeetCodeQuestionProxy;
@@ -50,13 +50,13 @@ public class ProblemService {
   }
 
   private Problem fetchAndCacheLeetCodeProblem(int id) {
-    ProblemDto apiResponse = fetchApi(id);
+    LeetCodeProblemApiResponse apiResponse = fetchApi(id);
     sanitizeQuestionContent(apiResponse);
     List<Tag> tags = tagService.saveAll(apiResponse.getTopicTags());
     return problemRepository.save(apiResponse.toProblemEntity(tags));
   }
 
-  private ProblemDto fetchApi(int id) {
+  private LeetCodeProblemApiResponse fetchApi(int id) {
     try {
       return leetCodeQuestionProxy.getProblem(id);
     } catch (Exception e) {
@@ -65,7 +65,7 @@ public class ProblemService {
     }
   }
 
-  private void sanitizeQuestionContent(ProblemDto problem) {
+  private void sanitizeQuestionContent(LeetCodeProblemApiResponse problem) {
     problem.setContent(htmlSanitizer.sanitize(problem.getContent()));
   }
 
