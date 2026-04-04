@@ -1,32 +1,18 @@
 package me.gabcytn.srsly.Service;
 
-import static me.gabcytn.srsly.DTO.Confidence.*;
-import static me.gabcytn.srsly.DTO.Difficulty.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
-import me.gabcytn.srsly.DTO.Confidence;
-import me.gabcytn.srsly.DTO.Difficulty;
-import me.gabcytn.srsly.DTO.PaginatedSrsProblem;
-import me.gabcytn.srsly.DTO.ProblemStatus;
+import me.gabcytn.srsly.DTO.*;
 import me.gabcytn.srsly.DTO.Review.InitialReviewRequest;
-import me.gabcytn.srsly.Entity.Attempt;
-import me.gabcytn.srsly.Entity.Problem;
-import me.gabcytn.srsly.Entity.SrsProblem;
-import me.gabcytn.srsly.Entity.User;
-import me.gabcytn.srsly.Exception.EarlyReviewException;
-import me.gabcytn.srsly.Exception.GenericNotFoundException;
-import me.gabcytn.srsly.Exception.SrsNotFound;
-import me.gabcytn.srsly.Exception.UnprocessableEntityException;
+import me.gabcytn.srsly.Entity.*;
+import me.gabcytn.srsly.Exception.*;
+import me.gabcytn.srsly.Helper.*;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
@@ -43,38 +29,90 @@ public class SrsProblemService {
   private final UserService userService;
   private final ProblemService problemService;
   private final AttemptService attemptService;
+  private final SpacedRepetitionHelper spacedRepetitionHelper;
 
-  public void saveInitial(InitialReviewRequest initialReview, Integer frontendId) {
+  public void saveInitial(InitialReviewRequest request, Integer frontendId) {
     Problem problem = problemService.findByFrontendId(frontendId);
     User user = userService.getCurrentUser();
 
-    if (existsByProblemAndUser(problem, user)) {
-      throw new UnprocessableEntityException("This problem is already solved.");
-    }
+    ensureProblemNotYetSubmitted(problem, user);
 
-    int reps = initialReps(initialReview.repetitions());
-    if (reps == 0) {
-      SrsProblem srsProblem = this.save(SrsProblem.ofInitial(user, problem));
-      attemptService.save(Attempt.fromSrsProblem(srsProblem));
+    int repetitions = spacedRepetitionHelper.getInitialRepetitions(request.repetitions());
+
+    if (isFreshAttempt(repetitions)) {
+      createFreshInitialAttempt(problem, user);
       return;
     }
 
-    LocalDate dateNow = LocalDate.now();
-    LocalDate lastReview = initialReview.lastReviewedAt();
-    double easeFactor = initialEaseFactor(initialReview.confidence(), problem);
-    int initialInterval = initialInterval(reps, easeFactor);
-    long dateDifference = dateDifference(lastReview, dateNow);
-    if (dateDifference == 0) dateDifference++;
-    int interval = (int) Math.min(initialInterval, dateDifference);
-    LocalDate nextReview = lastReview.plusDays(interval);
+    createFirstSubmissionWithHistory(request, problem, user, repetitions);
+  }
 
-    ProblemStatus status = reps <= 2 ? ProblemStatus.LEARNING : ProblemStatus.REVIEWING;
+  private void ensureProblemNotYetSubmitted(Problem problem, User user) {
+    if (existsByProblemAndUser(problem, user)) {
+      throw new UnprocessableEntityException("This problem is already solved.");
+    }
+  }
 
-    SrsProblem srsProblem =
-        this.save(
-            new SrsProblem(
-                status, easeFactor, reps, interval, lastReview, nextReview, user, problem));
+  private boolean isFreshAttempt(int repetitions) {
+    return repetitions == 0;
+  }
+
+  private void createFreshInitialAttempt(Problem problem, User user) {
+    SrsProblem srsProblem = save(SrsProblem.ofInitial(problem, user));
     attemptService.save(Attempt.fromSrsProblem(srsProblem));
+  }
+
+  private void createFirstSubmissionWithHistory(
+      InitialReviewRequest request, Problem problem, User user, int repetitions) {
+    LocalDate lastReviewedAt = request.lastReviewedAt();
+
+    double easeFactor = calculateInitialEaseFactor(problem, request);
+    int interval = calculateInitialInterval(repetitions, easeFactor, lastReviewedAt);
+    LocalDate nextReviewDate = calculateNextReviewDate(lastReviewedAt, interval);
+    ProblemStatus status = spacedRepetitionHelper.getProblemStatus(repetitions);
+
+    SrsProblem entity =
+        new SrsProblemEntityBuilder()
+            .status(status)
+            .easeFactor(easeFactor)
+            .repetitions(repetitions)
+            .interval(interval)
+            .lastAttemptAt(lastReviewedAt)
+            .nextAttemptAt(nextReviewDate)
+            .problem(problem)
+            .user(user)
+            .build();
+    SrsProblem srsProblem = this.save(entity);
+
+    attemptService.save(Attempt.fromSrsProblem(srsProblem));
+  }
+
+  private double calculateInitialEaseFactor(Problem problem, InitialReviewRequest request) {
+    Difficulty difficulty = problem.getDifficulty();
+    Confidence confidence = request.confidence();
+    return spacedRepetitionHelper.initialEaseFactor(difficulty, confidence);
+  }
+
+  private int calculateInitialInterval(
+      int repetitions, double easeFactor, LocalDate lastReviewedAt) {
+    int suggestedInterval = spacedRepetitionHelper.initialInterval(repetitions, easeFactor);
+    long daysSinceLastReview = daysSince(lastReviewedAt);
+
+    int adjustedDays = normalizeDaysDifference(daysSinceLastReview);
+
+    return (int) Math.min(suggestedInterval, adjustedDays);
+  }
+
+  private long daysSince(LocalDate date) {
+    return dateDifference(date, LocalDate.now());
+  }
+
+  private int normalizeDaysDifference(long days) {
+    return (days == 0) ? 1 : (int) days;
+  }
+
+  private LocalDate calculateNextReviewDate(LocalDate lastReviewedAt, int interval) {
+    return lastReviewedAt.plusDays(interval);
   }
 
   public void saveSubsequent(int id, int grade) {
@@ -208,31 +246,6 @@ public class SrsProblemService {
   public Integer countOfProblemsToSolveToday() {
     User user = userService.getCurrentUser();
     return srsProblemRepository.countByNextAttemptAtLessThanEqualAndUser(LocalDate.now(), user);
-  }
-
-  private double initialEaseFactor(Confidence confidence, Problem problem) {
-    BigDecimal easeFactor = BigDecimal.valueOf(2.4);
-
-    if (confidence == LOW) easeFactor = easeFactor.subtract(ZERO_POINT_TWO);
-    else if (confidence == HIGH) easeFactor = easeFactor.add(ZERO_POINT_TWO);
-
-    if (problem.getDifficulty() == Easy) easeFactor = easeFactor.add(ZERO_POINT_ONE);
-    else if (problem.getDifficulty() == Hard) easeFactor = easeFactor.subtract(ZERO_POINT_ONE);
-
-    return Math.min(easeFactor.doubleValue(), 2.6);
-  }
-
-  private int initialReps(int repetitions) {
-    int reps = repetitions;
-    if (reps == 3) reps = 2;
-    else if (reps >= 4) reps = 3;
-    return reps;
-  }
-
-  private int initialInterval(int repetitions, double easeFactor) {
-    if (repetitions == 0 || repetitions == 1) return 1;
-    else if (repetitions == 2) return 6;
-    else return (int) Math.round(6 * Math.pow(easeFactor, repetitions - 2));
   }
 
   private double calculateEaseFactor(double oldEaseFactor, int grade) {

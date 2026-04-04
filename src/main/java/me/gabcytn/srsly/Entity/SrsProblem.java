@@ -69,7 +69,7 @@ public class SrsProblem {
 
   @UpdateTimestamp private LocalDateTime updatedAt;
 
-  public static SrsProblem ofInitial(User user, Problem problem) {
+  public static SrsProblem ofInitial(Problem problem, User user) {
     double easeFactor;
     if (problem.getDifficulty().equals(Easy)) easeFactor = 2.6;
     else if (problem.getDifficulty().equals(Medium)) easeFactor = 2.4;
