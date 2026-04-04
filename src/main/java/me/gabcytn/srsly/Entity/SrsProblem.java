@@ -7,8 +7,8 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.*;
-import me.gabcytn.srsly.DTO.SrsProblemDto;
 import me.gabcytn.srsly.DTO.ProblemStatus;
+import me.gabcytn.srsly.DTO.SrsProblemDto;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -83,7 +83,7 @@ public class SrsProblem {
   public SrsProblemDto toDto() {
     SrsProblemDto dto = new SrsProblemDto();
     dto.setId(id);
-    dto.setProblem(problem.toApiPied());
+    dto.setProblem(problem.summarize());
     dto.setStatus(status);
     dto.setRepetitions(repetitions);
     dto.setLastAttemptAt(lastAttemptAt);

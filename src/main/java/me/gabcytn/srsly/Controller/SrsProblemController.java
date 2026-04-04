@@ -1,12 +1,10 @@
 package me.gabcytn.srsly.Controller;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.PaginatedSrsProblem;
 import me.gabcytn.srsly.DTO.ReviewProgress;
 import me.gabcytn.srsly.DTO.ReviewedProblem;
-import me.gabcytn.srsly.DTO.View.Views;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Service.AttemptService;
 import me.gabcytn.srsly.Service.SrsProblemService;
@@ -24,7 +22,6 @@ public class SrsProblemController {
   private final UserService userService;
 
   @GetMapping
-  @JsonView(Views.Summary.class)
   public PaginatedSrsProblem getTodayProblems(
       @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
       @RequestParam(name = "difficulty", required = false, defaultValue = "all") String difficulty,
