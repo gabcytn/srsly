@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.EditSolution;
-import me.gabcytn.srsly.DTO.InitialSolutionDto;
 import me.gabcytn.srsly.DTO.SolutionDto;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.Solution;
@@ -34,20 +33,6 @@ public class SolutionService {
       throw new SolutionException("Unable to save more than 5 solutions to a problem");
     }
     return this.save(solutionDto.toEntity(problem, user));
-  }
-
-  public void saveInitialToProblem(InitialSolutionDto initialSolutionDto, int problemId) {
-    Problem problem = problemService.findByFrontendId(problemId);
-    User user = userService.getCurrentUser();
-
-    if (this.existsByProblemAndUser(problem, user)) {
-      throw new SolutionException(
-          "Unable to save non-initial solution. User must hit 'POST /solutions' for already solved"
-              + " problems.");
-    }
-    srsProblemService.saveInitial(initialSolutionDto, problem, user);
-    if (initialSolutionDto.solutionDto() != null)
-      this.save(initialSolutionDto.solutionDto().toEntity(problem, user));
   }
 
   public Solution findById(long id) {

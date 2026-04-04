@@ -8,8 +8,11 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
-import me.gabcytn.srsly.DTO.InitialSolutionDto;
+import me.gabcytn.srsly.DTO.Confidence;
+import me.gabcytn.srsly.DTO.Difficulty;
 import me.gabcytn.srsly.DTO.PaginatedSrsProblem;
+import me.gabcytn.srsly.DTO.ProblemStatus;
+import me.gabcytn.srsly.DTO.Review.InitialReviewRequest;
 import me.gabcytn.srsly.Entity.Attempt;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SrsProblem;
@@ -17,9 +20,7 @@ import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Exception.EarlyReviewException;
 import me.gabcytn.srsly.Exception.GenericNotFoundException;
 import me.gabcytn.srsly.Exception.SrsNotFound;
-import me.gabcytn.srsly.DTO.Confidence;
-import me.gabcytn.srsly.DTO.Difficulty;
-import me.gabcytn.srsly.DTO.ProblemStatus;
+import me.gabcytn.srsly.Exception.UnprocessableEntityException;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
@@ -40,10 +41,18 @@ public class SrsProblemService {
 
   private final SrsProblemRepository srsProblemRepository;
   private final UserService userService;
+  private final ProblemService problemService;
   private final AttemptService attemptService;
 
-  public void saveInitial(InitialSolutionDto initialSolution, Problem problem, User user) {
-    int reps = initialReps(initialSolution.repetitions());
+  public void saveInitial(InitialReviewRequest initialReview, Integer frontendId) {
+    Problem problem = problemService.findByFrontendId(frontendId);
+    User user = userService.getCurrentUser();
+
+    if (existsByProblemAndUser(problem, user)) {
+      throw new UnprocessableEntityException("This problem is already solved.");
+    }
+
+    int reps = initialReps(initialReview.repetitions());
     if (reps == 0) {
       SrsProblem srsProblem = this.save(SrsProblem.ofInitial(user, problem));
       attemptService.save(Attempt.fromSrsProblem(srsProblem));
@@ -51,8 +60,8 @@ public class SrsProblemService {
     }
 
     LocalDate dateNow = LocalDate.now();
-    LocalDate lastReview = initialSolution.lastReviewedAt();
-    double easeFactor = initialEaseFactor(initialSolution.confidence(), problem);
+    LocalDate lastReview = initialReview.lastReviewedAt();
+    double easeFactor = initialEaseFactor(initialReview.confidence(), problem);
     int initialInterval = initialInterval(reps, easeFactor);
     long dateDifference = dateDifference(lastReview, dateNow);
     if (dateDifference == 0) dateDifference++;

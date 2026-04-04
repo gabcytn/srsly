@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.DTO.PaginatedProblemDto;
 import me.gabcytn.srsly.DTO.Problem.ProblemDetailDto;
 import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
+import me.gabcytn.srsly.Service.ProblemFacadeService;
 import me.gabcytn.srsly.Service.ProblemService;
 import me.gabcytn.srsly.Service.ProblemSuggestionService;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/problems")
 public class ProblemController {
   private final ProblemService problemService;
+  private final ProblemFacadeService problemFacadeService;
   private final ProblemSuggestionService problemSuggestionService;
 
   @GetMapping
@@ -29,6 +31,6 @@ public class ProblemController {
 
   @GetMapping("/{id}")
   public ProblemDetailDto getProblem(@PathVariable int id) {
-    return problemService.findDtoByFrontendId(id);
+    return problemFacadeService.findDtoByFrontendId(id);
   }
 }
