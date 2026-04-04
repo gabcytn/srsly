@@ -9,7 +9,9 @@ import java.math.BigDecimal;
 import me.gabcytn.srsly.DTO.Confidence;
 import me.gabcytn.srsly.DTO.Difficulty;
 import me.gabcytn.srsly.DTO.ProblemStatus;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SpacedRepetitionHelper {
   private static final BigDecimal ZERO_POINT_TWO = BigDecimal.valueOf(0.2);
   private static final BigDecimal ZERO_POINT_ONE = BigDecimal.valueOf(0.1);
