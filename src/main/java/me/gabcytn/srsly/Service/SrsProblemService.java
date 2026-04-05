@@ -51,7 +51,7 @@ public class SrsProblemService {
 
   private void createFreshInitialAttempt(Problem problem, User user) {
     SrsProblem srsProblem = save(SrsProblem.ofInitial(problem, user));
-    attemptService.save(Attempt.fromSrsProblem(srsProblem));
+    createAttemptFromSrsProblem(srsProblem);
   }
 
   private void createFirstSubmissionWithHistory(
@@ -76,7 +76,7 @@ public class SrsProblemService {
             .build();
     SrsProblem srsProblem = this.save(entity);
 
-    attemptService.save(Attempt.fromSrsProblem(srsProblem));
+    createAttemptFromSrsProblem(srsProblem);
   }
 
   private double calculateInitialEaseFactor(Problem problem, InitialReviewRequest request) {
@@ -118,21 +118,8 @@ public class SrsProblemService {
       return;
     }
 
-    double easeFactor = spacedRepetitionHelper.calculateEaseFactor(srsProblem, grade, dateNow);
-
-    srsProblem.setEaseFactor(easeFactor);
-    srsProblem.setRepetitions(srsProblem.getRepetitions() + 1);
-
-    int repetitions = srsProblem.getRepetitions();
-    int interval = spacedRepetitionHelper.calculateSubsequentInterval(srsProblem, dateNow);
-
-    srsProblem.setStatus(spacedRepetitionHelper.determineProblemStatus(interval, repetitions));
-    srsProblem.setLastAttemptAt(dateNow);
-    srsProblem.setNextAttemptAt(dateNow.plusDays(interval));
-    srsProblem.setInterval(interval);
-
-    SrsProblem savedProblem = this.save(srsProblem);
-    attemptService.save(Attempt.fromSrsProblem(savedProblem, grade));
+    SrsProblem updatedProblem = updateProblemFromSuccessfulReview(srsProblem, grade, dateNow);
+    createAttemptFromSrsProblem(updatedProblem, grade);
   }
 
   private SrsProblem findById(int id) {
@@ -153,7 +140,33 @@ public class SrsProblemService {
 
   private void createAttemptFromFailedReview(SrsProblem srsProblem, int grade) {
     SrsProblem created = this.save(spacedRepetitionHelper.reviewFailed(srsProblem, grade));
-    attemptService.save(Attempt.fromSrsProblem(created, grade));
+    createAttemptFromSrsProblem(created, grade);
+  }
+
+  private SrsProblem updateProblemFromSuccessfulReview(
+      SrsProblem srsProblem, int grade, LocalDate dateNow) {
+    double easeFactor = spacedRepetitionHelper.calculateEaseFactor(srsProblem, grade, dateNow);
+
+    srsProblem.setEaseFactor(easeFactor);
+    srsProblem.setRepetitions(srsProblem.getRepetitions() + 1);
+
+    int repetitions = srsProblem.getRepetitions();
+    int interval = spacedRepetitionHelper.calculateSubsequentInterval(srsProblem, dateNow);
+
+    srsProblem.setStatus(spacedRepetitionHelper.determineProblemStatus(interval, repetitions));
+    srsProblem.setLastAttemptAt(dateNow);
+    srsProblem.setNextAttemptAt(dateNow.plusDays(interval));
+    srsProblem.setInterval(interval);
+
+    return this.save(srsProblem);
+  }
+
+  private void createAttemptFromSrsProblem(SrsProblem problem) {
+    attemptService.save(Attempt.fromSrsProblem(problem));
+  }
+
+  private void createAttemptFromSrsProblem(SrsProblem problem, int grade) {
+    attemptService.save(Attempt.fromSrsProblem(problem, grade));
   }
 
   public SrsProblem save(SrsProblem srsProblem) {
