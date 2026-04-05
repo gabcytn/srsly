@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import lombok.*;
 import me.gabcytn.srsly.DTO.ProblemStatus;
 import me.gabcytn.srsly.DTO.SrsProblemDto;
+import me.gabcytn.srsly.Helper.SrsProblemEntityBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -76,8 +77,16 @@ public class SrsProblem {
     else easeFactor = 2.2;
 
     LocalDate dateNow = LocalDate.now();
-    return new SrsProblem(
-        ProblemStatus.NEW, easeFactor, 0, 1, dateNow, dateNow.plusDays(1), user, problem);
+    return new SrsProblemEntityBuilder()
+        .status(ProblemStatus.NEW)
+        .easeFactor(easeFactor)
+        .repetitions(0)
+        .interval(1)
+        .lastAttemptAt(dateNow)
+        .nextAttemptAt(dateNow.plusDays(1))
+        .user(user)
+        .problem(problem)
+        .build();
   }
 
   public SrsProblemDto toDto() {

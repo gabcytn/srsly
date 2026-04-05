@@ -6,9 +6,12 @@ import static me.gabcytn.srsly.DTO.Difficulty.Easy;
 import static me.gabcytn.srsly.DTO.Difficulty.Hard;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import me.gabcytn.srsly.DTO.Confidence;
 import me.gabcytn.srsly.DTO.Difficulty;
 import me.gabcytn.srsly.DTO.ProblemStatus;
+import me.gabcytn.srsly.Entity.SrsProblem;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -93,5 +96,87 @@ public class SpacedRepetitionHelper {
     }
 
     return (int) Math.round(6 * Math.pow(easeFactor, repetitions - 2));
+  }
+
+  public SrsProblem reviewFailed(SrsProblem srsProblem, int grade) {
+    BigDecimal easeFactor = BigDecimal.valueOf(srsProblem.getEaseFactor());
+    BigDecimal failedEaseFactor = easeFactor.subtract(ZERO_POINT_TWO);
+
+    LocalDate now = LocalDate.now();
+    srsProblem.setEaseFactor(failedEaseFactor.max(ONE_POINT_THREE).doubleValue());
+    srsProblem.setRepetitions(0);
+    srsProblem.setInterval(1);
+    srsProblem.setStatus(ProblemStatus.LEARNING);
+    srsProblem.setLastAttemptAt(now);
+    srsProblem.setNextAttemptAt(now.plusDays(1));
+
+    return srsProblem;
+  }
+
+  public double calculateEaseFactor(SrsProblem srsProblem, int grade, LocalDate dateNow) {
+    double previousEaseFactor = srsProblem.getEaseFactor();
+    BigDecimal gradeBD = BigDecimal.valueOf(grade);
+    BigDecimal gradeDiff = FIVE.subtract(gradeBD);
+
+    BigDecimal inner = ZERO_POINT_ZERO_EIGHT.add(gradeDiff.multiply(ZERO_POINT_ZERO_TWO));
+
+    BigDecimal adjustment = ZERO_POINT_ONE.subtract(gradeDiff.multiply(inner));
+
+    BigDecimal result = BigDecimal.valueOf(previousEaseFactor).add(adjustment);
+
+    return result.max(ONE_POINT_THREE).doubleValue()
+        + calculateEaseFactorAdjustments(srsProblem, grade, dateNow);
+  }
+
+  private double calculateEaseFactorAdjustments(
+      SrsProblem srsProblem, int grade, LocalDate dateNow) {
+    if (dateNow.isAfter(srsProblem.getNextAttemptAt()) && grade == 5) {
+      return 0.05;
+    }
+
+    return 0;
+  }
+
+  public long dateDifference(LocalDate from, LocalDate to) {
+    return ChronoUnit.DAYS.between(from, to);
+  }
+
+  public int calculateSubsequentInterval(SrsProblem srsProblem, LocalDate dateNow) {
+    int repetitions = srsProblem.getRepetitions();
+    int interval = srsProblem.getInterval();
+    double easeFactor = srsProblem.getEaseFactor();
+
+    if (repetitions == 1) {
+      return 1;
+    }
+
+    if (repetitions == 2) {
+      return 6;
+    }
+
+    double timingMultiplier = getTimingMultiplier(srsProblem, dateNow);
+    return (int) Math.round(interval * easeFactor * timingMultiplier);
+  }
+
+  private double getTimingMultiplier(SrsProblem problem, LocalDate dateNow) {
+    double timingMultiplier = 1;
+    if (dateNow.isAfter(problem.getNextAttemptAt())) {
+      long delay = dateDifference(problem.getNextAttemptAt(), dateNow.plusDays(1));
+      double ratio = (double) delay / problem.getInterval();
+      timingMultiplier += (ratio * 0.4);
+    }
+    return timingMultiplier;
+  }
+
+  public ProblemStatus determineProblemStatus(int interval, int repetitions) {
+    if (interval >= 60 && repetitions >= 4) {
+      return ProblemStatus.MASTERED;
+    }
+
+    if (repetitions > 2) {
+      return ProblemStatus.REVIEWING;
+    }
+
+    return ProblemStatus.LEARNING;
   }
 }

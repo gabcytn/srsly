@@ -1,8 +1,6 @@
 package me.gabcytn.srsly.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.*;
@@ -14,17 +12,11 @@ import me.gabcytn.srsly.Repository.SrsProblemRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
 @Service
 public class SrsProblemService {
-  private static final BigDecimal ZERO_POINT_TWO = BigDecimal.valueOf(0.2);
-  private static final BigDecimal ZERO_POINT_ONE = BigDecimal.valueOf(0.1);
-  private static final BigDecimal ONE_POINT_THREE = BigDecimal.valueOf(1.3);
-  private static final BigDecimal ZERO_POINT_ZERO_EIGHT = BigDecimal.valueOf(0.08);
-  private static final BigDecimal ZERO_POINT_ZERO_TWO = BigDecimal.valueOf(0.02);
-  private static final BigDecimal FIVE = BigDecimal.valueOf(5);
-
   private final SrsProblemRepository srsProblemRepository;
   private final UserService userService;
   private final ProblemService problemService;
@@ -104,7 +96,7 @@ public class SrsProblemService {
   }
 
   private long daysSince(LocalDate date) {
-    return dateDifference(date, LocalDate.now());
+    return spacedRepetitionHelper.dateDifference(date, LocalDate.now());
   }
 
   private int normalizeDaysDifference(long days) {
@@ -115,48 +107,26 @@ public class SrsProblemService {
     return lastReviewedAt.plusDays(interval);
   }
 
+  @Transactional
   public void saveSubsequent(int id, int grade) {
-    Optional<SrsProblem> optionalSrsProblem = srsProblemRepository.findById(id);
     LocalDate dateNow = LocalDate.now();
-    if (optionalSrsProblem.isEmpty()) {
-      throw new SrsNotFound("Problem has not been solved. Come up with a solution first.");
-    } else if (dateNow.isBefore(optionalSrsProblem.get().getNextAttemptAt())) {
-      throw new EarlyReviewException();
-    }
+    SrsProblem srsProblem = findById(id);
 
-    SrsProblem srsProblem = optionalSrsProblem.get();
-    if (grade < 3) {
-      this.reviewFailed(srsProblem, grade);
+    verifyProblemReviewDate(srsProblem, dateNow);
+    if (reviewFailed(grade)) {
+      createAttemptFromFailedReview(srsProblem, grade);
       return;
     }
 
-    double updatedEaseFactor = calculateEaseFactor(srsProblem.getEaseFactor(), grade);
-    if (dateNow.isAfter(srsProblem.getNextAttemptAt()) && grade == 5) {
-      updatedEaseFactor += 0.05;
-    }
-    srsProblem.setEaseFactor(updatedEaseFactor);
+    double easeFactor = spacedRepetitionHelper.calculateEaseFactor(srsProblem, grade, dateNow);
+
+    srsProblem.setEaseFactor(easeFactor);
     srsProblem.setRepetitions(srsProblem.getRepetitions() + 1);
 
     int repetitions = srsProblem.getRepetitions();
-    int interval = srsProblem.getInterval();
+    int interval = spacedRepetitionHelper.calculateSubsequentInterval(srsProblem, dateNow);
 
-    if (repetitions == 1) {
-      interval = 1;
-    } else if (repetitions == 2) {
-      interval = 6;
-    } else {
-      double timingMultiplier = this.getTimingMultiplier(srsProblem, dateNow);
-      interval = (int) Math.round(interval * updatedEaseFactor * timingMultiplier);
-    }
-
-    if (interval >= 60 && repetitions >= 4) {
-      srsProblem.setStatus(ProblemStatus.MASTERED);
-    } else if (repetitions > 2) {
-      srsProblem.setStatus(ProblemStatus.REVIEWING);
-    } else {
-      srsProblem.setStatus(ProblemStatus.LEARNING);
-    }
-
+    srsProblem.setStatus(spacedRepetitionHelper.determineProblemStatus(interval, repetitions));
     srsProblem.setLastAttemptAt(dateNow);
     srsProblem.setNextAttemptAt(dateNow.plusDays(interval));
     srsProblem.setInterval(interval);
@@ -165,19 +135,25 @@ public class SrsProblemService {
     attemptService.save(Attempt.fromSrsProblem(savedProblem, grade));
   }
 
-  private void reviewFailed(SrsProblem srsProblem, int grade) {
-    BigDecimal easeFactor = BigDecimal.valueOf(srsProblem.getEaseFactor());
-    BigDecimal failedEaseFactor = easeFactor.subtract(ZERO_POINT_TWO);
+  private SrsProblem findById(int id) {
+    Optional<SrsProblem> reviewProblem = srsProblemRepository.findById(id);
+    return reviewProblem.orElseThrow(
+        () -> new GenericNotFoundException("Review problem not found."));
+  }
 
-    LocalDate now = LocalDate.now();
-    srsProblem.setEaseFactor(failedEaseFactor.max(ONE_POINT_THREE).doubleValue());
-    srsProblem.setRepetitions(0);
-    srsProblem.setInterval(1);
-    srsProblem.setStatus(ProblemStatus.LEARNING);
-    srsProblem.setLastAttemptAt(now);
-    srsProblem.setNextAttemptAt(now.plusDays(1));
-    SrsProblem savedProblem = this.save(srsProblem);
-    attemptService.save(Attempt.fromSrsProblem(savedProblem, grade));
+  private void verifyProblemReviewDate(SrsProblem reviewProblem, LocalDate dateNow) {
+    if (dateNow.isBefore(reviewProblem.getNextAttemptAt())) {
+      throw new EarlyReviewException();
+    }
+  }
+
+  private boolean reviewFailed(int grade) {
+    return grade < 3;
+  }
+
+  private void createAttemptFromFailedReview(SrsProblem srsProblem, int grade) {
+    SrsProblem created = this.save(spacedRepetitionHelper.reviewFailed(srsProblem, grade));
+    attemptService.save(Attempt.fromSrsProblem(created, grade));
   }
 
   public SrsProblem save(SrsProblem srsProblem) {
@@ -246,32 +222,5 @@ public class SrsProblemService {
   public Integer countOfProblemsToSolveToday() {
     User user = userService.getCurrentUser();
     return srsProblemRepository.countByNextAttemptAtLessThanEqualAndUser(LocalDate.now(), user);
-  }
-
-  private double calculateEaseFactor(double oldEaseFactor, int grade) {
-    BigDecimal gradeBD = BigDecimal.valueOf(grade);
-    BigDecimal gradeDiff = FIVE.subtract(gradeBD);
-
-    BigDecimal inner = ZERO_POINT_ZERO_EIGHT.add(gradeDiff.multiply(ZERO_POINT_ZERO_TWO));
-
-    BigDecimal adjustment = ZERO_POINT_ONE.subtract(gradeDiff.multiply(inner));
-
-    BigDecimal result = BigDecimal.valueOf(oldEaseFactor).add(adjustment);
-
-    return result.max(ONE_POINT_THREE).doubleValue();
-  }
-
-  private double getTimingMultiplier(SrsProblem problem, LocalDate dateNow) {
-    double timingMultiplier = 1;
-    if (dateNow.isAfter(problem.getNextAttemptAt())) {
-      long delay = dateDifference(problem.getNextAttemptAt(), dateNow.plusDays(1));
-      double ratio = (double) delay / problem.getInterval();
-      timingMultiplier += (ratio * 0.4);
-    }
-    return timingMultiplier;
-  }
-
-  private long dateDifference(LocalDate from, LocalDate to) {
-    return ChronoUnit.DAYS.between(from, to);
   }
 }
