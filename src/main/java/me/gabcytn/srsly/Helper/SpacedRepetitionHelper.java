@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 public class SpacedRepetitionHelper {
   private static final BigDecimal ZERO_POINT_TWO = BigDecimal.valueOf(0.2);
   private static final BigDecimal ZERO_POINT_ONE = BigDecimal.valueOf(0.1);
+  private static final BigDecimal ZERO_POINT_FOUR = BigDecimal.valueOf(0.4);
   private static final BigDecimal ONE_POINT_THREE = BigDecimal.valueOf(1.3);
   private static final BigDecimal ZERO_POINT_ZERO_EIGHT = BigDecimal.valueOf(0.08);
   private static final BigDecimal ZERO_POINT_ZERO_TWO = BigDecimal.valueOf(0.02);
@@ -159,13 +160,13 @@ public class SpacedRepetitionHelper {
   }
 
   private double getTimingMultiplier(SrsProblem problem, LocalDate dateNow) {
-    double timingMultiplier = 1;
+    BigDecimal timingMultiplier = BigDecimal.valueOf(1);
     if (dateNow.isAfter(problem.getNextAttemptAt())) {
       long delay = dateDifference(problem.getNextAttemptAt(), dateNow.plusDays(1));
       double ratio = (double) delay / problem.getInterval();
-      timingMultiplier += (ratio * 0.4);
+      timingMultiplier.add((ZERO_POINT_FOUR.multiply(BigDecimal.valueOf(ratio))));
     }
-    return timingMultiplier;
+    return timingMultiplier.doubleValue();
   }
 
   public ProblemStatus determineProblemStatus(int interval, int repetitions) {
