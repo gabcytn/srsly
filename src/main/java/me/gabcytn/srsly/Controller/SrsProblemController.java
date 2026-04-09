@@ -38,7 +38,7 @@ public class SrsProblemController {
   @PostMapping("/{problemId}/srs/initial")
   public ResponseEntity<Void> saveReview(
       @PathVariable Integer problemId,
-      @Valid InitialReviewRequest request,
+      @RequestBody @Valid InitialReviewRequest request,
       @RequestParam(name = "reviewable", defaultValue = "true") Boolean isReviewable) {
     srsProblemService.saveInitial(request, problemId);
     return new ResponseEntity<>(HttpStatus.CREATED);

@@ -21,7 +21,8 @@ public class ProblemFacadeService {
     User user = userService.getCurrentUser();
     Optional<SrsProblem> optional = srsProblemService.findByProblemAndUser(problem, user);
 
-    ProblemDetailDto problemDetail = new ProblemDetailDto(problem.summarize());
+    ProblemDetailDto problemDetail =
+        new ProblemDetailDto(problem.summarize(), problem.getQuestion());
     problemDetail.setIsSolved(optional.isPresent());
 
     ReviewDetail reviewDetail = null;

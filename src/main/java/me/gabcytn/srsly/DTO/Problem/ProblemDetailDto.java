@@ -33,6 +33,15 @@ public class ProblemDetailDto {
   }
 
   public ProblemDetailDto(ProblemSummaryDto summary) {
+    initializeFromProblemSummary(summary);
+  }
+
+  public ProblemDetailDto(ProblemSummaryDto summary, String content) {
+    initializeFromProblemSummary(summary);
+    this.content = content;
+  }
+
+  private void initializeFromProblemSummary(ProblemSummaryDto summary) {
     questionFrontendId = summary.getQuestionFrontendId();
     title = summary.getTitle();
     difficulty = summary.getDifficulty();
