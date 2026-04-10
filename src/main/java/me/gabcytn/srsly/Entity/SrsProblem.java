@@ -7,8 +7,9 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.*;
-import me.gabcytn.srsly.DTO.SrsProblemDto;
 import me.gabcytn.srsly.DTO.ProblemStatus;
+import me.gabcytn.srsly.DTO.SrsProblemDto;
+import me.gabcytn.srsly.Helper.SrsProblemEntityBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -69,21 +70,29 @@ public class SrsProblem {
 
   @UpdateTimestamp private LocalDateTime updatedAt;
 
-  public static SrsProblem ofInitial(User user, Problem problem) {
+  public static SrsProblem ofInitial(Problem problem, User user) {
     double easeFactor;
     if (problem.getDifficulty().equals(Easy)) easeFactor = 2.6;
     else if (problem.getDifficulty().equals(Medium)) easeFactor = 2.4;
     else easeFactor = 2.2;
 
     LocalDate dateNow = LocalDate.now();
-    return new SrsProblem(
-        ProblemStatus.NEW, easeFactor, 0, 1, dateNow, dateNow.plusDays(1), user, problem);
+    return new SrsProblemEntityBuilder()
+        .status(ProblemStatus.NEW)
+        .easeFactor(easeFactor)
+        .repetitions(0)
+        .interval(1)
+        .lastAttemptAt(dateNow)
+        .nextAttemptAt(dateNow.plusDays(1))
+        .user(user)
+        .problem(problem)
+        .build();
   }
 
   public SrsProblemDto toDto() {
     SrsProblemDto dto = new SrsProblemDto();
     dto.setId(id);
-    dto.setProblem(problem.toApiPied());
+    dto.setProblem(problem.summarize());
     dto.setStatus(status);
     dto.setRepetitions(repetitions);
     dto.setLastAttemptAt(lastAttemptAt);

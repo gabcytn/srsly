@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.EditSolution;
-import me.gabcytn.srsly.DTO.InitialSolutionDto;
 import me.gabcytn.srsly.DTO.SolutionDto;
 import me.gabcytn.srsly.Entity.Solution;
 import me.gabcytn.srsly.Service.SolutionService;
@@ -23,13 +22,6 @@ public class SolutionController {
       @PathVariable int problemId, @RequestBody @Valid SolutionDto solutionDto) {
     Solution s = solutionService.saveToProblem(solutionDto, problemId);
     return new ResponseEntity<>(s.toDto(), HttpStatus.CREATED);
-  }
-
-  @PostMapping("/problems/{problemId}/solutions/initial")
-  public ResponseEntity<Void> initialSolution(
-      @PathVariable int problemId, @RequestBody @Valid InitialSolutionDto initialSolutionDto) {
-    solutionService.saveInitialToProblem(initialSolutionDto, problemId);
-    return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
   @GetMapping("/problems/{problemId}/solutions")

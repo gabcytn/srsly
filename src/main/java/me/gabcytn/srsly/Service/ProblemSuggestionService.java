@@ -1,7 +1,7 @@
 package me.gabcytn.srsly.Service;
 
 import java.util.*;
-import me.gabcytn.srsly.DTO.ProblemDto;
+import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
 import me.gabcytn.srsly.Entity.SuggestedProblems;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Repository.SrsProblemRepository;
@@ -23,7 +23,7 @@ public class ProblemSuggestionService {
     this.suggestedProblemsRepository = suggestedProblemsRepository;
   }
 
-  public List<ProblemDto> getSuggestions() {
+  public List<ProblemSummaryDto> getSuggestions() {
     User user = userService.getCurrentUser();
 
     Optional<SuggestedProblems> cachedProblems = suggestedProblemsRepository.findById(user.getId());
@@ -31,12 +31,12 @@ public class ProblemSuggestionService {
       return cachedProblems.get().getProblems();
     }
 
-    List<ProblemDto> problemList = new ArrayList<>();
+    List<ProblemSummaryDto> problemList = new ArrayList<>();
     srsProblemRepository
         .findProblemsNotSolvedByUser(user.getId())
-        .forEach(problem -> problemList.add(problem.toApiPied()));
+        .forEach(problem -> problemList.add(problem.summarize()));
 
-    List<ProblemDto> result = getFiveRandomProblemsFromList(problemList);
+    List<ProblemSummaryDto> result = getFiveRandomProblemsFromList(problemList);
     suggestedProblemsRepository.save(new SuggestedProblems(user.getId(), result));
     return result;
   }

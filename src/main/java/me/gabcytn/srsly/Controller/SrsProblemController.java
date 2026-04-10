@@ -1,30 +1,24 @@
 package me.gabcytn.srsly.Controller;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import me.gabcytn.srsly.DTO.PaginatedSrsProblem;
-import me.gabcytn.srsly.DTO.ReviewProgress;
-import me.gabcytn.srsly.DTO.ReviewedProblem;
-import me.gabcytn.srsly.DTO.View.Views;
+import me.gabcytn.srsly.DTO.*;
+import me.gabcytn.srsly.DTO.Review.InitialReviewRequest;
 import me.gabcytn.srsly.Entity.User;
-import me.gabcytn.srsly.Service.AttemptService;
-import me.gabcytn.srsly.Service.SrsProblemService;
-import me.gabcytn.srsly.Service.UserService;
+import me.gabcytn.srsly.Service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/v1/problems/srs")
+@RequestMapping("/api/v1/problems")
 public class SrsProblemController {
   private final SrsProblemService srsProblemService;
   private final AttemptService attemptService;
   private final UserService userService;
 
-  @GetMapping
-  @JsonView(Views.Summary.class)
+  @GetMapping("/srs")
   public PaginatedSrsProblem getTodayProblems(
       @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
       @RequestParam(name = "difficulty", required = false, defaultValue = "all") String difficulty,
@@ -32,7 +26,7 @@ public class SrsProblemController {
     return srsProblemService.getTodayProblems(page, difficulty, titleSearch);
   }
 
-  @GetMapping("/progress")
+  @GetMapping("/srs/progress")
   public ReviewProgress progress() {
     User user = userService.getCurrentUser();
     Integer solvedTodayCount = attemptService.countSolvedTodayExcludingInitial(user);
@@ -41,7 +35,16 @@ public class SrsProblemController {
     return new ReviewProgress(unsolvedCount, solvedTodayCount);
   }
 
-  @PostMapping("/{id}")
+  @PostMapping("/{problemId}/srs/initial")
+  public ResponseEntity<Void> saveReview(
+      @PathVariable Integer problemId,
+      @RequestBody @Valid InitialReviewRequest request,
+      @RequestParam(name = "reviewable", defaultValue = "true") Boolean isReviewable) {
+    srsProblemService.saveInitial(request, problemId);
+    return new ResponseEntity<>(HttpStatus.CREATED);
+  }
+
+  @PostMapping("/srs/{id}")
   public ResponseEntity<Void> save(
       @PathVariable int id, @RequestBody @Valid ReviewedProblem reviewedProblem) {
     srsProblemService.saveSubsequent(id, reviewedProblem.grade());

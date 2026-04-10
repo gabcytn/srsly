@@ -1,36 +1,70 @@
 package me.gabcytn.srsly.DTO;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import me.gabcytn.srsly.DTO.View.Views;
+import lombok.*;
+import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
+@Data
 public class SrsProblemDto {
-  @JsonView(Views.Summary.class)
   private int id;
 
-  @JsonView(Views.Detailed.class)
-  private double grade;
-
-  @JsonView(Views.Summary.class)
   private int repetitions;
 
-  @JsonView(Views.Summary.class)
   private LocalDate lastAttemptAt;
 
-  @JsonView(Views.Summary.class)
   private LocalDate nextAttemptAt;
 
-  @JsonView(Views.Summary.class)
   private ProblemStatus status;
 
-  @JsonView(Views.Summary.class)
-  private ProblemDto problem;
+  private ProblemSummaryDto problem;
+
+  public static class Builder {
+    private int id;
+
+    private int repetitions;
+
+    private LocalDate lastAttemptAt;
+
+    private LocalDate nextAttemptAt;
+
+    private ProblemStatus status;
+
+    private ProblemSummaryDto problem;
+
+    public Builder id(int id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder repetitions(int repetitions) {
+      this.repetitions = repetitions;
+      return this;
+    }
+
+    public Builder lastAttemptAt(LocalDate date) {
+      this.lastAttemptAt = date;
+      return this;
+    }
+
+    public Builder nextAttemptAt(LocalDate date) {
+      this.nextAttemptAt = date;
+      return this;
+    }
+
+    public Builder problemStatus(ProblemStatus status) {
+      this.status = status;
+      return this;
+    }
+
+    public Builder problemSummary(ProblemSummaryDto problem) {
+      this.problem = problem;
+      return this;
+    }
+
+    public SrsProblemDto build() {
+      return new SrsProblemDto(id, repetitions, lastAttemptAt, nextAttemptAt, status, problem);
+    }
+  }
 }
