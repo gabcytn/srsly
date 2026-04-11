@@ -2,9 +2,12 @@ package me.gabcytn.srsly.Service;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.*;
+import me.gabcytn.srsly.DTO.Review.InitialProblemReview;
 import me.gabcytn.srsly.DTO.Review.InitialReviewRequest;
+import me.gabcytn.srsly.DTO.Review.ProblemSubmissionWithHistory;
 import me.gabcytn.srsly.Entity.*;
 import me.gabcytn.srsly.Exception.*;
 import me.gabcytn.srsly.Helper.*;
@@ -23,42 +26,69 @@ public class SrsProblemService {
   private final AttemptService attemptService;
   private final SpacedRepetitionHelper spacedRepetitionHelper;
 
-  public void saveInitial(InitialReviewRequest request, Integer frontendId) {
-    Problem problem = problemService.findByFrontendId(frontendId);
+  @Transactional
+  public Optional<SrsProblem> saveInitial(InitialProblemReview initialProblemReview) {
+    Problem problem = problemService.findByFrontendId(initialProblemReview.getProblemFrontendId());
     User user = userService.getCurrentUser();
+    Integer repetitions = initialProblemReview.getInitialReviewRequest().repetitions();
 
     ensureProblemNotYetSubmitted(problem, user);
+    markProblemAsSolvedBy(problem, user);
 
-    int repetitions = spacedRepetitionHelper.getInitialRepetitions(request.repetitions());
-
-    if (isFreshAttempt(repetitions)) {
-      createFreshInitialAttempt(problem, user);
-      return;
+    if (isProblemNotReviewable(initialProblemReview)) {
+      return Optional.empty();
     }
 
-    createFirstSubmissionWithHistory(request, problem, user, repetitions);
+    repetitions = spacedRepetitionHelper.getInitialRepetitions(repetitions);
+
+    if (isFreshAttempt(repetitions)) {
+      return Optional.of(createFreshInitialAttempt(problem, user));
+    }
+
+    ProblemSubmissionWithHistory submission =
+        ProblemSubmissionWithHistory.builder()
+            .initialReview(initialProblemReview.getInitialReviewRequest())
+            .problem(problem)
+            .user(user)
+            .repetitions(repetitions)
+            .build();
+
+    return Optional.of(createFirstSubmissionWithHistory(submission));
   }
 
   private void ensureProblemNotYetSubmitted(Problem problem, User user) {
-    if (existsByProblemAndUser(problem, user)) {
+    if (isProblemSolvedBy(problem, user)) {
       throw new UnprocessableEntityException("This problem is already solved.");
     }
+  }
+
+  private void markProblemAsSolvedBy(Problem problem, User user) {
+    Set<Problem> solvedProblems = user.getSolvedProblems();
+    solvedProblems.add(problem);
+    user.setSolvedProblems(solvedProblems);
+    userService.save(user);
+  }
+
+  private boolean isProblemNotReviewable(InitialProblemReview problemReview) {
+    return !problemReview.getIsReviewable();
   }
 
   private boolean isFreshAttempt(int repetitions) {
     return repetitions == 0;
   }
 
-  private void createFreshInitialAttempt(Problem problem, User user) {
+  private SrsProblem createFreshInitialAttempt(Problem problem, User user) {
     SrsProblem srsProblem = save(SrsProblem.ofInitial(problem, user));
     createAttemptFromSrsProblem(srsProblem);
+    return srsProblem;
   }
 
-  private void createFirstSubmissionWithHistory(
-      InitialReviewRequest request, Problem problem, User user, int repetitions) {
-    LocalDate lastReviewedAt = request.lastReviewedAt();
+  private SrsProblem createFirstSubmissionWithHistory(ProblemSubmissionWithHistory submission) {
+    Integer repetitions = submission.getInitialReview().repetitions();
+    Problem problem = submission.getProblem();
+    LocalDate lastReviewedAt = submission.getInitialReview().lastReviewedAt();
 
-    double easeFactor = calculateInitialEaseFactor(problem, request);
+    double easeFactor = calculateInitialEaseFactor(problem, submission.getInitialReview());
     int interval = calculateInitialInterval(repetitions, easeFactor, lastReviewedAt);
     LocalDate nextReviewDate = calculateNextReviewDate(lastReviewedAt, interval);
     ProblemStatus status = spacedRepetitionHelper.getProblemStatus(repetitions);
@@ -72,11 +102,16 @@ public class SrsProblemService {
             .lastAttemptAt(lastReviewedAt)
             .nextAttemptAt(nextReviewDate)
             .problem(problem)
-            .user(user)
+            .user(submission.getUser())
             .build();
     SrsProblem srsProblem = this.save(entity);
 
     createAttemptFromSrsProblem(srsProblem);
+    return srsProblem;
+  }
+
+  private boolean isProblemSolvedBy(Problem problem, User user) {
+    return user.getSolvedProblems().contains(problem);
   }
 
   private double calculateInitialEaseFactor(Problem problem, InitialReviewRequest request) {

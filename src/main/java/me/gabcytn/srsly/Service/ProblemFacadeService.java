@@ -23,7 +23,7 @@ public class ProblemFacadeService {
 
     ProblemDetailDto problemDetail =
         new ProblemDetailDto(problem.summarize(), problem.getQuestion());
-    problemDetail.setIsSolved(optional.isPresent());
+    problemDetail.setIsSolved(user.getSolvedProblems().contains(problem));
 
     ReviewDetail reviewDetail = null;
     if (optional.isPresent()) {
