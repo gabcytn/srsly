@@ -43,6 +43,13 @@ public class User {
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   private Set<Solution> solutions;
 
+  @ManyToMany
+  @JoinTable(
+      name = "solved_problems",
+      joinColumns = @JoinColumn(name = "user_id", nullable = false),
+      inverseJoinColumns = @JoinColumn(name = "problem_id", nullable = false))
+  private Set<Problem> solvedProblems;
+
   public static User ofEmailAndPassword(String email, String password) {
     User user = new User();
     user.setEmail(email);
