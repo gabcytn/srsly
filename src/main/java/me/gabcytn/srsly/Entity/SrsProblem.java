@@ -1,8 +1,5 @@
 package me.gabcytn.srsly.Entity;
 
-import static me.gabcytn.srsly.DTO.Difficulty.Easy;
-import static me.gabcytn.srsly.DTO.Difficulty.Medium;
-
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,8 +9,10 @@ import me.gabcytn.srsly.DTO.SrsProblemDto;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-@Builder
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(
     name = "srs_problems",
@@ -68,10 +67,12 @@ public class SrsProblem {
   @UpdateTimestamp private LocalDateTime updatedAt;
 
   public static SrsProblem ofInitial(Problem problem, User user) {
-    double easeFactor;
-    if (problem.getDifficulty().equals(Easy)) easeFactor = 2.6;
-    else if (problem.getDifficulty().equals(Medium)) easeFactor = 2.4;
-    else easeFactor = 2.2;
+    double easeFactor =
+        switch (problem.getDifficulty()) {
+          case Easy -> 2.6;
+          case Medium -> 2.4;
+          case Hard -> 2.2;
+        };
 
     LocalDate dateNow = LocalDate.now();
     return SrsProblem.builder()

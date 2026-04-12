@@ -51,6 +51,9 @@ public class Problem {
       inverseJoinColumns = @JoinColumn(name = "tag_id", nullable = false))
   private Set<Tag> tags;
 
+  @ManyToMany(mappedBy = "solvedProblems")
+  private Set<User> solvers;
+
   public Problem(
       int id, String title, String question, Difficulty difficulty, String url, Set<Tag> tags) {
     this.frontendId = id;

@@ -33,4 +33,9 @@ public class ProblemController {
   public ProblemDetailDto getProblem(@PathVariable int id) {
     return problemFacadeService.findDtoByFrontendId(id);
   }
+
+  @GetMapping("/solved")
+  public PaginatedProblemDto getSolvedProblems() {
+    return problemFacadeService.findProblemsSolvedByUser();
+  }
 }

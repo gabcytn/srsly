@@ -2,6 +2,7 @@ package me.gabcytn.srsly.Service;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import me.gabcytn.srsly.DTO.PaginatedProblemDto;
 import me.gabcytn.srsly.DTO.Problem.ProblemDetailDto;
 import me.gabcytn.srsly.DTO.Problem.ReviewDetail;
 import me.gabcytn.srsly.Entity.Problem;
@@ -33,5 +34,10 @@ public class ProblemFacadeService {
     problemDetail.setReviewDetail(reviewDetail);
 
     return problemDetail;
+  }
+
+  public PaginatedProblemDto findProblemsSolvedByUser() {
+    User user = userService.getCurrentUser();
+    return new PaginatedProblemDto(problemService.findSolvedByUser(user));
   }
 }
