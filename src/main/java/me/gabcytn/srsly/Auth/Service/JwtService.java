@@ -9,17 +9,26 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class JwtService {
-  @Value("${security.jwt.secret-key}")
-  private String secretKey;
+  enum Type {
+    AUTHENTICATION,
+    EMAIL_VERIFICATION
+  }
 
-  @Value("${security.jwt.expiration-time}")
-  private long jwtExpiration;
+  protected Type JWT_TYPE = Type.AUTHENTICATION;
+
+  @Value("${security.jwt.secret.auth}")
+  protected String secretKey;
+
+  @Value("${security.jwt.expiration.auth}")
+  protected long jwtExpiration;
 
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
@@ -31,7 +40,7 @@ public class JwtService {
   }
 
   public String generateToken(String username) {
-    return generateToken(new HashMap<>(), username);
+    return generateToken(new HashMap<>(Map.of("type", JWT_TYPE)), username);
   }
 
   public String generateToken(Map<String, Object> extraClaims, String username) {
@@ -54,7 +63,16 @@ public class JwtService {
 
   public boolean isTokenValid(String token, UserDetails userDetails) {
     final String username = extractUsername(token);
-    return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    final String tokenType = extractClaim(token, claims -> claims.get("type", String.class));
+    try {
+      Type type = Type.valueOf(tokenType);
+      return username.equals(userDetails.getUsername())
+          && !isTokenExpired(token)
+          && type.equals(JWT_TYPE);
+    } catch (RuntimeException e) {
+      log.error("Error: {}", e.getMessage());
+      return false;
+    }
   }
 
   private boolean isTokenExpired(String token) {

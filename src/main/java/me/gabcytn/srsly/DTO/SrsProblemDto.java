@@ -1,31 +1,21 @@
 package me.gabcytn.srsly.DTO;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import me.gabcytn.srsly.DTO.View.Views;
-import me.gabcytn.srsly.Model.ProblemStatus;
+import lombok.*;
+import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
+@Builder
+@Data
 public class SrsProblemDto {
-  @JsonView(Views.Detailed.class)
-  private double grade;
+  private int id;
 
-  @JsonView(Views.Summary.class)
   private int repetitions;
 
-  @JsonView(Views.Summary.class)
   private LocalDate lastAttemptAt;
 
-  @JsonView(Views.Summary.class)
+  private LocalDate nextAttemptAt;
+
   private ProblemStatus status;
 
-  @JsonView(Views.Summary.class)
-  private ProblemDto problem;
+  private ProblemSummaryDto problem;
 }

@@ -3,13 +3,13 @@ package me.gabcytn.srsly.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -26,19 +26,29 @@ public class User {
 
   private String password;
 
+  private LocalDateTime emailVerifiedAt;
+
+  private Boolean isSubscribedToMailReminders = false;
+
   @JsonIgnore
   @CreationTimestamp
   @Column(updatable = false)
   private Timestamp createdAt;
 
-  @JsonIgnore
-  @UpdateTimestamp private Timestamp updatedAt;
+  @JsonIgnore @UpdateTimestamp private Timestamp updatedAt;
 
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   private Set<SrsProblem> srsProblems;
 
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   private Set<Solution> solutions;
+
+  @ManyToMany
+  @JoinTable(
+      name = "solved_problems",
+      joinColumns = @JoinColumn(name = "user_id", nullable = false),
+      inverseJoinColumns = @JoinColumn(name = "problem_id", nullable = false))
+  private Set<Problem> solvedProblems;
 
   public static User ofEmailAndPassword(String email, String password) {
     User user = new User();

@@ -1,13 +1,13 @@
 package me.gabcytn.srsly.Controller;
 
-import com.fasterxml.jackson.annotation.JsonView;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import me.gabcytn.srsly.DTO.ProblemDto;
-import me.gabcytn.srsly.DTO.View.Views;
-import me.gabcytn.srsly.Entity.Problem;
+import me.gabcytn.srsly.DTO.PaginatedProblemDto;
+import me.gabcytn.srsly.DTO.Problem.ProblemDetailDto;
+import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
+import me.gabcytn.srsly.Service.ProblemFacadeService;
 import me.gabcytn.srsly.Service.ProblemService;
-import me.gabcytn.srsly.Service.SrsProblemService;
-import me.gabcytn.srsly.Service.UserService;
+import me.gabcytn.srsly.Service.ProblemSuggestionService;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -15,17 +15,27 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/problems")
 public class ProblemController {
   private final ProblemService problemService;
-  private final UserService userService;
-  private final SrsProblemService srsProblemService;
+  private final ProblemFacadeService problemFacadeService;
+  private final ProblemSuggestionService problemSuggestionService;
+
+  @GetMapping
+  public PaginatedProblemDto getAll(
+      @RequestParam(name = "page", required = false, defaultValue = "0") int page) {
+    return problemService.getAll(page);
+  }
+
+  @GetMapping("/suggested")
+  public List<ProblemSummaryDto> getSuggestedProblems() {
+    return problemSuggestionService.getSuggestions();
+  }
 
   @GetMapping("/{id}")
-  @JsonView(Views.Detailed.class)
-  public ProblemDto getProblem(@PathVariable int id) {
-    Problem problem = problemService.findByFrontendId(id);
-    Boolean isSolved = srsProblemService.existsByProblemAndUser(problem, userService.getCurrentlyLoggedInUser());
+  public ProblemDetailDto getProblem(@PathVariable int id) {
+    return problemFacadeService.findDtoByFrontendId(id);
+  }
 
-    ProblemDto dto = problem.toApiPied();
-    dto.setIsSolved(isSolved);
-    return dto;
+  @GetMapping("/solved")
+  public PaginatedProblemDto getSolvedProblems() {
+    return problemFacadeService.findProblemsSolvedByUser();
   }
 }

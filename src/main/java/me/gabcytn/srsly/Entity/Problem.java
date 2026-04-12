@@ -7,15 +7,19 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import me.gabcytn.srsly.DTO.ProblemDto;
-import me.gabcytn.srsly.DTO.TagDto;
-import me.gabcytn.srsly.Model.Difficulty;
+import me.gabcytn.srsly.DTO.*;
+import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
 
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "problems")
+@Table(
+    name = "problems",
+    indexes = {
+      @Index(name = "idx_problem_title", columnList = "title"),
+      @Index(name = "idx_problem_difficulty", columnList = "difficulty")
+    })
 public class Problem {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -47,18 +51,21 @@ public class Problem {
       inverseJoinColumns = @JoinColumn(name = "tag_id", nullable = false))
   private Set<Tag> tags;
 
+  @ManyToMany(mappedBy = "solvedProblems")
+  private Set<User> solvers;
+
   public Problem(
-      int id, String title, String question, Difficulty difficulty, Set<Tag> tags, String url) {
+      int id, String title, String question, Difficulty difficulty, String url, Set<Tag> tags) {
     this.frontendId = id;
     this.title = title;
     this.question = question;
     this.difficulty = difficulty;
-    this.tags = tags;
     this.url = url;
+    this.tags = tags;
   }
 
-  public ProblemDto toApiPied() {
-    return new ProblemDto(frontendId, title, question, difficulty, getTagNames(), url);
+  public ProblemSummaryDto summarize() {
+    return new ProblemSummaryDto(frontendId, title, difficulty, getTagNames(), url);
   }
 
   private List<TagDto> getTagNames() {

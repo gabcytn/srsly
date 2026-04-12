@@ -1,4 +1,4 @@
-package me.gabcytn.srsly.Controller;
+package me.gabcytn.srsly.DTO;
 
 import jakarta.validation.constraints.NotNull;
 import me.gabcytn.srsly.DTO.Annotation.IsGradeValid;

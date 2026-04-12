@@ -3,6 +3,7 @@ package me.gabcytn.srsly.Service;
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.AI.AiCritique;
 import me.gabcytn.srsly.Entity.Solution;
+import me.gabcytn.srsly.Exception.AiException;
 import org.jsoup.Jsoup;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
@@ -15,8 +16,11 @@ public class AiService {
   private final ChatModel chatModel;
   private final SolutionService solutionService;
 
-  public AiCritique critique(int solutionId) {
+  public AiCritique critique(long solutionId) {
     Solution solution = solutionService.findById(solutionId);
+		if (solution.getAiCritique() != null) {
+			throw new AiException("Critique already exists.");
+		}
     String problemDescription = Jsoup.parse(solution.getProblem().getQuestion()).text();
     String model = "gemini-2.5-flash-lite";
     AiCritique response =

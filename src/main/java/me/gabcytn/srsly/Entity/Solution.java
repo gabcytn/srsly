@@ -1,13 +1,16 @@
 package me.gabcytn.srsly.Entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.gabcytn.srsly.AI.AiCritique;
 import me.gabcytn.srsly.DTO.SolutionDto;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
 @AllArgsConstructor
@@ -24,7 +27,7 @@ import org.hibernate.type.SqlTypes;
 public class Solution {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  private Long id;
 
   @Column(nullable = false)
   private String title;
@@ -46,7 +49,13 @@ public class Solution {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
+  @CreationTimestamp
+  @Column(updatable = false)
+  private LocalDateTime createdAt;
+
+  @UpdateTimestamp private LocalDateTime updatedAt;
+
   public SolutionDto toDto() {
-    return new SolutionDto(code, title, aiCritique, note);
+    return new SolutionDto(id, code, title, aiCritique, note);
   }
 }

@@ -3,13 +3,13 @@ package me.gabcytn.srsly.DTO.Annotation.Validator;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.time.LocalDate;
-import me.gabcytn.srsly.DTO.Annotation.ValidInitialSolution;
-import me.gabcytn.srsly.DTO.InitialSolutionDto;
+import me.gabcytn.srsly.DTO.Annotation.ValidInitialReview;
+import me.gabcytn.srsly.DTO.Review.InitialReviewRequest;
 
-public class InitialSolutionValidator implements ConstraintValidator<ValidInitialSolution, Object> {
+public class InitialReviewValidator implements ConstraintValidator<ValidInitialReview, Object> {
   @Override
   public boolean isValid(Object o, ConstraintValidatorContext context) {
-    if (!(o instanceof InitialSolutionDto dto) || dto.repetitions() == null) {
+    if (!(o instanceof InitialReviewRequest dto) || dto.repetitions() == null) {
       return true;
     }
 

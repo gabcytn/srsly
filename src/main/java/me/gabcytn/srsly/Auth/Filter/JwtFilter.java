@@ -6,10 +6,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.gabcytn.srsly.Auth.Service.JwtService;
 import me.gabcytn.srsly.Auth.Service.UserDetailsServiceImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,10 +18,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-  private static final Logger LOGGER = LoggerFactory.getLogger(JwtFilter.class);
   private final JwtService jwtService;
   private final UserDetailsServiceImpl userDetailsServiceImpl;
   private final HandlerExceptionResolver handlerExceptionResolver;
@@ -33,12 +32,12 @@ public class JwtFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
     final String authorizationHeader = request.getHeader("Authorization");
     if (request.getRequestURI().startsWith("/api/v1/auth")) {
-      LOGGER.info("Disregard filter. User is trying to authenticate.");
+      log.info("Disregard filter. User is trying to authenticate.");
       filterChain.doFilter(request, response);
       return;
     }
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-      LOGGER.info("No auth header / doesn't start with Bearer");
+      log.info("No auth header / doesn't start with Bearer");
       filterChain.doFilter(request, response);
       return;
     }
@@ -49,7 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
       // early return if email is invalid or already authenticated
       if (userEmail == null || authentication != null) {
-        LOGGER.info("user email is null OR authentication is NOT NULL");
+        log.info("user email is null OR authentication is NOT NULL");
         filterChain.doFilter(request, response);
         return;
       }
@@ -58,7 +57,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
       // early return if token is invalid
       if (!jwtService.isTokenValid(token, userDetails)) {
-        System.err.println("Token is invalid");
+        log.error("Invalid token");
         filterChain.doFilter(request, response);
         return;
       }
@@ -70,7 +69,7 @@ public class JwtFilter extends OncePerRequestFilter {
       SecurityContextHolder.getContext().setAuthentication(authToken);
       filterChain.doFilter(request, response);
     } catch (Exception e) {
-      LOGGER.error(e.getMessage());
+      log.error(e.getMessage());
       handlerExceptionResolver.resolveException(request, response, null, e);
     }
   }

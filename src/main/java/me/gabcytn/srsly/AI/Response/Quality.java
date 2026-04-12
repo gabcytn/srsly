@@ -1,4 +1,4 @@
-package me.gabcytn.srsly.Model;
+package me.gabcytn.srsly.AI.Response;
 
 public enum Quality {
 	Poor,

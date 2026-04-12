@@ -1,7 +1,9 @@
 package me.gabcytn.srsly.Service;
 
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.Entity.Attempt;
+import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Repository.AttemptRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,5 +14,9 @@ public class AttemptService {
 
   public void save(Attempt attempt) {
     attemptRepository.save(attempt);
+  }
+
+  public Integer countSolvedTodayExcludingInitial(User user) {
+    return attemptRepository.countByAttemptedAtAndUserAndGradeIsNotNull(LocalDate.now(), user);
   }
 }

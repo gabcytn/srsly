@@ -1,33 +1,49 @@
 package me.gabcytn.srsly.Service;
 
 import java.util.Optional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.gabcytn.srsly.Auth.DTO.UserPrincipal;
 import me.gabcytn.srsly.Auth.Repository.UserRepository;
 import me.gabcytn.srsly.Entity.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Slf4j
 @Service
 public class UserService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
   private final UserRepository userRepository;
 
-  public User getCurrentlyLoggedInUser() {
+  private UserPrincipal getCurrentUserPrincipal() {
     try {
-      UserPrincipal principal =
-          (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-      Optional<User> user = userRepository.findByEmail(principal.getUsername());
-      if (user.isEmpty())
-        throw new UsernameNotFoundException("User { " + principal.getUsername() + " } not found.");
-      return user.get();
+      return (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     } catch (ClassCastException e) {
-      LOGGER.error("Failed to cast to me.gabcytn.srsly.Auth.DTO.UserPrincipal");
+      log.error("Failed to cast to me.gabcytn.srsly.Auth.DTO.UserPrincipal");
       throw new RuntimeException(e.getMessage());
     }
+  }
+
+  public String getCurrentUserEmail() {
+    return getCurrentUserPrincipal().getUsername();
+  }
+
+  public User getCurrentUser() {
+    return findByEmail(getCurrentUserEmail());
+  }
+
+  public User findByEmail(String email) {
+    Optional<User> user = userRepository.findByEmail(email);
+    return user.orElseThrow(
+        () -> new UsernameNotFoundException("User { " + email + " } not found."));
+  }
+
+  public User save(User user) {
+    return userRepository.save(user);
+  }
+
+  public Boolean existsByEmail(String email) {
+    return userRepository.existsByEmail(email);
   }
 }

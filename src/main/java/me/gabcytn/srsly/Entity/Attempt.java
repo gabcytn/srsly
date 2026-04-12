@@ -2,14 +2,22 @@ package me.gabcytn.srsly.Entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 @RequiredArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "attempts")
+@Table(
+    name = "attempts",
+    indexes = {
+      @Index(name = "idx_attempt_date", columnList = "attempted_at"),
+      @Index(name = "idx_attempt_user", columnList = "user_id")
+    })
 public class Attempt {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -34,6 +42,10 @@ public class Attempt {
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
+
+  @CreationTimestamp
+  @Column(updatable = false)
+  private LocalDateTime createdAt;
 
   public Attempt(
       Double easeFactor, Integer grade, LocalDate attemptedAt, Problem problem, User user) {

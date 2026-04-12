@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: srsly
+    frontend:
+      url: ${SRSLY_FRONTEND_URL}
+  datasource:
+    url: jdbc:postgresql://${SRSLY_DB_ADDRESS}:${SRSLY_DB_PORT}/${SRSLY_DB_NAME}
+    username: ${SRSLY_DB_USERNAME}
+    password: ${SRSLY_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+  ai:
+    google:
+      genai:
+        api-key: ${SRSLY_GEMINI_API_KEY}
+    retry:
+      max-attempts: 2
+  mail:
+    host: email-smtp.${SRSLY_AWS_SES_REGION}.amazonaws.com
+    port: 587
+    username: ${SRSLY_AWS_SES_USERNAME}
+    password: ${SRSLY_AWS_SES_PASSWORD}
+    from: ${SRSLY_MAIL_FROM}
+    protocol: smtp
+    properties:
+      mail:
+        debug: true
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+
+security:
+  jwt:
+    secret:
+      auth: ${SRSLY_AUTH_JWT_SECRET_KEY}
+      email: ${SRSLY_EMAIL_JWT_SECRET_KEY}
+    expiration:
+      auth: 900000
+      email: 1800000
+
+openfeign:
+  client:
+    url: https://leetcode-api-pied.vercel.app

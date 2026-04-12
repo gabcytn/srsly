@@ -16,6 +16,8 @@ import me.gabcytn.srsly.Entity.User;
 @Getter
 @Setter
 public class SolutionDto {
+  private Long id;
+
   @NotNull(message = "Code solution is required.")
   @NotBlank(message = "Title must not be blank.")
   private String code;
@@ -27,7 +29,7 @@ public class SolutionDto {
   private AiCritique aiCritique;
   private String note;
 
-  public Solution toSolutionEntity(Problem problem, User user) {
+  public Solution toEntity(Problem problem, User user) {
     Solution s = new Solution();
     s.setCode(code);
     s.setTitle(title);

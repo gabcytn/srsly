@@ -1,18 +1,18 @@
 package me.gabcytn.srsly.Entity;
 
-import static me.gabcytn.srsly.Model.Difficulty.Easy;
-import static me.gabcytn.srsly.Model.Difficulty.Medium;
-
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.*;
+import me.gabcytn.srsly.DTO.ProblemStatus;
 import me.gabcytn.srsly.DTO.SrsProblemDto;
-import me.gabcytn.srsly.Model.ProblemStatus;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+@Data
+@Builder
 @NoArgsConstructor
-@RequiredArgsConstructor
-@Setter
-@Getter
+@AllArgsConstructor
 @Entity
 @Table(
     name = "srs_problems",
@@ -60,23 +60,41 @@ public class SrsProblem {
   @JoinColumn(name = "problem_id", nullable = false)
   private Problem problem;
 
-  public static SrsProblem ofInitial(User user, Problem problem) {
-    double easeFactor;
-    if (problem.getDifficulty().equals(Easy)) easeFactor = 2.6;
-    else if (problem.getDifficulty().equals(Medium)) easeFactor = 2.4;
-    else easeFactor = 2.2;
+  @CreationTimestamp
+  @Column(updatable = false)
+  private LocalDateTime createdAt;
+
+  @UpdateTimestamp private LocalDateTime updatedAt;
+
+  public static SrsProblem ofInitial(Problem problem, User user) {
+    double easeFactor =
+        switch (problem.getDifficulty()) {
+          case Easy -> 2.6;
+          case Medium -> 2.4;
+          case Hard -> 2.2;
+        };
 
     LocalDate dateNow = LocalDate.now();
-    return new SrsProblem(
-        ProblemStatus.NEW, easeFactor, 0, 1, dateNow, dateNow.plusDays(1), user, problem);
+    return SrsProblem.builder()
+        .status(ProblemStatus.NEW)
+        .easeFactor(easeFactor)
+        .repetitions(0)
+        .interval(1)
+        .lastAttemptAt(dateNow)
+        .nextAttemptAt(dateNow.plusDays(1))
+        .user(user)
+        .problem(problem)
+        .build();
   }
 
   public SrsProblemDto toDto() {
-    SrsProblemDto dto = new SrsProblemDto();
-    dto.setProblem(problem.toApiPied());
-    dto.setStatus(status);
-    dto.setRepetitions(repetitions);
-    dto.setLastAttemptAt(lastAttemptAt);
-    return dto;
+    return SrsProblemDto.builder()
+        .id(id)
+        .repetitions(repetitions)
+        .lastAttemptAt(lastAttemptAt)
+        .nextAttemptAt(nextAttemptAt)
+        .status(status)
+        .problem(problem.summarize())
+        .build();
   }
 }
