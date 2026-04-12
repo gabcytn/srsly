@@ -94,7 +94,7 @@ public class SrsProblemService {
     ProblemStatus status = spacedRepetitionHelper.getProblemStatus(repetitions);
 
     SrsProblem entity =
-        new SrsProblemEntityBuilder()
+        SrsProblem.builder()
             .status(status)
             .easeFactor(easeFactor)
             .repetitions(repetitions)

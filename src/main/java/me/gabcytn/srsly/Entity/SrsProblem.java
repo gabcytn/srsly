@@ -9,14 +9,11 @@ import java.time.LocalDateTime;
 import lombok.*;
 import me.gabcytn.srsly.DTO.ProblemStatus;
 import me.gabcytn.srsly.DTO.SrsProblemDto;
-import me.gabcytn.srsly.Helper.SrsProblemEntityBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-@NoArgsConstructor
-@RequiredArgsConstructor
-@Setter
-@Getter
+@Builder
+@Data
 @Entity
 @Table(
     name = "srs_problems",
@@ -77,7 +74,7 @@ public class SrsProblem {
     else easeFactor = 2.2;
 
     LocalDate dateNow = LocalDate.now();
-    return new SrsProblemEntityBuilder()
+    return SrsProblem.builder()
         .status(ProblemStatus.NEW)
         .easeFactor(easeFactor)
         .repetitions(0)
@@ -90,13 +87,13 @@ public class SrsProblem {
   }
 
   public SrsProblemDto toDto() {
-    SrsProblemDto dto = new SrsProblemDto();
-    dto.setId(id);
-    dto.setProblem(problem.summarize());
-    dto.setStatus(status);
-    dto.setRepetitions(repetitions);
-    dto.setLastAttemptAt(lastAttemptAt);
-    dto.setNextAttemptAt(nextAttemptAt);
-    return dto;
+    return SrsProblemDto.builder()
+        .id(id)
+        .repetitions(repetitions)
+        .lastAttemptAt(lastAttemptAt)
+        .nextAttemptAt(nextAttemptAt)
+        .status(status)
+        .problem(problem.summarize())
+        .build();
   }
 }
