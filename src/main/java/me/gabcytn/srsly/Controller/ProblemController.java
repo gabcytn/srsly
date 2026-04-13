@@ -3,6 +3,7 @@ package me.gabcytn.srsly.Controller;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.DTO.PaginatedProblemDto;
+import me.gabcytn.srsly.DTO.PaginatedSolvedProblem;
 import me.gabcytn.srsly.DTO.Problem.ProblemDetailDto;
 import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
 import me.gabcytn.srsly.Service.ProblemFacadeService;
@@ -35,7 +36,7 @@ public class ProblemController {
   }
 
   @GetMapping("/solved")
-  public PaginatedProblemDto getSolvedProblems() {
+  public PaginatedSolvedProblem getSolvedProblems() {
     return problemFacadeService.findProblemsSolvedByUser();
   }
 }

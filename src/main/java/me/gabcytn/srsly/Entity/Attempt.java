@@ -56,7 +56,7 @@ public class Attempt {
     this.user = user;
   }
 
-  public static Attempt fromSrsProblem(SrsProblem problem) {
+  public static Attempt fromSrsProblem(SolvedProblem problem) {
     return new Attempt(
         problem.getEaseFactor(),
         problem.getLastAttemptAt(),
@@ -64,7 +64,7 @@ public class Attempt {
         problem.getUser());
   }
 
-  public static Attempt fromSrsProblem(SrsProblem problem, int grade) {
+  public static Attempt fromSrsProblem(SolvedProblem problem, int grade) {
     return new Attempt(
         problem.getEaseFactor(),
         grade,

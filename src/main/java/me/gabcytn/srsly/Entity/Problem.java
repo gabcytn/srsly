@@ -42,7 +42,7 @@ public class Problem {
   private String url;
 
   @OneToMany(mappedBy = "problem")
-  private Set<SrsProblem> srsProblem;
+  private Set<SolvedProblem> solvedProblem;
 
   @ManyToMany
   @JoinTable(
@@ -50,9 +50,6 @@ public class Problem {
       joinColumns = @JoinColumn(name = "problem_id", nullable = false),
       inverseJoinColumns = @JoinColumn(name = "tag_id", nullable = false))
   private Set<Tag> tags;
-
-  @ManyToMany(mappedBy = "solvedProblems")
-  private Set<User> solvers;
 
   public Problem(
       int id, String title, String question, Difficulty difficulty, String url, Set<Tag> tags) {

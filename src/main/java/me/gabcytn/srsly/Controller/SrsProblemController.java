@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.*;
 import me.gabcytn.srsly.DTO.Review.InitialProblemReview;
 import me.gabcytn.srsly.DTO.Review.InitialReviewRequest;
-import me.gabcytn.srsly.Entity.SrsProblem;
+import me.gabcytn.srsly.Entity.SolvedProblem;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Service.*;
 import org.springframework.http.HttpStatus;
@@ -17,23 +17,23 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/problems")
 public class SrsProblemController {
-  private final SrsProblemService srsProblemService;
+  private final SolvedProblemService solvedProblemService;
   private final AttemptService attemptService;
   private final UserService userService;
 
   @GetMapping("/srs")
-  public PaginatedSrsProblem getTodayProblems(
+  public PaginatedSolvedProblem getTodayProblems(
       @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
       @RequestParam(name = "difficulty", required = false, defaultValue = "all") String difficulty,
       @RequestParam(name = "title", required = false) String titleSearch) {
-    return srsProblemService.getTodayProblems(page, difficulty, titleSearch);
+    return solvedProblemService.getTodayProblems(page, difficulty, titleSearch);
   }
 
   @GetMapping("/srs/progress")
   public ReviewProgress progress() {
     User user = userService.getCurrentUser();
     Integer solvedTodayCount = attemptService.countSolvedTodayExcludingInitial(user);
-    Integer unsolvedCount = srsProblemService.countOfProblemsToSolveToday();
+    Integer unsolvedCount = solvedProblemService.countOfProblemsToSolveToday();
 
     return new ReviewProgress(unsolvedCount, solvedTodayCount);
   }
@@ -43,8 +43,8 @@ public class SrsProblemController {
       @PathVariable Integer problemId,
       @RequestBody @Valid InitialReviewRequest request,
       @RequestParam(name = "reviewable", defaultValue = "true") Boolean isReviewable) {
-    Optional<SrsProblem> reviewedProblem =
-        srsProblemService.saveInitial(
+    Optional<SolvedProblem> reviewedProblem =
+        solvedProblemService.saveInitial(
             InitialProblemReview.builder()
                 .initialReviewRequest(request)
                 .problemFrontendId(problemId)
@@ -60,7 +60,7 @@ public class SrsProblemController {
   @PostMapping("/srs/{id}")
   public ResponseEntity<Void> save(
       @PathVariable int id, @RequestBody @Valid ReviewedProblem reviewedProblem) {
-    srsProblemService.saveSubsequent(id, reviewedProblem.grade());
+    solvedProblemService.saveSubsequent(id, reviewedProblem.grade());
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
 }

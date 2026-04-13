@@ -52,9 +52,4 @@ public class ProblemService {
     Page<Problem> problems = problemRepository.findAll(pageable);
     return new PaginatedProblemDto(problems);
   }
-
-  public Page<Problem> findSolvedByUser(User user) {
-    Pageable pageable = Pageable.ofSize(10);
-    return problemRepository.findBySolvers_Id(user.getId(), pageable);
-  }
 }
