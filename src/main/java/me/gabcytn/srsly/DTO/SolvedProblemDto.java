@@ -6,7 +6,7 @@ import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
 
 @Builder
 @Data
-public class SrsProblemDto {
+public class SolvedProblemDto {
   private int id;
 
   private int repetitions;

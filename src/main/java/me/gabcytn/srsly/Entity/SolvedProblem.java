@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.*;
 import me.gabcytn.srsly.DTO.ProblemStatus;
-import me.gabcytn.srsly.DTO.SrsProblemDto;
+import me.gabcytn.srsly.DTO.SolvedProblemDto;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -15,10 +15,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @Entity
 @Table(
-    name = "srs_problems",
+    name = "solved_problems",
     indexes = {
-      @Index(name = "srs_idx_problem", columnList = "problem_id"),
-      @Index(name = "srs_idx_user", columnList = "user_id")
+      @Index(name = "solved_idx_problem", columnList = "problem_id"),
+      @Index(name = "solved_idx_user", columnList = "user_id")
     })
 public class SolvedProblem {
   @Id
@@ -85,8 +85,8 @@ public class SolvedProblem {
         .build();
   }
 
-  public SrsProblemDto toDto() {
-    return SrsProblemDto.builder()
+  public SolvedProblemDto toDto() {
+    return SolvedProblemDto.builder()
         .id(id)
         .repetitions(repetitions)
         .lastAttemptAt(lastAttemptAt)

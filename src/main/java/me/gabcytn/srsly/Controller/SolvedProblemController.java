@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/problems")
-public class SrsProblemController {
+public class SolvedProblemController {
   private final SolvedProblemService solvedProblemService;
   private final AttemptService attemptService;
   private final UserService userService;
 
-  @GetMapping("/srs")
+  @GetMapping("/review")
   public PaginatedSolvedProblem getTodayProblems(
       @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
       @RequestParam(name = "difficulty", required = false, defaultValue = "all") String difficulty,
@@ -29,7 +29,7 @@ public class SrsProblemController {
     return solvedProblemService.getTodayProblems(page, difficulty, titleSearch);
   }
 
-  @GetMapping("/srs/progress")
+  @GetMapping("/review/progress")
   public ReviewProgress progress() {
     User user = userService.getCurrentUser();
     Integer solvedTodayCount = attemptService.countSolvedTodayExcludingInitial(user);
@@ -38,8 +38,8 @@ public class SrsProblemController {
     return new ReviewProgress(unsolvedCount, solvedTodayCount);
   }
 
-  @PostMapping("/{problemId}/srs/initial")
-  public ResponseEntity<SrsProblemDto> saveReview(
+  @PostMapping("/{problemId}/review/initial")
+  public ResponseEntity<SolvedProblemDto> saveReview(
       @PathVariable Integer problemId,
       @RequestBody @Valid InitialReviewRequest request,
       @RequestParam(name = "reviewable", defaultValue = "true") Boolean isReviewable) {
@@ -57,7 +57,7 @@ public class SrsProblemController {
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
-  @PostMapping("/srs/{id}")
+  @PostMapping("/review/{id}")
   public ResponseEntity<Void> save(
       @PathVariable int id, @RequestBody @Valid ReviewedProblem reviewedProblem) {
     solvedProblemService.saveSubsequent(id, reviewedProblem.grade());

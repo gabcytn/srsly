@@ -8,9 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 
 @Getter
-public class PaginatedSolvedProblem
-{
-  private final List<SrsProblemDto> content;
+public class PaginatedSolvedProblem {
+  private final List<SolvedProblemDto> content;
 
   private final int page;
 
@@ -24,18 +23,18 @@ public class PaginatedSolvedProblem
 
   private final Sort sort;
 
-  public PaginatedSolvedProblem(Page<SolvedProblem> pagedSrsProblem) {
-    List<SrsProblemDto> problemDtoList = new ArrayList<>();
-    for (SolvedProblem problem : pagedSrsProblem.getContent()) {
+  public PaginatedSolvedProblem(Page<SolvedProblem> pagedSolvedProblem) {
+    List<SolvedProblemDto> problemDtoList = new ArrayList<>();
+    for (SolvedProblem problem : pagedSolvedProblem.getContent()) {
       problemDtoList.add(problem.toDto());
     }
 
-    this.totalPages = pagedSrsProblem.getTotalPages();
-    this.totalElements = pagedSrsProblem.getTotalElements();
-    this.page = pagedSrsProblem.getNumber();
-    this.numberOfElements = pagedSrsProblem.getNumberOfElements();
-    this.size = pagedSrsProblem.getSize();
-    this.sort = pagedSrsProblem.getSort();
+    this.totalPages = pagedSolvedProblem.getTotalPages();
+    this.totalElements = pagedSolvedProblem.getTotalElements();
+    this.page = pagedSolvedProblem.getNumber();
+    this.numberOfElements = pagedSolvedProblem.getNumberOfElements();
+    this.size = pagedSolvedProblem.getSize();
+    this.sort = pagedSolvedProblem.getSort();
     this.content = problemDtoList;
   }
 }

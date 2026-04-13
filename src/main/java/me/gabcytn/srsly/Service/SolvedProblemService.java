@@ -182,11 +182,11 @@ public class SolvedProblemService {
   }
 
   private void createAttemptFromSolvedProblem(SolvedProblem problem) {
-    attemptService.save(Attempt.fromSrsProblem(problem));
+    attemptService.save(Attempt.fromSolvedProblem(problem));
   }
 
   private void createAttemptFromSolvedProblem(SolvedProblem problem, int grade) {
-    attemptService.save(Attempt.fromSrsProblem(problem, grade));
+    attemptService.save(Attempt.fromSolvedProblem(problem, grade));
   }
 
   public SolvedProblem save(SolvedProblem solvedProblem) {
@@ -213,35 +213,35 @@ public class SolvedProblemService {
 
   private PaginatedSolvedProblem getTodayProblemsWithoutDifficulty(
       String titleSearch, User user, LocalDate dateNow, Pageable pageable) {
-    Page<SolvedProblem> paginatedSrsProblems;
+    Page<SolvedProblem> paginatedSolvedProblem;
 
     if (titleSearch != null) {
-      paginatedSrsProblems =
+      paginatedSolvedProblem =
           solvedProblemRepository
               .findByUserAndNextAttemptAtLessThanEqualAndProblem_TitleContainingIgnoreCase(
                   user, dateNow, titleSearch, pageable);
     } else {
-      paginatedSrsProblems =
+      paginatedSolvedProblem =
           solvedProblemRepository.findByUserAndNextAttemptAtLessThanEqual(user, dateNow, pageable);
     }
 
-    return new PaginatedSolvedProblem(paginatedSrsProblems);
+    return new PaginatedSolvedProblem(paginatedSolvedProblem);
   }
 
   private PaginatedSolvedProblem getTodayProblemsWithDifficulty(
       Difficulty difficulty, String titleSearch, User user, LocalDate dateNow, Pageable pageable) {
-    Page<SolvedProblem> paginatedSrsProblems;
+    Page<SolvedProblem> paginatedSolvedProblem;
     if (titleSearch != null) {
-      paginatedSrsProblems =
+      paginatedSolvedProblem =
           solvedProblemRepository
               .findByUserAndNextAttemptAtLessThanEqualAndProblem_TitleContainingIgnoreCaseAndProblem_Difficulty(
                   user, dateNow, titleSearch, difficulty, pageable);
     } else {
-      paginatedSrsProblems =
+      paginatedSolvedProblem =
           solvedProblemRepository.findByUserAndNextAttemptAtLessThanEqualAndProblem_Difficulty(
               user, dateNow, difficulty, pageable);
     }
-    return new PaginatedSolvedProblem(paginatedSrsProblems);
+    return new PaginatedSolvedProblem(paginatedSolvedProblem);
   }
 
   public Boolean existsByProblemAndUser(Problem problem, User user) {
