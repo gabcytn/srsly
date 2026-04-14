@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/problems")
 public class SolvedProblemController {
   private final SolvedProblemService solvedProblemService;
+  private final ProblemFacadeService problemFacadeService;
   private final AttemptService attemptService;
   private final UserService userService;
 
@@ -58,5 +59,11 @@ public class SolvedProblemController {
       @PathVariable int id, @RequestBody @Valid ReviewedProblem reviewedProblem) {
     solvedProblemService.saveSubsequent(id, reviewedProblem.grade());
     return new ResponseEntity<>(HttpStatus.CREATED);
+  }
+
+  @GetMapping("/solved")
+  public PaginatedSolvedProblem getSolvedProblems(
+      @RequestParam(name = "page", defaultValue = "0") int page) {
+    return problemFacadeService.findProblemsSolvedByUser(page);
   }
 }

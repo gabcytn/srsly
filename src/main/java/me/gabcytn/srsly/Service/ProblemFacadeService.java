@@ -8,6 +8,8 @@ import me.gabcytn.srsly.DTO.Problem.ReviewDetail;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SolvedProblem;
 import me.gabcytn.srsly.Entity.User;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -36,8 +38,9 @@ public class ProblemFacadeService {
     return problemDetail;
   }
 
-  public PaginatedSolvedProblem findProblemsSolvedByUser() {
+  public PaginatedSolvedProblem findProblemsSolvedByUser(int pageNumber) {
     User user = userService.getCurrentUser();
-    return new PaginatedSolvedProblem(solvedProblemService.findByUser(user));
+    Pageable pageRequest = PageRequest.of(pageNumber, 10);
+    return new PaginatedSolvedProblem(solvedProblemService.findByUser(user, pageRequest));
   }
 }

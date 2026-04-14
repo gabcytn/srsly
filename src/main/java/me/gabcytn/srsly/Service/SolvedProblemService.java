@@ -255,8 +255,7 @@ public class SolvedProblemService {
     return solvedProblemRepository.countByNextAttemptAtLessThanEqualAndUser(LocalDate.now(), user);
   }
 
-  public Page<SolvedProblem> findByUser(User user) {
-    Pageable pageable = Pageable.ofSize(10);
+  public Page<SolvedProblem> findByUser(User user, Pageable pageable) {
     return solvedProblemRepository.findByUser(user, pageable);
   }
 }
