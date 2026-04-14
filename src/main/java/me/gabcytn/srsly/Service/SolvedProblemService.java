@@ -24,32 +24,34 @@ public class SolvedProblemService {
   private final AttemptService attemptService;
   private final SpacedRepetitionHelper spacedRepetitionHelper;
 
-  @Transactional
-  public Optional<SolvedProblem> saveInitial(InitialProblemReview initialProblemReview) {
-    Problem problem = problemService.findByFrontendId(initialProblemReview.getProblemFrontendId());
+  public SolvedProblem saveInitialAsNonReviewable(int problemFrontendId) {
+    Problem problem = problemService.findByFrontendId(problemFrontendId);
     User user = userService.getCurrentUser();
-    int untrackedReps = initialProblemReview.getInitialReviewRequest().repetitions();
+    ensureProblemNotYetSubmitted(problem, user);
+    return save(SolvedProblem.ofNonReviewableInitial(problem, user));
+  }
+
+  @Transactional
+  public SolvedProblem saveInitialAsReviewable(InitialProblemReview initialProblemReview) {
+    Problem problem = problemService.findByFrontendId(initialProblemReview.problemFrontendId());
+    User user = userService.getCurrentUser();
+    int untrackedReps = initialProblemReview.initialReview().repetitions();
 
     ensureProblemNotYetSubmitted(problem, user);
-
-    if (isProblemNotReviewable(initialProblemReview)) {
-      return Optional.empty();
-    }
-
     int repetitions = spacedRepetitionHelper.getInitialRepetitions(untrackedReps);
     if (isFreshAttempt(repetitions)) {
-      return Optional.of(createFreshInitialAttempt(problem, user));
+      return createFreshReviewableInitialAttempt(problem, user);
     }
 
     ProblemSubmissionWithHistory submission =
         ProblemSubmissionWithHistory.builder()
-            .initialReview(initialProblemReview.getInitialReviewRequest())
+            .initialReview(initialProblemReview.initialReview())
             .problem(problem)
             .user(user)
             .repetitions(repetitions)
             .build();
 
-    return Optional.of(createFirstSubmissionWithHistory(submission));
+    return createFirstSubmissionWithHistory(submission);
   }
 
   private void ensureProblemNotYetSubmitted(Problem problem, User user) {
@@ -58,16 +60,12 @@ public class SolvedProblemService {
     }
   }
 
-  private boolean isProblemNotReviewable(InitialProblemReview problemReview) {
-    return !problemReview.getIsReviewable();
-  }
-
   private boolean isFreshAttempt(int repetitions) {
     return repetitions == 0;
   }
 
-  private SolvedProblem createFreshInitialAttempt(Problem problem, User user) {
-    SolvedProblem solvedProblem = save(SolvedProblem.ofInitial(problem, user));
+  private SolvedProblem createFreshReviewableInitialAttempt(Problem problem, User user) {
+    SolvedProblem solvedProblem = save(SolvedProblem.ofReviewableInitial(problem, user));
     createAttemptFromSolvedProblem(solvedProblem);
     return solvedProblem;
   }

@@ -30,16 +30,10 @@ public class SolvedProblem {
   @Column(nullable = false)
   private ProblemStatus status;
 
-  @NonNull
-  @Column(nullable = false)
   private Double easeFactor;
 
-  @NonNull
-  @Column(nullable = false)
   private Integer repetitions;
 
-  @NonNull
-  @Column(nullable = false)
   private Integer interval;
 
   @NonNull
@@ -64,7 +58,7 @@ public class SolvedProblem {
 
   @UpdateTimestamp private LocalDateTime updatedAt;
 
-  public static SolvedProblem ofInitial(Problem problem, User user) {
+  public static SolvedProblem ofReviewableInitial(Problem problem, User user) {
     double easeFactor =
         switch (problem.getDifficulty()) {
           case Easy -> 2.6;
@@ -85,10 +79,19 @@ public class SolvedProblem {
         .build();
   }
 
+  public static SolvedProblem ofNonReviewableInitial(Problem problem, User user) {
+    LocalDate dateNow = LocalDate.now();
+    return SolvedProblem.builder()
+        .status(ProblemStatus.NON_REVIEW)
+        .lastAttemptAt(dateNow)
+        .user(user)
+        .problem(problem)
+        .build();
+  }
+
   public SolvedProblemDto toDto() {
     return SolvedProblemDto.builder()
         .id(id)
-        .repetitions(repetitions)
         .lastAttemptAt(lastAttemptAt)
         .nextAttemptAt(nextAttemptAt)
         .status(status)

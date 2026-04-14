@@ -1,7 +1,6 @@
 package me.gabcytn.srsly.Controller;
 
 import jakarta.validation.Valid;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.*;
 import me.gabcytn.srsly.DTO.Review.InitialProblemReview;
@@ -38,23 +37,20 @@ public class SolvedProblemController {
     return new ReviewProgress(unsolvedCount, solvedTodayCount);
   }
 
+  /** Spaced-repetition review */
   @PostMapping("/{problemId}/review/initial")
   public ResponseEntity<SolvedProblemDto> saveReview(
-      @PathVariable Integer problemId,
-      @RequestBody @Valid InitialReviewRequest request,
-      @RequestParam(name = "reviewable", defaultValue = "true") Boolean isReviewable) {
-    Optional<SolvedProblem> reviewedProblem =
-        solvedProblemService.saveInitial(
-            InitialProblemReview.builder()
-                .initialReviewRequest(request)
-                .problemFrontendId(problemId)
-                .isReviewable(isReviewable)
-                .build());
-    if (reviewedProblem.isPresent()) {
-      return new ResponseEntity<>(reviewedProblem.get().toDto(), HttpStatus.CREATED);
-    }
+      @PathVariable Integer problemId, @RequestBody @Valid InitialReviewRequest request) {
+    SolvedProblem reviewedProblem =
+        solvedProblemService.saveInitialAsReviewable(new InitialProblemReview(request, problemId));
+    return new ResponseEntity<>(reviewedProblem.toDto(), HttpStatus.CREATED);
+  }
 
-    return new ResponseEntity<>(HttpStatus.CREATED);
+  /** No spaced-repetition review */
+  @PostMapping("/{problemId}/solve/initial")
+  public ResponseEntity<SolvedProblemDto> markProblemAsSolved(@PathVariable Integer problemId) {
+    SolvedProblem solvedProblem = solvedProblemService.saveInitialAsNonReviewable(problemId);
+    return new ResponseEntity<>(solvedProblem.toDto(), HttpStatus.CREATED);
   }
 
   @PostMapping("/review/{id}")

@@ -9,8 +9,6 @@ import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
 public class SolvedProblemDto {
   private int id;
 
-  private int repetitions;
-
   private LocalDate lastAttemptAt;
 
   private LocalDate nextAttemptAt;
