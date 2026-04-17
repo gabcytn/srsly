@@ -2,42 +2,45 @@ package me.gabcytn.srsly.Service;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import me.gabcytn.srsly.DTO.PaginatedProblemDto;
+import me.gabcytn.srsly.DTO.PaginatedSolvedProblem;
 import me.gabcytn.srsly.DTO.Problem.ProblemDetailDto;
 import me.gabcytn.srsly.DTO.Problem.ReviewDetail;
 import me.gabcytn.srsly.Entity.Problem;
-import me.gabcytn.srsly.Entity.SrsProblem;
+import me.gabcytn.srsly.Entity.SolvedProblem;
 import me.gabcytn.srsly.Entity.User;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
 public class ProblemFacadeService {
-  private final SrsProblemService srsProblemService;
+  private final SolvedProblemService solvedProblemService;
   private final ProblemService problemService;
   private final UserService userService;
 
   public ProblemDetailDto findDtoByFrontendId(int frontendId) {
     Problem problem = problemService.findByFrontendId(frontendId);
     User user = userService.getCurrentUser();
-    Optional<SrsProblem> optional = srsProblemService.findByProblemAndUser(problem, user);
+    Optional<SolvedProblem> optional = solvedProblemService.findByProblemAndUser(problem, user);
 
     ProblemDetailDto problemDetail =
         new ProblemDetailDto(problem.summarize(), problem.getQuestion());
-    problemDetail.setIsSolved(user.getSolvedProblems().contains(problem));
 
     ReviewDetail reviewDetail = null;
     if (optional.isPresent()) {
-      SrsProblem srsProblem = optional.get();
-      reviewDetail = new ReviewDetail(srsProblem.getId(), srsProblem.getNextAttemptAt());
+      SolvedProblem solvedProblem = optional.get();
+      reviewDetail = new ReviewDetail(solvedProblem.getId(), solvedProblem.getNextAttemptAt());
+      problemDetail.setIsSolved(Boolean.TRUE);
     }
     problemDetail.setReviewDetail(reviewDetail);
 
     return problemDetail;
   }
 
-  public PaginatedProblemDto findProblemsSolvedByUser() {
+  public PaginatedSolvedProblem findProblemsSolvedByUser(int pageNumber) {
     User user = userService.getCurrentUser();
-    return new PaginatedProblemDto(problemService.findSolvedByUser(user));
+    Pageable pageRequest = PageRequest.of(pageNumber, 10);
+    return new PaginatedSolvedProblem(solvedProblemService.findByUser(user, pageRequest));
   }
 }

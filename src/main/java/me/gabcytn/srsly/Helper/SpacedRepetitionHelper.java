@@ -11,7 +11,7 @@ import java.time.temporal.ChronoUnit;
 import me.gabcytn.srsly.DTO.Confidence;
 import me.gabcytn.srsly.DTO.Difficulty;
 import me.gabcytn.srsly.DTO.ProblemStatus;
-import me.gabcytn.srsly.Entity.SrsProblem;
+import me.gabcytn.srsly.Entity.SolvedProblem;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -99,23 +99,23 @@ public class SpacedRepetitionHelper {
     return (int) Math.round(6 * Math.pow(easeFactor, repetitions - 2));
   }
 
-  public SrsProblem reviewFailed(SrsProblem srsProblem, int grade) {
-    BigDecimal easeFactor = BigDecimal.valueOf(srsProblem.getEaseFactor());
+  public SolvedProblem reviewFailed(SolvedProblem solvedProblem, int grade) {
+    BigDecimal easeFactor = BigDecimal.valueOf(solvedProblem.getEaseFactor());
     BigDecimal failedEaseFactor = easeFactor.subtract(ZERO_POINT_TWO);
 
     LocalDate now = LocalDate.now();
-    srsProblem.setEaseFactor(failedEaseFactor.max(ONE_POINT_THREE).doubleValue());
-    srsProblem.setRepetitions(0);
-    srsProblem.setInterval(1);
-    srsProblem.setStatus(ProblemStatus.LEARNING);
-    srsProblem.setLastAttemptAt(now);
-    srsProblem.setNextAttemptAt(now.plusDays(1));
+    solvedProblem.setEaseFactor(failedEaseFactor.max(ONE_POINT_THREE).doubleValue());
+    solvedProblem.setRepetitions(0);
+    solvedProblem.setInterval(1);
+    solvedProblem.setStatus(ProblemStatus.LEARNING);
+    solvedProblem.setLastAttemptAt(now);
+    solvedProblem.setNextAttemptAt(now.plusDays(1));
 
-    return srsProblem;
+    return solvedProblem;
   }
 
-  public double calculateEaseFactor(SrsProblem srsProblem, int grade, LocalDate dateNow) {
-    double previousEaseFactor = srsProblem.getEaseFactor();
+  public double calculateEaseFactor(SolvedProblem solvedProblem, int grade, LocalDate dateNow) {
+    double previousEaseFactor = solvedProblem.getEaseFactor();
     BigDecimal gradeBD = BigDecimal.valueOf(grade);
     BigDecimal gradeDiff = FIVE.subtract(gradeBD);
 
@@ -126,12 +126,12 @@ public class SpacedRepetitionHelper {
     BigDecimal result = BigDecimal.valueOf(previousEaseFactor).add(adjustment);
 
     return result.max(ONE_POINT_THREE).doubleValue()
-        + calculateEaseFactorAdjustments(srsProblem, grade, dateNow);
+        + calculateEaseFactorAdjustments(solvedProblem, grade, dateNow);
   }
 
   private double calculateEaseFactorAdjustments(
-      SrsProblem srsProblem, int grade, LocalDate dateNow) {
-    if (dateNow.isAfter(srsProblem.getNextAttemptAt()) && grade == 5) {
+			SolvedProblem solvedProblem, int grade, LocalDate dateNow) {
+    if (dateNow.isAfter(solvedProblem.getNextAttemptAt()) && grade == 5) {
       return 0.05;
     }
 
@@ -142,10 +142,10 @@ public class SpacedRepetitionHelper {
     return ChronoUnit.DAYS.between(from, to);
   }
 
-  public int calculateSubsequentInterval(SrsProblem srsProblem, LocalDate dateNow) {
-    int repetitions = srsProblem.getRepetitions();
-    int interval = srsProblem.getInterval();
-    double easeFactor = srsProblem.getEaseFactor();
+  public int calculateSubsequentInterval(SolvedProblem solvedProblem, LocalDate dateNow) {
+    int repetitions = solvedProblem.getRepetitions();
+    int interval = solvedProblem.getInterval();
+    double easeFactor = solvedProblem.getEaseFactor();
 
     if (repetitions == 1) {
       return 1;
@@ -155,11 +155,11 @@ public class SpacedRepetitionHelper {
       return 6;
     }
 
-    double timingMultiplier = getTimingMultiplier(srsProblem, dateNow);
+    double timingMultiplier = getTimingMultiplier(solvedProblem, dateNow);
     return (int) Math.round(interval * easeFactor * timingMultiplier);
   }
 
-  private double getTimingMultiplier(SrsProblem problem, LocalDate dateNow) {
+  private double getTimingMultiplier(SolvedProblem problem, LocalDate dateNow) {
     BigDecimal timingMultiplier = BigDecimal.valueOf(1);
     if (dateNow.isAfter(problem.getNextAttemptAt())) {
       long delay = dateDifference(problem.getNextAttemptAt(), dateNow.plusDays(1));

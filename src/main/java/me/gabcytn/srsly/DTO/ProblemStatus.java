@@ -4,5 +4,6 @@ public enum ProblemStatus {
   NEW,
   LEARNING,
   REVIEWING,
-  MASTERED
+  MASTERED,
+  NON_REVIEW,
 }

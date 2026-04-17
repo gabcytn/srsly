@@ -3,14 +3,13 @@ package me.gabcytn.srsly.DTO;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
-import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
-import me.gabcytn.srsly.Entity.Problem;
+import me.gabcytn.srsly.Entity.SolvedProblem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 
 @Getter
-public class PaginatedProblemDto {
-  private final List<ProblemSummaryDto> content;
+public class PaginatedSolvedProblem {
+  private final List<SolvedProblemDto> content;
 
   private final int page;
 
@@ -24,10 +23,10 @@ public class PaginatedProblemDto {
 
   private final Sort sort;
 
-  public PaginatedProblemDto(Page<Problem> pagedSolvedProblem) {
-    List<ProblemSummaryDto> problemDtoList = new ArrayList<>();
-    for (Problem problem : pagedSolvedProblem.getContent()) {
-      problemDtoList.add(problem.summarize());
+  public PaginatedSolvedProblem(Page<SolvedProblem> pagedSolvedProblem) {
+    List<SolvedProblemDto> problemDtoList = new ArrayList<>();
+    for (SolvedProblem problem : pagedSolvedProblem.getContent()) {
+      problemDtoList.add(problem.toDto());
     }
 
     this.totalPages = pagedSolvedProblem.getTotalPages();

@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.*;
 import me.gabcytn.srsly.DTO.ProblemStatus;
-import me.gabcytn.srsly.DTO.SrsProblemDto;
+import me.gabcytn.srsly.DTO.SolvedProblemDto;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -15,12 +15,12 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @Entity
 @Table(
-    name = "srs_problems",
+    name = "solved_problems",
     indexes = {
-      @Index(name = "srs_idx_problem", columnList = "problem_id"),
-      @Index(name = "srs_idx_user", columnList = "user_id")
+      @Index(name = "solved_idx_problem", columnList = "problem_id"),
+      @Index(name = "solved_idx_user", columnList = "user_id")
     })
-public class SrsProblem {
+public class SolvedProblem {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private int id;
@@ -30,24 +30,16 @@ public class SrsProblem {
   @Column(nullable = false)
   private ProblemStatus status;
 
-  @NonNull
-  @Column(nullable = false)
   private Double easeFactor;
 
-  @NonNull
-  @Column(nullable = false)
   private Integer repetitions;
 
-  @NonNull
-  @Column(nullable = false)
   private Integer interval;
 
   @NonNull
   @Column(nullable = false)
   private LocalDate lastAttemptAt;
 
-  @NonNull
-  @Column(nullable = false)
   private LocalDate nextAttemptAt;
 
   @NonNull
@@ -66,7 +58,7 @@ public class SrsProblem {
 
   @UpdateTimestamp private LocalDateTime updatedAt;
 
-  public static SrsProblem ofInitial(Problem problem, User user) {
+  public static SolvedProblem ofReviewableInitial(Problem problem, User user) {
     double easeFactor =
         switch (problem.getDifficulty()) {
           case Easy -> 2.6;
@@ -75,7 +67,7 @@ public class SrsProblem {
         };
 
     LocalDate dateNow = LocalDate.now();
-    return SrsProblem.builder()
+    return SolvedProblem.builder()
         .status(ProblemStatus.NEW)
         .easeFactor(easeFactor)
         .repetitions(0)
@@ -87,10 +79,19 @@ public class SrsProblem {
         .build();
   }
 
-  public SrsProblemDto toDto() {
-    return SrsProblemDto.builder()
+  public static SolvedProblem ofNonReviewableInitial(Problem problem, User user) {
+    LocalDate dateNow = LocalDate.now();
+    return SolvedProblem.builder()
+        .status(ProblemStatus.NON_REVIEW)
+        .lastAttemptAt(dateNow)
+        .user(user)
+        .problem(problem)
+        .build();
+  }
+
+  public SolvedProblemDto toDto() {
+    return SolvedProblemDto.builder()
         .id(id)
-        .repetitions(repetitions)
         .lastAttemptAt(lastAttemptAt)
         .nextAttemptAt(nextAttemptAt)
         .status(status)
