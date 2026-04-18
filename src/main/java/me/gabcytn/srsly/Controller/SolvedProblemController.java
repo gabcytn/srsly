@@ -6,7 +6,6 @@ import me.gabcytn.srsly.DTO.*;
 import me.gabcytn.srsly.DTO.Review.InitialProblemReview;
 import me.gabcytn.srsly.DTO.Review.InitialReviewRequest;
 import me.gabcytn.srsly.Entity.SolvedProblem;
-import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +17,6 @@ import org.springframework.web.bind.annotation.*;
 public class SolvedProblemController {
   private final SolvedProblemService solvedProblemService;
   private final ProblemFacadeService problemFacadeService;
-  private final AttemptService attemptService;
-  private final UserService userService;
 
   @GetMapping("/review")
   public PaginatedSolvedProblem getTodayProblems(
@@ -31,11 +28,7 @@ public class SolvedProblemController {
 
   @GetMapping("/review/progress")
   public ReviewProgress progress() {
-    User user = userService.getCurrentUser();
-    Integer solvedTodayCount = attemptService.countSolvedTodayExcludingInitial(user);
-    Integer unsolvedCount = solvedProblemService.countOfProblemsToSolveToday();
-
-    return new ReviewProgress(unsolvedCount, solvedTodayCount);
+    return solvedProblemService.getReviewProgress();
   }
 
   /** Spaced-repetition review */

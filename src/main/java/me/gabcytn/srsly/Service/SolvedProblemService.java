@@ -250,9 +250,15 @@ public class SolvedProblemService {
     return solvedProblemRepository.findByProblemAndUser(problem, user);
   }
 
-  public Integer countOfProblemsToSolveToday() {
+  @Transactional
+  public ReviewProgress getReviewProgress() {
     User user = userService.getCurrentUser();
-    return solvedProblemRepository.countByNextAttemptAtLessThanEqualAndUser(LocalDate.now(), user);
+    LocalDate now = LocalDate.now();
+
+    int solvedTodayCount = attemptService.countSolvedTodayExcludingInitial(user);
+    int unsolvedCount = solvedProblemRepository.countByNextAttemptAtLessThanEqualAndUser(now, user);
+
+    return new ReviewProgress(unsolvedCount, solvedTodayCount);
   }
 
   public Page<SolvedProblem> findByUser(User user, Pageable pageable) {
