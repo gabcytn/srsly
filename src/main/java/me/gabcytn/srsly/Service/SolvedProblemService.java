@@ -10,6 +10,7 @@ import me.gabcytn.srsly.DTO.Review.ProblemSubmissionWithHistory;
 import me.gabcytn.srsly.Entity.*;
 import me.gabcytn.srsly.Exception.*;
 import me.gabcytn.srsly.Helper.*;
+import me.gabcytn.srsly.Repository.SolvedProblemRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 @Service
 public class SolvedProblemService {
-  private final me.gabcytn.srsly.Repository.SolvedProblemRepository solvedProblemRepository;
+  private final SolvedProblemRepository solvedProblemRepository;
   private final UserService userService;
   private final ProblemService problemService;
   private final AttemptService attemptService;
