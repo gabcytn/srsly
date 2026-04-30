@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 public class ProblemFacadeService {
+  private final AttemptService attemptService;
   private final SolvedProblemService solvedProblemService;
   private final ProblemService problemService;
   private final UserService userService;
@@ -68,7 +69,8 @@ public class ProblemFacadeService {
   @Transactional
   public ReviewProgress getReviewProgress() {
     User user = userService.getCurrentUser();
-    return solvedProblemService.getReviewProgress(user);
+    int reviewedProblemsCount = attemptService.getCountOfReviewedProblemsToday(user);
+    return solvedProblemService.getReviewProgress(reviewedProblemsCount, user);
   }
 
   public PaginatedSolvedProblem getProblemsToReviewToday(ReviewableProblemsFilter filters) {

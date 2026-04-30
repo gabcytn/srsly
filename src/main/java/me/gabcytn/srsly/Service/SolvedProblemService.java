@@ -10,6 +10,7 @@ import me.gabcytn.srsly.DTO.Review.ProblemSubmissionWithHistory;
 import me.gabcytn.srsly.Entity.*;
 import me.gabcytn.srsly.Exception.*;
 import me.gabcytn.srsly.Helper.*;
+import me.gabcytn.srsly.Publisher.ReviewAttemptEventPublisher;
 import me.gabcytn.srsly.Repository.SolvedProblemRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.*;
@@ -20,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SolvedProblemService {
   private final SolvedProblemRepository solvedProblemRepository;
-  private final AttemptService attemptService;
+  private final ReviewAttemptEventPublisher reviewAttemptEventPublisher;
   private final SpacedRepetitionHelper spacedRepetitionHelper;
 
   public SolvedProblem saveInitialAsNonReviewable(Problem problem, User user) {
@@ -176,11 +177,11 @@ public class SolvedProblemService {
   }
 
   private void createAttemptFromSolvedProblem(SolvedProblem problem) {
-    attemptService.save(Attempt.fromSolvedProblem(problem));
+    reviewAttemptEventPublisher.publish(Attempt.fromSolvedProblem(problem));
   }
 
   private void createAttemptFromSolvedProblem(SolvedProblem problem, int grade) {
-    attemptService.save(Attempt.fromSolvedProblem(problem, grade));
+    reviewAttemptEventPublisher.publish(Attempt.fromSolvedProblem(problem, grade));
   }
 
   public SolvedProblem save(SolvedProblem solvedProblem) {
@@ -245,10 +246,8 @@ public class SolvedProblemService {
     return solvedProblemRepository.findByProblemAndUser(problem, user);
   }
 
-  public ReviewProgress getReviewProgress(User user) {
+  public ReviewProgress getReviewProgress(int solvedTodayCount, User user) {
     LocalDate now = LocalDate.now();
-
-    int solvedTodayCount = attemptService.countSolvedTodayExcludingInitial(user);
     int unsolvedCount = solvedProblemRepository.countByNextAttemptAtLessThanEqualAndUser(now, user);
 
     return new ReviewProgress(unsolvedCount, solvedTodayCount);
