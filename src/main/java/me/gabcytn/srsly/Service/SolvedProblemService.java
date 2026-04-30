@@ -20,22 +20,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SolvedProblemService {
   private final SolvedProblemRepository solvedProblemRepository;
-  private final UserService userService;
-  private final ProblemService problemService;
   private final AttemptService attemptService;
   private final SpacedRepetitionHelper spacedRepetitionHelper;
 
-  public SolvedProblem saveInitialAsNonReviewable(int problemFrontendId) {
-    Problem problem = problemService.findByFrontendId(problemFrontendId);
-    User user = userService.getCurrentUser();
+  public SolvedProblem saveInitialAsNonReviewable(Problem problem, User user) {
     ensureProblemNotYetSubmitted(problem, user);
     return save(SolvedProblem.ofNonReviewableInitial(problem, user));
   }
 
-  @Transactional
   public SolvedProblem saveInitialAsReviewable(InitialProblemReview initialProblemReview) {
-    Problem problem = problemService.findByFrontendId(initialProblemReview.problemFrontendId());
-    User user = userService.getCurrentUser();
+    Problem problem = initialProblemReview.problem();
+    User user = initialProblemReview.user();
     int untrackedReps = initialProblemReview.initialReview().repetitions();
 
     ensureProblemNotYetSubmitted(problem, user);
@@ -192,22 +187,21 @@ public class SolvedProblemService {
     return solvedProblemRepository.save(solvedProblem);
   }
 
-  public PaginatedSolvedProblem getTodayProblems(int page, String difficulty, String titleSearch) {
-    Pageable pageable = PageRequest.of(page, 5, Sort.by("nextAttemptAt"));
-    User currentUser = userService.getCurrentUser();
+  public PaginatedSolvedProblem getTodayProblems(ReviewableProblemsFilter filter, User currentUser) {
+    Pageable pageable = PageRequest.of(filter.getPage(), 5, Sort.by("nextAttemptAt"));
     LocalDate dateNow = LocalDate.now();
 
-    if (!"all".equals(difficulty)) {
-      String formattedDifficulty = StringUtils.capitalize(difficulty.toLowerCase());
+    if (!"all".equals(filter.getDifficulty())) {
+      String formattedDifficulty = StringUtils.capitalize(filter.getDifficulty().toLowerCase());
       try {
         Difficulty diffEnum = Enum.valueOf(Difficulty.class, formattedDifficulty);
         return getTodayProblemsWithDifficulty(
-            diffEnum, titleSearch, currentUser, dateNow, pageable);
+            diffEnum, filter.getTitle(), currentUser, dateNow, pageable);
       } catch (IllegalArgumentException e) {
         throw new GenericNotFoundException("Invalid difficulty.");
       }
     }
-    return getTodayProblemsWithoutDifficulty(titleSearch, currentUser, dateNow, pageable);
+    return getTodayProblemsWithoutDifficulty(filter.getTitle(), currentUser, dateNow, pageable);
   }
 
   private PaginatedSolvedProblem getTodayProblemsWithoutDifficulty(
@@ -251,9 +245,7 @@ public class SolvedProblemService {
     return solvedProblemRepository.findByProblemAndUser(problem, user);
   }
 
-  @Transactional
-  public ReviewProgress getReviewProgress() {
-    User user = userService.getCurrentUser();
+  public ReviewProgress getReviewProgress(User user) {
     LocalDate now = LocalDate.now();
 
     int solvedTodayCount = attemptService.countSolvedTodayExcludingInitial(user);
