@@ -24,7 +24,7 @@ public class SpacedRepetitionHelper {
   private static final BigDecimal ZERO_POINT_ZERO_TWO = BigDecimal.valueOf(0.02);
   private static final BigDecimal FIVE = BigDecimal.valueOf(5);
 
-  public int getInitialRepetitions(int repetitions) {
+  public static int getInitialRepetitions(int repetitions) {
     validateNonNegativeRepetitions(repetitions);
 
     if (repetitions <= 2) {
@@ -38,13 +38,13 @@ public class SpacedRepetitionHelper {
     return 3;
   }
 
-  private void validateNonNegativeRepetitions(int n) {
+  private static void validateNonNegativeRepetitions(int n) {
     if (n < 0) {
       throw new RuntimeException("Repetitions must be a non-negative integer");
     }
   }
 
-  public ProblemStatus getProblemStatus(int repetitions) {
+  public static ProblemStatus getProblemStatus(int repetitions) {
     if (repetitions <= 2) {
       return ProblemStatus.LEARNING;
     }
@@ -52,7 +52,7 @@ public class SpacedRepetitionHelper {
     return ProblemStatus.REVIEWING;
   }
 
-  public Double initialEaseFactor(Difficulty difficulty, Confidence confidence) {
+  public static Double initialEaseFactor(Difficulty difficulty, Confidence confidence) {
     BigDecimal easeFactor = BigDecimal.valueOf(2.4);
 
     easeFactor = problemConfidenceAdjustment(confidence, easeFactor);
@@ -61,7 +61,7 @@ public class SpacedRepetitionHelper {
     return Math.min(easeFactor.doubleValue(), 2.6);
   }
 
-  private BigDecimal problemConfidenceAdjustment(Confidence confidence, BigDecimal easeFactor) {
+  private static BigDecimal problemConfidenceAdjustment(Confidence confidence, BigDecimal easeFactor) {
     if (confidence.equals(LOW)) {
       return easeFactor.subtract(ZERO_POINT_TWO);
     }
@@ -73,7 +73,7 @@ public class SpacedRepetitionHelper {
     return easeFactor;
   }
 
-  private BigDecimal problemDifficultyAdjustment(Difficulty difficulty, BigDecimal easeFactor) {
+  private static BigDecimal problemDifficultyAdjustment(Difficulty difficulty, BigDecimal easeFactor) {
     if (difficulty.equals(Easy)) {
       return easeFactor.add(ZERO_POINT_ONE);
     }
@@ -85,7 +85,7 @@ public class SpacedRepetitionHelper {
     return easeFactor;
   }
 
-  public int initialInterval(int repetitions, double easeFactor) {
+  public static int initialInterval(int repetitions, double easeFactor) {
     validateNonNegativeRepetitions(repetitions);
 
     if (repetitions <= 1) {
@@ -99,7 +99,7 @@ public class SpacedRepetitionHelper {
     return (int) Math.round(6 * Math.pow(easeFactor, repetitions - 2));
   }
 
-  public SolvedProblem reviewFailed(SolvedProblem solvedProblem, int grade) {
+  public static SolvedProblem reviewFailed(SolvedProblem solvedProblem, int grade) {
     BigDecimal easeFactor = BigDecimal.valueOf(solvedProblem.getEaseFactor());
     BigDecimal failedEaseFactor = easeFactor.subtract(ZERO_POINT_TWO);
 
@@ -114,7 +114,7 @@ public class SpacedRepetitionHelper {
     return solvedProblem;
   }
 
-  public double calculateEaseFactor(SolvedProblem solvedProblem, int grade, LocalDate dateNow) {
+  public static double calculateEaseFactor(SolvedProblem solvedProblem, int grade, LocalDate dateNow) {
     double previousEaseFactor = solvedProblem.getEaseFactor();
     BigDecimal gradeBD = BigDecimal.valueOf(grade);
     BigDecimal gradeDiff = FIVE.subtract(gradeBD);
@@ -129,7 +129,7 @@ public class SpacedRepetitionHelper {
         + calculateEaseFactorAdjustments(solvedProblem, grade, dateNow);
   }
 
-  private double calculateEaseFactorAdjustments(
+  private static double calculateEaseFactorAdjustments(
 			SolvedProblem solvedProblem, int grade, LocalDate dateNow) {
     if (dateNow.isAfter(solvedProblem.getNextAttemptAt()) && grade == 5) {
       return 0.05;
@@ -138,11 +138,11 @@ public class SpacedRepetitionHelper {
     return 0;
   }
 
-  public long dateDifference(LocalDate from, LocalDate to) {
+  public static long dateDifference(LocalDate from, LocalDate to) {
     return ChronoUnit.DAYS.between(from, to);
   }
 
-  public int calculateSubsequentInterval(SolvedProblem solvedProblem, LocalDate dateNow) {
+  public static int calculateSubsequentInterval(SolvedProblem solvedProblem, LocalDate dateNow) {
     int repetitions = solvedProblem.getRepetitions();
     int interval = solvedProblem.getInterval();
     double easeFactor = solvedProblem.getEaseFactor();
@@ -159,7 +159,7 @@ public class SpacedRepetitionHelper {
     return (int) Math.round(interval * easeFactor * timingMultiplier);
   }
 
-  private double getTimingMultiplier(SolvedProblem problem, LocalDate dateNow) {
+  private static double getTimingMultiplier(SolvedProblem problem, LocalDate dateNow) {
     BigDecimal timingMultiplier = BigDecimal.valueOf(1);
     if (dateNow.isAfter(problem.getNextAttemptAt())) {
       long delay = dateDifference(problem.getNextAttemptAt(), dateNow.plusDays(1));
@@ -169,7 +169,7 @@ public class SpacedRepetitionHelper {
     return timingMultiplier.doubleValue();
   }
 
-  public ProblemStatus determineProblemStatus(int interval, int repetitions) {
+  public static ProblemStatus determineProblemStatus(int interval, int repetitions) {
     if (interval >= 60 && repetitions >= 4) {
       return ProblemStatus.MASTERED;
     }

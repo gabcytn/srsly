@@ -10,6 +10,8 @@ import me.gabcytn.srsly.DTO.Review.ProblemSubmissionWithHistory;
 import me.gabcytn.srsly.Entity.*;
 import me.gabcytn.srsly.Exception.*;
 import me.gabcytn.srsly.Helper.*;
+import me.gabcytn.srsly.Publisher.ReviewAttemptEventPublisher;
+import me.gabcytn.srsly.Repository.SolvedProblemRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -18,27 +20,21 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 @Service
 public class SolvedProblemService {
-  private final me.gabcytn.srsly.Repository.SolvedProblemRepository solvedProblemRepository;
-  private final UserService userService;
-  private final ProblemService problemService;
-  private final AttemptService attemptService;
-  private final SpacedRepetitionHelper spacedRepetitionHelper;
+  private final SolvedProblemRepository solvedProblemRepository;
+  private final ReviewAttemptEventPublisher reviewAttemptEventPublisher;
 
-  public SolvedProblem saveInitialAsNonReviewable(int problemFrontendId) {
-    Problem problem = problemService.findByFrontendId(problemFrontendId);
-    User user = userService.getCurrentUser();
+  public SolvedProblem saveInitialAsNonReviewable(Problem problem, User user) {
     ensureProblemNotYetSubmitted(problem, user);
     return save(SolvedProblem.ofNonReviewableInitial(problem, user));
   }
 
-  @Transactional
   public SolvedProblem saveInitialAsReviewable(InitialProblemReview initialProblemReview) {
-    Problem problem = problemService.findByFrontendId(initialProblemReview.problemFrontendId());
-    User user = userService.getCurrentUser();
+    Problem problem = initialProblemReview.problem();
+    User user = initialProblemReview.user();
     int untrackedReps = initialProblemReview.initialReview().repetitions();
 
     ensureProblemNotYetSubmitted(problem, user);
-    int repetitions = spacedRepetitionHelper.getInitialRepetitions(untrackedReps);
+    int repetitions = SpacedRepetitionHelper.getInitialRepetitions(untrackedReps);
     if (isFreshAttempt(repetitions)) {
       return createFreshReviewableInitialAttempt(problem, user);
     }
@@ -78,7 +74,7 @@ public class SolvedProblemService {
     double easeFactor = calculateInitialEaseFactor(problem, submission.getInitialReview());
     int interval = calculateInitialInterval(repetitions, easeFactor, lastReviewedAt);
     LocalDate nextReviewDate = calculateNextReviewDate(lastReviewedAt, interval);
-    ProblemStatus status = spacedRepetitionHelper.getProblemStatus(repetitions);
+    ProblemStatus status = SpacedRepetitionHelper.getProblemStatus(repetitions);
 
     SolvedProblem entity =
         SolvedProblem.builder()
@@ -100,12 +96,12 @@ public class SolvedProblemService {
   private double calculateInitialEaseFactor(Problem problem, InitialReviewRequest request) {
     Difficulty difficulty = problem.getDifficulty();
     Confidence confidence = request.confidence();
-    return spacedRepetitionHelper.initialEaseFactor(difficulty, confidence);
+    return SpacedRepetitionHelper.initialEaseFactor(difficulty, confidence);
   }
 
   private int calculateInitialInterval(
       int repetitions, double easeFactor, LocalDate lastReviewedAt) {
-    int suggestedInterval = spacedRepetitionHelper.initialInterval(repetitions, easeFactor);
+    int suggestedInterval = SpacedRepetitionHelper.initialInterval(repetitions, easeFactor);
     long daysSinceLastReview = daysSince(lastReviewedAt);
 
     int adjustedDays = normalizeDaysDifference(daysSinceLastReview);
@@ -114,7 +110,7 @@ public class SolvedProblemService {
   }
 
   private long daysSince(LocalDate date) {
-    return spacedRepetitionHelper.dateDifference(date, LocalDate.now());
+    return SpacedRepetitionHelper.dateDifference(date, LocalDate.now());
   }
 
   private int normalizeDaysDifference(long days) {
@@ -157,21 +153,21 @@ public class SolvedProblemService {
   }
 
   private void createAttemptFromFailedReview(SolvedProblem solvedProblem, int grade) {
-    SolvedProblem created = this.save(spacedRepetitionHelper.reviewFailed(solvedProblem, grade));
+    SolvedProblem created = this.save(SpacedRepetitionHelper.reviewFailed(solvedProblem, grade));
     createAttemptFromSolvedProblem(created, grade);
   }
 
   private SolvedProblem updateProblemFromSuccessfulReview(
       SolvedProblem solvedProblem, int grade, LocalDate dateNow) {
-    double easeFactor = spacedRepetitionHelper.calculateEaseFactor(solvedProblem, grade, dateNow);
+    double easeFactor = SpacedRepetitionHelper.calculateEaseFactor(solvedProblem, grade, dateNow);
 
     solvedProblem.setEaseFactor(easeFactor);
     solvedProblem.setRepetitions(solvedProblem.getRepetitions() + 1);
 
     int repetitions = solvedProblem.getRepetitions();
-    int interval = spacedRepetitionHelper.calculateSubsequentInterval(solvedProblem, dateNow);
+    int interval = SpacedRepetitionHelper.calculateSubsequentInterval(solvedProblem, dateNow);
 
-    solvedProblem.setStatus(spacedRepetitionHelper.determineProblemStatus(interval, repetitions));
+    solvedProblem.setStatus(SpacedRepetitionHelper.determineProblemStatus(interval, repetitions));
     solvedProblem.setLastAttemptAt(dateNow);
     solvedProblem.setNextAttemptAt(dateNow.plusDays(interval));
     solvedProblem.setInterval(interval);
@@ -180,33 +176,32 @@ public class SolvedProblemService {
   }
 
   private void createAttemptFromSolvedProblem(SolvedProblem problem) {
-    attemptService.save(Attempt.fromSolvedProblem(problem));
+    reviewAttemptEventPublisher.publish(Attempt.fromSolvedProblem(problem));
   }
 
   private void createAttemptFromSolvedProblem(SolvedProblem problem, int grade) {
-    attemptService.save(Attempt.fromSolvedProblem(problem, grade));
+    reviewAttemptEventPublisher.publish(Attempt.fromSolvedProblem(problem, grade));
   }
 
   public SolvedProblem save(SolvedProblem solvedProblem) {
     return solvedProblemRepository.save(solvedProblem);
   }
 
-  public PaginatedSolvedProblem getTodayProblems(int page, String difficulty, String titleSearch) {
-    Pageable pageable = PageRequest.of(page, 5, Sort.by("nextAttemptAt"));
-    User currentUser = userService.getCurrentUser();
+  public PaginatedSolvedProblem getTodayProblems(ReviewableProblemsFilter filter, User currentUser) {
+    Pageable pageable = PageRequest.of(filter.getPage(), 5, Sort.by("nextAttemptAt"));
     LocalDate dateNow = LocalDate.now();
 
-    if (!"all".equals(difficulty)) {
-      String formattedDifficulty = StringUtils.capitalize(difficulty.toLowerCase());
+    if (!"all".equals(filter.getDifficulty())) {
+      String formattedDifficulty = StringUtils.capitalize(filter.getDifficulty().toLowerCase());
       try {
         Difficulty diffEnum = Enum.valueOf(Difficulty.class, formattedDifficulty);
         return getTodayProblemsWithDifficulty(
-            diffEnum, titleSearch, currentUser, dateNow, pageable);
+            diffEnum, filter.getTitle(), currentUser, dateNow, pageable);
       } catch (IllegalArgumentException e) {
         throw new GenericNotFoundException("Invalid difficulty.");
       }
     }
-    return getTodayProblemsWithoutDifficulty(titleSearch, currentUser, dateNow, pageable);
+    return getTodayProblemsWithoutDifficulty(filter.getTitle(), currentUser, dateNow, pageable);
   }
 
   private PaginatedSolvedProblem getTodayProblemsWithoutDifficulty(
@@ -250,9 +245,11 @@ public class SolvedProblemService {
     return solvedProblemRepository.findByProblemAndUser(problem, user);
   }
 
-  public Integer countOfProblemsToSolveToday() {
-    User user = userService.getCurrentUser();
-    return solvedProblemRepository.countByNextAttemptAtLessThanEqualAndUser(LocalDate.now(), user);
+  public ReviewProgress getReviewProgress(int solvedTodayCount, User user) {
+    LocalDate now = LocalDate.now();
+    int unsolvedCount = solvedProblemRepository.countByNextAttemptAtLessThanEqualAndUser(now, user);
+
+    return new ReviewProgress(unsolvedCount, solvedTodayCount);
   }
 
   public Page<SolvedProblem> findByUser(User user, Pageable pageable) {
