@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 import me.gabcytn.srsly.DTO.UserProblemToSolveCount;
 import me.gabcytn.srsly.Entity.Problem;
-import me.gabcytn.srsly.Entity.SolvedProblem;
+import me.gabcytn.srsly.Entity.ReviewProblem;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.DTO.Difficulty;
 import org.springframework.data.domain.Page;
@@ -17,29 +17,29 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SolvedProblemRepository extends JpaRepository<SolvedProblem, Integer> {
-  Page<SolvedProblem> findByUserAndNextAttemptAtLessThanEqual(
+public interface SolvedProblemRepository extends JpaRepository<ReviewProblem, Integer> {
+  Page<ReviewProblem> findByUserAndNextAttemptAtLessThanEqual(
       User user, LocalDate date, Pageable pageable);
 
-  Page<SolvedProblem>
+  Page<ReviewProblem>
       findByUserAndNextAttemptAtLessThanEqualAndProblem_TitleContainingIgnoreCaseAndProblem_Difficulty(
           User user, LocalDate date, String titleSearch, Difficulty difficulty, Pageable pageable);
 
-  Page<SolvedProblem> findByUserAndNextAttemptAtLessThanEqualAndProblem_TitleContainingIgnoreCase(
+  Page<ReviewProblem> findByUserAndNextAttemptAtLessThanEqualAndProblem_TitleContainingIgnoreCase(
       User user, LocalDate date, String titleSearch, Pageable pageable);
 
-  Page<SolvedProblem> findByUserAndNextAttemptAtLessThanEqualAndProblem_Difficulty(
+  Page<ReviewProblem> findByUserAndNextAttemptAtLessThanEqualAndProblem_Difficulty(
       User user, LocalDate date, Difficulty difficulty, Pageable pageable);
 
-  Page<SolvedProblem> findByUser(User user, Pageable pageable);
+  Page<ReviewProblem> findByUser(User user, Pageable pageable);
 
   @Query(
 """
     SELECT DISTINCT srs1.problem
-    FROM SolvedProblem srs1
+    FROM ReviewProblem srs1
     WHERE NOT EXISTS (
         SELECT 1
-        FROM SolvedProblem srs2
+        FROM ReviewProblem srs2
         WHERE srs2.problem.id = srs1.problem.id
           AND srs2.user.id = :userId
     )
@@ -48,13 +48,13 @@ public interface SolvedProblemRepository extends JpaRepository<SolvedProblem, In
 
   Boolean existsByProblemAndUser(Problem problem, User user);
 
-  Optional<SolvedProblem> findByProblemAndUser(Problem problem, User user);
+  Optional<ReviewProblem> findByProblemAndUser(Problem problem, User user);
 
   Integer countByNextAttemptAtLessThanEqualAndUser(LocalDate date, User user);
 
   @Query(
 """
-    SELECT u.email, COUNT(srs.id) FROM SolvedProblem srs
+    SELECT u.email, COUNT(srs.id) FROM ReviewProblem srs
     JOIN srs.user u WHERE srs.nextAttemptAt <= :date AND u.emailVerifiedAt IS NOT NULL GROUP BY u.email
 """)
   List<UserProblemToSolveCount> findUserWithToSolveCountByNextAttemptAtLessThanEqual(

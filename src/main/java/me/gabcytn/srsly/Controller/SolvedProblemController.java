@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.*;
 import me.gabcytn.srsly.DTO.Review.InitialReviewRequest;
-import me.gabcytn.srsly.Entity.SolvedProblem;
+import me.gabcytn.srsly.Entity.ReviewProblem;
 import me.gabcytn.srsly.Service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +40,7 @@ public class SolvedProblemController {
   @PostMapping("/{problemId}/review/initial")
   public ResponseEntity<SolvedProblemDto> saveReview(
       @PathVariable Integer problemId, @RequestBody @Valid InitialReviewRequest request) {
-    SolvedProblem reviewedProblem =
+    ReviewProblem reviewedProblem =
         problemFacadeService.saveInitialAsReviewable(request, problemId);
     return new ResponseEntity<>(reviewedProblem.toDto(), HttpStatus.CREATED);
   }
@@ -48,8 +48,8 @@ public class SolvedProblemController {
   /** No spaced-repetition review */
   @PostMapping("/{problemId}/solve/initial")
   public ResponseEntity<SolvedProblemDto> markProblemAsSolved(@PathVariable Integer problemId) {
-    SolvedProblem solvedProblem = problemFacadeService.saveInitialAsNonReviewable(problemId);
-    return new ResponseEntity<>(solvedProblem.toDto(), HttpStatus.CREATED);
+    ReviewProblem reviewProblem = problemFacadeService.saveInitialAsNonReviewable(problemId);
+    return new ResponseEntity<>(reviewProblem.toDto(), HttpStatus.CREATED);
   }
 
   @PostMapping("/review/{id}")

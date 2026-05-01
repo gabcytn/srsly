@@ -42,7 +42,7 @@ public class Problem {
   private String url;
 
   @OneToMany(mappedBy = "problem")
-  private Set<SolvedProblem> solvedProblem;
+  private Set<ReviewProblem> reviewProblem;
 
   @ManyToMany
   @JoinTable(

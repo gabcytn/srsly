@@ -23,12 +23,12 @@ public class SolvedProblemService {
   private final SolvedProblemRepository solvedProblemRepository;
   private final ReviewAttemptEventPublisher reviewAttemptEventPublisher;
 
-  public SolvedProblem saveInitialAsNonReviewable(Problem problem, User user) {
+  public ReviewProblem saveInitialAsNonReviewable(Problem problem, User user) {
     ensureProblemNotYetSubmitted(problem, user);
-    return save(SolvedProblem.ofNonReviewableInitial(problem, user));
+    return save(ReviewProblem.ofNonReviewableInitial(problem, user));
   }
 
-  public SolvedProblem saveInitialAsReviewable(InitialProblemReview initialProblemReview) {
+  public ReviewProblem saveInitialAsReviewable(InitialProblemReview initialProblemReview) {
     Problem problem = initialProblemReview.problem();
     User user = initialProblemReview.user();
     int untrackedReps = initialProblemReview.initialReview().repetitions();
@@ -60,13 +60,13 @@ public class SolvedProblemService {
     return repetitions == 0;
   }
 
-  private SolvedProblem createFreshReviewableInitialAttempt(Problem problem, User user) {
-    SolvedProblem solvedProblem = save(SolvedProblem.ofReviewableInitial(problem, user));
-    createAttemptFromSolvedProblem(solvedProblem);
-    return solvedProblem;
+  private ReviewProblem createFreshReviewableInitialAttempt(Problem problem, User user) {
+    ReviewProblem reviewProblem = save(ReviewProblem.ofReviewableInitial(problem, user));
+    createAttemptFromSolvedProblem(reviewProblem);
+    return reviewProblem;
   }
 
-  private SolvedProblem createFirstSubmissionWithHistory(ProblemSubmissionWithHistory submission) {
+  private ReviewProblem createFirstSubmissionWithHistory(ProblemSubmissionWithHistory submission) {
     Integer repetitions = submission.getInitialReview().repetitions();
     Problem problem = submission.getProblem();
     LocalDate lastReviewedAt = submission.getInitialReview().lastReviewedAt();
@@ -76,8 +76,8 @@ public class SolvedProblemService {
     LocalDate nextReviewDate = calculateNextReviewDate(lastReviewedAt, interval);
     ProblemStatus status = SpacedRepetitionHelper.getProblemStatus(repetitions);
 
-    SolvedProblem entity =
-        SolvedProblem.builder()
+    ReviewProblem entity =
+        ReviewProblem.builder()
             .status(status)
             .easeFactor(easeFactor)
             .repetitions(repetitions)
@@ -87,10 +87,10 @@ public class SolvedProblemService {
             .problem(problem)
             .user(submission.getUser())
             .build();
-    SolvedProblem solvedProblem = this.save(entity);
+    ReviewProblem reviewProblem = this.save(entity);
 
-    createAttemptFromSolvedProblem(solvedProblem);
-    return solvedProblem;
+    createAttemptFromSolvedProblem(reviewProblem);
+    return reviewProblem;
   }
 
   private double calculateInitialEaseFactor(Problem problem, InitialReviewRequest request) {
@@ -124,25 +124,25 @@ public class SolvedProblemService {
   @Transactional
   public void saveSubsequent(int id, int grade) {
     LocalDate dateNow = LocalDate.now();
-    SolvedProblem solvedProblem = findById(id);
+    ReviewProblem reviewProblem = findById(id);
 
-    verifyProblemReviewDate(solvedProblem, dateNow);
+    verifyProblemReviewDate(reviewProblem, dateNow);
     if (reviewFailed(grade)) {
-      createAttemptFromFailedReview(solvedProblem, grade);
+      createAttemptFromFailedReview(reviewProblem, grade);
       return;
     }
 
-    SolvedProblem updatedProblem = updateProblemFromSuccessfulReview(solvedProblem, grade, dateNow);
+    ReviewProblem updatedProblem = updateProblemFromSuccessfulReview(reviewProblem, grade, dateNow);
     createAttemptFromSolvedProblem(updatedProblem, grade);
   }
 
-  private SolvedProblem findById(int id) {
-    Optional<SolvedProblem> reviewProblem = solvedProblemRepository.findById(id);
+  private ReviewProblem findById(int id) {
+    Optional<ReviewProblem> reviewProblem = solvedProblemRepository.findById(id);
     return reviewProblem.orElseThrow(
         () -> new GenericNotFoundException("Review problem not found."));
   }
 
-  private void verifyProblemReviewDate(SolvedProblem reviewProblem, LocalDate dateNow) {
+  private void verifyProblemReviewDate(ReviewProblem reviewProblem, LocalDate dateNow) {
     if (dateNow.isBefore(reviewProblem.getNextAttemptAt())) {
       throw new EarlyReviewException();
     }
@@ -152,39 +152,39 @@ public class SolvedProblemService {
     return grade < 3;
   }
 
-  private void createAttemptFromFailedReview(SolvedProblem solvedProblem, int grade) {
-    SolvedProblem created = this.save(SpacedRepetitionHelper.reviewFailed(solvedProblem, grade));
+  private void createAttemptFromFailedReview(ReviewProblem reviewProblem, int grade) {
+    ReviewProblem created = this.save(SpacedRepetitionHelper.reviewFailed(reviewProblem, grade));
     createAttemptFromSolvedProblem(created, grade);
   }
 
-  private SolvedProblem updateProblemFromSuccessfulReview(
-      SolvedProblem solvedProblem, int grade, LocalDate dateNow) {
-    double easeFactor = SpacedRepetitionHelper.calculateEaseFactor(solvedProblem, grade, dateNow);
+  private ReviewProblem updateProblemFromSuccessfulReview(
+			ReviewProblem reviewProblem, int grade, LocalDate dateNow) {
+    double easeFactor = SpacedRepetitionHelper.calculateEaseFactor(reviewProblem, grade, dateNow);
 
-    solvedProblem.setEaseFactor(easeFactor);
-    solvedProblem.setRepetitions(solvedProblem.getRepetitions() + 1);
+    reviewProblem.setEaseFactor(easeFactor);
+    reviewProblem.setRepetitions(reviewProblem.getRepetitions() + 1);
 
-    int repetitions = solvedProblem.getRepetitions();
-    int interval = SpacedRepetitionHelper.calculateSubsequentInterval(solvedProblem, dateNow);
+    int repetitions = reviewProblem.getRepetitions();
+    int interval = SpacedRepetitionHelper.calculateSubsequentInterval(reviewProblem, dateNow);
 
-    solvedProblem.setStatus(SpacedRepetitionHelper.determineProblemStatus(interval, repetitions));
-    solvedProblem.setLastAttemptAt(dateNow);
-    solvedProblem.setNextAttemptAt(dateNow.plusDays(interval));
-    solvedProblem.setInterval(interval);
+    reviewProblem.setStatus(SpacedRepetitionHelper.determineProblemStatus(interval, repetitions));
+    reviewProblem.setLastAttemptAt(dateNow);
+    reviewProblem.setNextAttemptAt(dateNow.plusDays(interval));
+    reviewProblem.setInterval(interval);
 
-    return this.save(solvedProblem);
+    return this.save(reviewProblem);
   }
 
-  private void createAttemptFromSolvedProblem(SolvedProblem problem) {
+  private void createAttemptFromSolvedProblem(ReviewProblem problem) {
     reviewAttemptEventPublisher.publish(Attempt.fromSolvedProblem(problem));
   }
 
-  private void createAttemptFromSolvedProblem(SolvedProblem problem, int grade) {
+  private void createAttemptFromSolvedProblem(ReviewProblem problem, int grade) {
     reviewAttemptEventPublisher.publish(Attempt.fromSolvedProblem(problem, grade));
   }
 
-  public SolvedProblem save(SolvedProblem solvedProblem) {
-    return solvedProblemRepository.save(solvedProblem);
+  public ReviewProblem save(ReviewProblem reviewProblem) {
+    return solvedProblemRepository.save(reviewProblem);
   }
 
   public PaginatedSolvedProblem getTodayProblems(ReviewableProblemsFilter filter, User currentUser) {
@@ -206,7 +206,7 @@ public class SolvedProblemService {
 
   private PaginatedSolvedProblem getTodayProblemsWithoutDifficulty(
       String titleSearch, User user, LocalDate dateNow, Pageable pageable) {
-    Page<SolvedProblem> paginatedSolvedProblem;
+    Page<ReviewProblem> paginatedSolvedProblem;
 
     if (titleSearch != null) {
       paginatedSolvedProblem =
@@ -223,7 +223,7 @@ public class SolvedProblemService {
 
   private PaginatedSolvedProblem getTodayProblemsWithDifficulty(
       Difficulty difficulty, String titleSearch, User user, LocalDate dateNow, Pageable pageable) {
-    Page<SolvedProblem> paginatedSolvedProblem;
+    Page<ReviewProblem> paginatedSolvedProblem;
     if (titleSearch != null) {
       paginatedSolvedProblem =
           solvedProblemRepository
@@ -241,7 +241,7 @@ public class SolvedProblemService {
     return solvedProblemRepository.existsByProblemAndUser(problem, user);
   }
 
-  public Optional<SolvedProblem> findByProblemAndUser(Problem problem, User user) {
+  public Optional<ReviewProblem> findByProblemAndUser(Problem problem, User user) {
     return solvedProblemRepository.findByProblemAndUser(problem, user);
   }
 
@@ -252,7 +252,7 @@ public class SolvedProblemService {
     return new ReviewProgress(unsolvedCount, solvedTodayCount);
   }
 
-  public Page<SolvedProblem> findByUser(User user, Pageable pageable) {
+  public Page<ReviewProblem> findByUser(User user, Pageable pageable) {
     return solvedProblemRepository.findByUser(user, pageable);
   }
 }

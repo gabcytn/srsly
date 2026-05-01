@@ -3,7 +3,7 @@ package me.gabcytn.srsly.DTO;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
-import me.gabcytn.srsly.Entity.SolvedProblem;
+import me.gabcytn.srsly.Entity.ReviewProblem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 
@@ -23,9 +23,9 @@ public class PaginatedSolvedProblem {
 
   private final Sort sort;
 
-  public PaginatedSolvedProblem(Page<SolvedProblem> pagedSolvedProblem) {
+  public PaginatedSolvedProblem(Page<ReviewProblem> pagedSolvedProblem) {
     List<SolvedProblemDto> problemDtoList = new ArrayList<>();
-    for (SolvedProblem problem : pagedSolvedProblem.getContent()) {
+    for (ReviewProblem problem : pagedSolvedProblem.getContent()) {
       problemDtoList.add(problem.toDto());
     }
 

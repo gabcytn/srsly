@@ -10,7 +10,7 @@ import me.gabcytn.srsly.DTO.Review.InitialReviewRequest;
 import me.gabcytn.srsly.DTO.ReviewProgress;
 import me.gabcytn.srsly.DTO.ReviewableProblemsFilter;
 import me.gabcytn.srsly.Entity.Problem;
-import me.gabcytn.srsly.Entity.SolvedProblem;
+import me.gabcytn.srsly.Entity.ReviewProblem;
 import me.gabcytn.srsly.Entity.User;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,15 +28,15 @@ public class ProblemFacadeService {
   public ProblemDetailDto findDtoByFrontendId(int frontendId) {
     Problem problem = problemService.findByFrontendId(frontendId);
     User user = userService.getCurrentUser();
-    Optional<SolvedProblem> optional = solvedProblemService.findByProblemAndUser(problem, user);
+    Optional<ReviewProblem> optional = solvedProblemService.findByProblemAndUser(problem, user);
 
     ProblemDetailDto problemDetail =
         new ProblemDetailDto(problem.summarize(), problem.getQuestion());
 
     ReviewDetail reviewDetail = null;
     if (optional.isPresent()) {
-      SolvedProblem solvedProblem = optional.get();
-      reviewDetail = new ReviewDetail(solvedProblem.getId(), solvedProblem.getNextAttemptAt());
+      ReviewProblem reviewProblem = optional.get();
+      reviewDetail = new ReviewDetail(reviewProblem.getId(), reviewProblem.getNextAttemptAt());
       problemDetail.setIsSolved(Boolean.TRUE);
     }
     problemDetail.setReviewDetail(reviewDetail);
@@ -51,7 +51,7 @@ public class ProblemFacadeService {
   }
 
   @Transactional
-  public SolvedProblem saveInitialAsReviewable(InitialReviewRequest reviewRequest, int problemId) {
+  public ReviewProblem saveInitialAsReviewable(InitialReviewRequest reviewRequest, int problemId) {
     Problem problem = problemService.findByFrontendId(problemId);
     User user = userService.getCurrentUser();
 
@@ -59,7 +59,7 @@ public class ProblemFacadeService {
         new InitialProblemReview(reviewRequest, problem, user));
   }
 
-  public SolvedProblem saveInitialAsNonReviewable(int problemFrontendId) {
+  public ReviewProblem saveInitialAsNonReviewable(int problemFrontendId) {
     Problem problem = problemService.findByFrontendId(problemFrontendId);
     User user = userService.getCurrentUser();
 

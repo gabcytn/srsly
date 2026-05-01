@@ -11,7 +11,7 @@ import java.time.temporal.ChronoUnit;
 import me.gabcytn.srsly.DTO.Confidence;
 import me.gabcytn.srsly.DTO.Difficulty;
 import me.gabcytn.srsly.DTO.ProblemStatus;
-import me.gabcytn.srsly.Entity.SolvedProblem;
+import me.gabcytn.srsly.Entity.ReviewProblem;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -99,23 +99,23 @@ public class SpacedRepetitionHelper {
     return (int) Math.round(6 * Math.pow(easeFactor, repetitions - 2));
   }
 
-  public static SolvedProblem reviewFailed(SolvedProblem solvedProblem, int grade) {
-    BigDecimal easeFactor = BigDecimal.valueOf(solvedProblem.getEaseFactor());
+  public static ReviewProblem reviewFailed(ReviewProblem reviewProblem, int grade) {
+    BigDecimal easeFactor = BigDecimal.valueOf(reviewProblem.getEaseFactor());
     BigDecimal failedEaseFactor = easeFactor.subtract(ZERO_POINT_TWO);
 
     LocalDate now = LocalDate.now();
-    solvedProblem.setEaseFactor(failedEaseFactor.max(ONE_POINT_THREE).doubleValue());
-    solvedProblem.setRepetitions(0);
-    solvedProblem.setInterval(1);
-    solvedProblem.setStatus(ProblemStatus.LEARNING);
-    solvedProblem.setLastAttemptAt(now);
-    solvedProblem.setNextAttemptAt(now.plusDays(1));
+    reviewProblem.setEaseFactor(failedEaseFactor.max(ONE_POINT_THREE).doubleValue());
+    reviewProblem.setRepetitions(0);
+    reviewProblem.setInterval(1);
+    reviewProblem.setStatus(ProblemStatus.LEARNING);
+    reviewProblem.setLastAttemptAt(now);
+    reviewProblem.setNextAttemptAt(now.plusDays(1));
 
-    return solvedProblem;
+    return reviewProblem;
   }
 
-  public static double calculateEaseFactor(SolvedProblem solvedProblem, int grade, LocalDate dateNow) {
-    double previousEaseFactor = solvedProblem.getEaseFactor();
+  public static double calculateEaseFactor(ReviewProblem reviewProblem, int grade, LocalDate dateNow) {
+    double previousEaseFactor = reviewProblem.getEaseFactor();
     BigDecimal gradeBD = BigDecimal.valueOf(grade);
     BigDecimal gradeDiff = FIVE.subtract(gradeBD);
 
@@ -126,12 +126,12 @@ public class SpacedRepetitionHelper {
     BigDecimal result = BigDecimal.valueOf(previousEaseFactor).add(adjustment);
 
     return result.max(ONE_POINT_THREE).doubleValue()
-        + calculateEaseFactorAdjustments(solvedProblem, grade, dateNow);
+        + calculateEaseFactorAdjustments(reviewProblem, grade, dateNow);
   }
 
   private static double calculateEaseFactorAdjustments(
-			SolvedProblem solvedProblem, int grade, LocalDate dateNow) {
-    if (dateNow.isAfter(solvedProblem.getNextAttemptAt()) && grade == 5) {
+			ReviewProblem reviewProblem, int grade, LocalDate dateNow) {
+    if (dateNow.isAfter(reviewProblem.getNextAttemptAt()) && grade == 5) {
       return 0.05;
     }
 
@@ -142,10 +142,10 @@ public class SpacedRepetitionHelper {
     return ChronoUnit.DAYS.between(from, to);
   }
 
-  public static int calculateSubsequentInterval(SolvedProblem solvedProblem, LocalDate dateNow) {
-    int repetitions = solvedProblem.getRepetitions();
-    int interval = solvedProblem.getInterval();
-    double easeFactor = solvedProblem.getEaseFactor();
+  public static int calculateSubsequentInterval(ReviewProblem reviewProblem, LocalDate dateNow) {
+    int repetitions = reviewProblem.getRepetitions();
+    int interval = reviewProblem.getInterval();
+    double easeFactor = reviewProblem.getEaseFactor();
 
     if (repetitions == 1) {
       return 1;
@@ -155,11 +155,11 @@ public class SpacedRepetitionHelper {
       return 6;
     }
 
-    double timingMultiplier = getTimingMultiplier(solvedProblem, dateNow);
+    double timingMultiplier = getTimingMultiplier(reviewProblem, dateNow);
     return (int) Math.round(interval * easeFactor * timingMultiplier);
   }
 
-  private static double getTimingMultiplier(SolvedProblem problem, LocalDate dateNow) {
+  private static double getTimingMultiplier(ReviewProblem problem, LocalDate dateNow) {
     BigDecimal timingMultiplier = BigDecimal.valueOf(1);
     if (dateNow.isAfter(problem.getNextAttemptAt())) {
       long delay = dateDifference(problem.getNextAttemptAt(), dateNow.plusDays(1));
