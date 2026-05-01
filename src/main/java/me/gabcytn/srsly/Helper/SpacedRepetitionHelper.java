@@ -24,7 +24,7 @@ public class SpacedRepetitionHelper {
   private static final BigDecimal ZERO_POINT_ZERO_TWO = BigDecimal.valueOf(0.02);
   private static final BigDecimal FIVE = BigDecimal.valueOf(5);
 
-  public static int getInitialRepetitions(int repetitions) {
+  public static int normalizeInitialReps(int repetitions) {
     validateNonNegativeRepetitions(repetitions);
 
     if (repetitions <= 2) {

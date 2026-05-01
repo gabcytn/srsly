@@ -20,8 +20,7 @@ import org.hibernate.annotations.UpdateTimestamp;
       @Index(name = "solved_idx_problem", columnList = "problem_id"),
       @Index(name = "solved_idx_user", columnList = "user_id")
     })
-public class ReviewProblem
-{
+public class ReviewProblem {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private int id;
@@ -61,7 +60,8 @@ public class ReviewProblem
 
   @UpdateTimestamp private LocalDateTime updatedAt;
 
-  public static ReviewProblem ofReviewableInitial(Problem problem, User user) {
+  public static ReviewProblem ofReviewableInitial(SolvedProblem solvedProblem) {
+    Problem problem = solvedProblem.getProblem();
     double easeFactor =
         switch (problem.getDifficulty()) {
           case Easy -> 2.6;
@@ -77,18 +77,7 @@ public class ReviewProblem
         .interval(1)
         .lastAttemptAt(dateNow)
         .nextAttemptAt(dateNow.plusDays(1))
-        .user(user)
-        .problem(problem)
-        .build();
-  }
-
-  public static ReviewProblem ofNonReviewableInitial(Problem problem, User user) {
-    LocalDate dateNow = LocalDate.now();
-    return ReviewProblem.builder()
-        .status(ProblemStatus.NON_REVIEW)
-        .lastAttemptAt(dateNow)
-        .user(user)
-        .problem(problem)
+        .solvedProblem(solvedProblem)
         .build();
   }
 
@@ -98,7 +87,7 @@ public class ReviewProblem
         .lastAttemptAt(lastAttemptAt)
         .nextAttemptAt(nextAttemptAt)
         .status(status)
-        .problem(problem.summarize())
+        .problem(solvedProblem.getProblem().summarize())
         .build();
   }
 }

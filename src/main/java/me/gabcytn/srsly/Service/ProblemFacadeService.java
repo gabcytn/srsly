@@ -11,7 +11,9 @@ import me.gabcytn.srsly.DTO.ReviewProgress;
 import me.gabcytn.srsly.DTO.ReviewableProblemsFilter;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.ReviewProblem;
+import me.gabcytn.srsly.Entity.SolvedProblem;
 import me.gabcytn.srsly.Entity.User;
+import me.gabcytn.srsly.Exception.UnprocessableEntityException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class ProblemFacadeService {
   private final AttemptService attemptService;
   private final ReviewProblemService reviewProblemService;
   private final ProblemService problemService;
+  private final SolvedProblemService solvedProblemService;
   private final UserService userService;
 
   public ProblemDetailDto findDtoByFrontendId(int frontendId) {
@@ -54,16 +57,27 @@ public class ProblemFacadeService {
   public ReviewProblem saveInitialAsReviewable(InitialReviewRequest reviewRequest, int problemId) {
     Problem problem = problemService.findByFrontendId(problemId);
     User user = userService.getCurrentUser();
+    ensureProblemNotYetSubmitted(problem, user);
+
+    SolvedProblem solvedProblem = new SolvedProblem(problem, user);
+    solvedProblemService.save(solvedProblem);
 
     return reviewProblemService.saveInitialAsReviewable(
-        new InitialProblemReview(reviewRequest, problem, user));
+        new InitialProblemReview(reviewRequest, solvedProblem));
   }
 
-  public ReviewProblem saveInitialAsNonReviewable(int problemFrontendId) {
+  private void ensureProblemNotYetSubmitted(Problem problem, User user) {
+    if (solvedProblemService.existsByProblemAndUser(problem, user)) {
+      throw new UnprocessableEntityException("Problem already solved.");
+    }
+  }
+
+  public void saveInitialAsNonReviewable(int problemFrontendId) {
     Problem problem = problemService.findByFrontendId(problemFrontendId);
     User user = userService.getCurrentUser();
 
-    return reviewProblemService.saveInitialAsNonReviewable(problem, user);
+    ensureProblemNotYetSubmitted(problem, user);
+    solvedProblemService.save(new SolvedProblem(problem, user));
   }
 
   @Transactional

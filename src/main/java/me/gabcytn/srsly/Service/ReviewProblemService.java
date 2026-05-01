@@ -24,52 +24,38 @@ public class ReviewProblemService
   private final ReviewProblemRepository reviewProblemRepository;
   private final ReviewAttemptEventPublisher reviewAttemptEventPublisher;
 
-  public ReviewProblem saveInitialAsNonReviewable(Problem problem, User user) {
-    ensureProblemNotYetSubmitted(problem, user);
-    return save(ReviewProblem.ofNonReviewableInitial(problem, user));
-  }
-
   public ReviewProblem saveInitialAsReviewable(InitialProblemReview initialProblemReview) {
-    Problem problem = initialProblemReview.problem();
-    User user = initialProblemReview.user();
+    SolvedProblem solvedProblem = initialProblemReview.solvedProblem();
     int untrackedReps = initialProblemReview.initialReview().repetitions();
 
-    ensureProblemNotYetSubmitted(problem, user);
-    int repetitions = SpacedRepetitionHelper.getInitialRepetitions(untrackedReps);
+    int repetitions = SpacedRepetitionHelper.normalizeInitialReps(untrackedReps);
     if (isFreshAttempt(repetitions)) {
-      return createFreshReviewableInitialAttempt(problem, user);
+      return createFreshReviewableInitialAttempt(solvedProblem);
     }
 
     ProblemSubmissionWithHistory submission =
         ProblemSubmissionWithHistory.builder()
             .initialReview(initialProblemReview.initialReview())
-            .problem(problem)
-            .user(user)
+            .solvedProblem(solvedProblem)
             .repetitions(repetitions)
             .build();
 
     return createFirstSubmissionWithHistory(submission);
   }
 
-  private void ensureProblemNotYetSubmitted(Problem problem, User user) {
-    if (existsByProblemAndUser(problem, user)) {
-      throw new UnprocessableEntityException("This problem is already solved.");
-    }
-  }
-
   private boolean isFreshAttempt(int repetitions) {
     return repetitions == 0;
   }
 
-  private ReviewProblem createFreshReviewableInitialAttempt(Problem problem, User user) {
-    ReviewProblem reviewProblem = save(ReviewProblem.ofReviewableInitial(problem, user));
+  private ReviewProblem createFreshReviewableInitialAttempt(SolvedProblem solvedProblem) {
+    ReviewProblem reviewProblem = save(ReviewProblem.ofReviewableInitial(solvedProblem));
     createAttemptFromSolvedProblem(reviewProblem);
     return reviewProblem;
   }
 
   private ReviewProblem createFirstSubmissionWithHistory(ProblemSubmissionWithHistory submission) {
     Integer repetitions = submission.getInitialReview().repetitions();
-    Problem problem = submission.getProblem();
+    Problem problem = submission.getSolvedProblem().getProblem();
     LocalDate lastReviewedAt = submission.getInitialReview().lastReviewedAt();
 
     double easeFactor = calculateInitialEaseFactor(problem, submission.getInitialReview());
@@ -85,8 +71,7 @@ public class ReviewProblemService
             .interval(interval)
             .lastAttemptAt(lastReviewedAt)
             .nextAttemptAt(nextReviewDate)
-            .problem(problem)
-            .user(submission.getUser())
+            .solvedProblem(submission.getSolvedProblem())
             .build();
     ReviewProblem reviewProblem = this.save(entity);
 

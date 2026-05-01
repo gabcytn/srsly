@@ -48,9 +48,9 @@ public class ReviewProblemController
 
   /** No spaced-repetition review */
   @PostMapping("/{problemId}/solve/initial")
-  public ResponseEntity<SolvedProblemDto> markProblemAsSolved(@PathVariable Integer problemId) {
-    ReviewProblem reviewProblem = problemFacadeService.saveInitialAsNonReviewable(problemId);
-    return new ResponseEntity<>(reviewProblem.toDto(), HttpStatus.CREATED);
+  public ResponseEntity<Void> markProblemAsSolved(@PathVariable Integer problemId) {
+    problemFacadeService.saveInitialAsNonReviewable(problemId);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   @PostMapping("/review/{id}")
