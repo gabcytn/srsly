@@ -17,7 +17,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SolvedProblemRepository extends JpaRepository<ReviewProblem, Integer> {
+public interface ReviewProblemRepository extends JpaRepository<ReviewProblem, Integer> {
   Page<ReviewProblem> findByUserAndNextAttemptAtLessThanEqual(
       User user, LocalDate date, Pageable pageable);
 

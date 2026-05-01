@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/problems")
-public class SolvedProblemController {
-  private final SolvedProblemService solvedProblemService;
+public class ReviewProblemController
+{
+  private final ReviewProblemService reviewProblemService;
   private final ProblemFacadeService problemFacadeService;
 
   @GetMapping("/review")
@@ -55,7 +56,7 @@ public class SolvedProblemController {
   @PostMapping("/review/{id}")
   public ResponseEntity<Void> save(
       @PathVariable int id, @RequestBody @Valid ReviewedProblem reviewedProblem) {
-    solvedProblemService.saveSubsequent(id, reviewedProblem.grade());
+    reviewProblemService.saveSubsequent(id, reviewedProblem.grade());
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
 

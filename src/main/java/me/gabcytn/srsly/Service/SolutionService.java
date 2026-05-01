@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 public class SolutionService {
   private final SolutionRepository solutionRepository;
   private final ProblemService problemService;
-  private final SolvedProblemService solvedProblemService;
+  private final ReviewProblemService reviewProblemService;
   private final UserService userService;
 
   public Solution saveToProblem(SolutionDto solutionDto, int problemId) {
@@ -32,7 +32,7 @@ public class SolutionService {
   }
 
   private void validateSolutionEligibility(Problem problem, User user) {
-    if (!solvedProblemService.existsByProblemAndUser(problem, user)) {
+    if (!reviewProblemService.existsByProblemAndUser(problem, user)) {
       throw new SolutionException("Initial solutions must be provided during initial review.");
     }
 

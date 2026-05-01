@@ -31,27 +31,29 @@ public class ReviewProblem
   @Column(nullable = false)
   private ProblemStatus status;
 
+  @NonNull
+  @Column(nullable = false)
   private Double easeFactor;
 
+  @NonNull
+  @Column(nullable = false)
   private Integer repetitions;
 
+  @NonNull
+  @Column(nullable = false)
   private Integer interval;
 
   @NonNull
   @Column(nullable = false)
   private LocalDate lastAttemptAt;
 
+  @NonNull
+  @Column(nullable = false)
   private LocalDate nextAttemptAt;
 
-  @NonNull
   @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false)
-  private User user;
-
-  @NonNull
-  @ManyToOne
-  @JoinColumn(name = "problem_id", nullable = false)
-  private Problem problem;
+  @JoinColumn(name = "solved_problem_id", nullable = false)
+  private SolvedProblem solvedProblem;
 
   @CreationTimestamp
   @Column(updatable = false)

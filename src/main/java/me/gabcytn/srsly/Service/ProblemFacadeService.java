@@ -21,14 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProblemFacadeService {
   private final AttemptService attemptService;
-  private final SolvedProblemService solvedProblemService;
+  private final ReviewProblemService reviewProblemService;
   private final ProblemService problemService;
   private final UserService userService;
 
   public ProblemDetailDto findDtoByFrontendId(int frontendId) {
     Problem problem = problemService.findByFrontendId(frontendId);
     User user = userService.getCurrentUser();
-    Optional<ReviewProblem> optional = solvedProblemService.findByProblemAndUser(problem, user);
+    Optional<ReviewProblem> optional = reviewProblemService.findByProblemAndUser(problem, user);
 
     ProblemDetailDto problemDetail =
         new ProblemDetailDto(problem.summarize(), problem.getQuestion());
@@ -47,7 +47,7 @@ public class ProblemFacadeService {
   public PaginatedSolvedProblem findProblemsSolvedByUser(int pageNumber) {
     User user = userService.getCurrentUser();
     Pageable pageRequest = PageRequest.of(pageNumber, 10);
-    return new PaginatedSolvedProblem(solvedProblemService.findByUser(user, pageRequest));
+    return new PaginatedSolvedProblem(reviewProblemService.findByUser(user, pageRequest));
   }
 
   @Transactional
@@ -55,7 +55,7 @@ public class ProblemFacadeService {
     Problem problem = problemService.findByFrontendId(problemId);
     User user = userService.getCurrentUser();
 
-    return solvedProblemService.saveInitialAsReviewable(
+    return reviewProblemService.saveInitialAsReviewable(
         new InitialProblemReview(reviewRequest, problem, user));
   }
 
@@ -63,17 +63,17 @@ public class ProblemFacadeService {
     Problem problem = problemService.findByFrontendId(problemFrontendId);
     User user = userService.getCurrentUser();
 
-    return solvedProblemService.saveInitialAsNonReviewable(problem, user);
+    return reviewProblemService.saveInitialAsNonReviewable(problem, user);
   }
 
   @Transactional
   public ReviewProgress getReviewProgress() {
     User user = userService.getCurrentUser();
     int reviewedProblemsCount = attemptService.getCountOfReviewedProblemsToday(user);
-    return solvedProblemService.getReviewProgress(reviewedProblemsCount, user);
+    return reviewProblemService.getReviewProgress(reviewedProblemsCount, user);
   }
 
   public PaginatedSolvedProblem getProblemsToReviewToday(ReviewableProblemsFilter filters) {
-    return solvedProblemService.getTodayProblems(filters, userService.getCurrentUser());
+    return reviewProblemService.getTodayProblems(filters, userService.getCurrentUser());
   }
 }

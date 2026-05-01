@@ -13,7 +13,7 @@ import me.gabcytn.srsly.DTO.UserProblemToSolveCount;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Exception.EmailAlreadyVerifiedException;
 import me.gabcytn.srsly.Exception.InvalidEmailVerificationTokenException;
-import me.gabcytn.srsly.Repository.SolvedProblemRepository;
+import me.gabcytn.srsly.Repository.ReviewProblemRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -35,7 +35,7 @@ public class MailService {
 
   private final TemplateEngine templateEngine;
   private final JavaMailSender mailSender;
-  private final SolvedProblemRepository solvedProblemRepository;
+  private final ReviewProblemRepository reviewProblemRepository;
   private final UserService userService;
   private final EmailJwtService jwtService;
 
@@ -76,7 +76,7 @@ public class MailService {
   public void sendMailReminder() {
     LocalDate now = LocalDate.now();
     List<UserProblemToSolveCount> userProblemCount =
-        solvedProblemRepository.findUserWithToSolveCountByNextAttemptAtLessThanEqual(now);
+        reviewProblemRepository.findUserWithToSolveCountByNextAttemptAtLessThanEqual(now);
     userProblemCount.forEach(
         e -> {
           Context ctx = new Context();

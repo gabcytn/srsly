@@ -11,7 +11,7 @@ import me.gabcytn.srsly.Entity.*;
 import me.gabcytn.srsly.Exception.*;
 import me.gabcytn.srsly.Helper.*;
 import me.gabcytn.srsly.Publisher.ReviewAttemptEventPublisher;
-import me.gabcytn.srsly.Repository.SolvedProblemRepository;
+import me.gabcytn.srsly.Repository.ReviewProblemRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -19,8 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
 @Service
-public class SolvedProblemService {
-  private final SolvedProblemRepository solvedProblemRepository;
+public class ReviewProblemService
+{
+  private final ReviewProblemRepository reviewProblemRepository;
   private final ReviewAttemptEventPublisher reviewAttemptEventPublisher;
 
   public ReviewProblem saveInitialAsNonReviewable(Problem problem, User user) {
@@ -137,7 +138,7 @@ public class SolvedProblemService {
   }
 
   private ReviewProblem findById(int id) {
-    Optional<ReviewProblem> reviewProblem = solvedProblemRepository.findById(id);
+    Optional<ReviewProblem> reviewProblem = reviewProblemRepository.findById(id);
     return reviewProblem.orElseThrow(
         () -> new GenericNotFoundException("Review problem not found."));
   }
@@ -184,7 +185,7 @@ public class SolvedProblemService {
   }
 
   public ReviewProblem save(ReviewProblem reviewProblem) {
-    return solvedProblemRepository.save(reviewProblem);
+    return reviewProblemRepository.save(reviewProblem);
   }
 
   public PaginatedSolvedProblem getTodayProblems(ReviewableProblemsFilter filter, User currentUser) {
@@ -210,12 +211,12 @@ public class SolvedProblemService {
 
     if (titleSearch != null) {
       paginatedSolvedProblem =
-          solvedProblemRepository
+          reviewProblemRepository
               .findByUserAndNextAttemptAtLessThanEqualAndProblem_TitleContainingIgnoreCase(
                   user, dateNow, titleSearch, pageable);
     } else {
       paginatedSolvedProblem =
-          solvedProblemRepository.findByUserAndNextAttemptAtLessThanEqual(user, dateNow, pageable);
+          reviewProblemRepository.findByUserAndNextAttemptAtLessThanEqual(user, dateNow, pageable);
     }
 
     return new PaginatedSolvedProblem(paginatedSolvedProblem);
@@ -226,33 +227,33 @@ public class SolvedProblemService {
     Page<ReviewProblem> paginatedSolvedProblem;
     if (titleSearch != null) {
       paginatedSolvedProblem =
-          solvedProblemRepository
+          reviewProblemRepository
               .findByUserAndNextAttemptAtLessThanEqualAndProblem_TitleContainingIgnoreCaseAndProblem_Difficulty(
                   user, dateNow, titleSearch, difficulty, pageable);
     } else {
       paginatedSolvedProblem =
-          solvedProblemRepository.findByUserAndNextAttemptAtLessThanEqualAndProblem_Difficulty(
+          reviewProblemRepository.findByUserAndNextAttemptAtLessThanEqualAndProblem_Difficulty(
               user, dateNow, difficulty, pageable);
     }
     return new PaginatedSolvedProblem(paginatedSolvedProblem);
   }
 
   public Boolean existsByProblemAndUser(Problem problem, User user) {
-    return solvedProblemRepository.existsByProblemAndUser(problem, user);
+    return reviewProblemRepository.existsByProblemAndUser(problem, user);
   }
 
   public Optional<ReviewProblem> findByProblemAndUser(Problem problem, User user) {
-    return solvedProblemRepository.findByProblemAndUser(problem, user);
+    return reviewProblemRepository.findByProblemAndUser(problem, user);
   }
 
   public ReviewProgress getReviewProgress(int solvedTodayCount, User user) {
     LocalDate now = LocalDate.now();
-    int unsolvedCount = solvedProblemRepository.countByNextAttemptAtLessThanEqualAndUser(now, user);
+    int unsolvedCount = reviewProblemRepository.countByNextAttemptAtLessThanEqualAndUser(now, user);
 
     return new ReviewProgress(unsolvedCount, solvedTodayCount);
   }
 
   public Page<ReviewProblem> findByUser(User user, Pageable pageable) {
-    return solvedProblemRepository.findByUser(user, pageable);
+    return reviewProblemRepository.findByUser(user, pageable);
   }
 }
