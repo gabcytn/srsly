@@ -88,6 +88,12 @@ public class ProblemFacadeService {
   }
 
   public PaginatedReviewProblem getProblemsToReviewToday(ReviewableProblemsFilter filters) {
-    return reviewProblemService.getTodayProblems(filters, userService.getCurrentUser());
+    User user = userService.getCurrentUser();
+    String titleSearchFilter = filters.getTitle();
+    String difficultyFilter = filters.getDifficulty();
+    int pageNumber = filters.getPage();
+
+    throw new RuntimeException("Wait lang");
+//    return reviewProblemService.getTodayProblems(filters, userService.getCurrentUser());
   }
 }

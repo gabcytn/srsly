@@ -12,7 +12,6 @@ import me.gabcytn.srsly.Exception.*;
 import me.gabcytn.srsly.Helper.*;
 import me.gabcytn.srsly.Publisher.ReviewAttemptEventPublisher;
 import me.gabcytn.srsly.Repository.ReviewProblemRepository;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -167,69 +166,22 @@ public class ReviewProblemService {
     return repository.save(reviewProblem);
   }
 
-  public PaginatedReviewProblem getTodayProblems(ReviewableProblemsFilter filter, User user) {
-    Pageable pageable = PageRequest.of(filter.getPage(), 5, Sort.by("nextAttemptAt"));
-
-    if ("all".equals(filter.getDifficulty()))
-      return getTodayProblemsWithoutDifficulty(filter.getTitle(), user, pageable);
-
-    String formattedDifficulty = StringUtils.capitalize(filter.getDifficulty().toLowerCase());
-    Difficulty difficulty = Difficulty.fromStringOrElseThrow(formattedDifficulty);
-    return getTodayProblemsWithDifficulty(difficulty, filter.getTitle(), user, pageable);
-  }
-
-  private PaginatedReviewProblem getTodayProblemsWithoutDifficulty(
-      String titleSearch, User user, Pageable pageable) {
-    LocalDate dateNow = LocalDate.now();
-    Page<ReviewProblem> paginatedSolvedProblem;
-
-    if (titleSearch != null) {
-      paginatedSolvedProblem =
-          repository
-              .findBySolvedProblem_UserAndNextAttemptAtLessThanEqualAndSolvedProblem_Problem_TitleContainingIgnoreCase(
-                  user, dateNow, titleSearch, pageable);
-    } else {
-      paginatedSolvedProblem =
-          repository.findBySolvedProblem_UserAndNextAttemptAtLessThanEqual(user, dateNow, pageable);
-    }
-
-    return new PaginatedReviewProblem(paginatedSolvedProblem);
-  }
-
-  private PaginatedReviewProblem getTodayProblemsWithDifficulty(
-      Difficulty difficulty, String titleSearch, User user, Pageable pageable) {
-    LocalDate dateNow = LocalDate.now();
-    Page<ReviewProblem> paginatedSolvedProblem;
-
-    if (titleSearch != null) {
-      paginatedSolvedProblem =
-          repository
-              .findBySolvedProblem_UserAndNextAttemptAtLessThanEqualAndSolvedProblem_Problem_TitleContainingIgnoreCaseAndSolvedProblem_Problem_Difficulty(
-                  user, dateNow, titleSearch, difficulty, pageable);
-    } else {
-      paginatedSolvedProblem =
-          repository.findByUserAndNextAttemptAtLessThanEqualAndProblem_Difficulty(
-              user, dateNow, difficulty, pageable);
-    }
-    return new PaginatedReviewProblem(paginatedSolvedProblem);
-  }
-
   public Boolean existsByProblemAndUser(Problem problem, User user) {
-    return repository.existsByProblemAndUser(problem, user);
+    return repository.existsBySolvedProblem_ProblemAndSolvedProblem_User(problem, user);
   }
 
   public Optional<ReviewProblem> findByProblemAndUser(Problem problem, User user) {
-    return repository.findByProblemAndUser(problem, user);
+    return repository.findBySolvedProblem_ProblemAndSolvedProblem_User(problem, user);
   }
 
   public ReviewProgress getReviewProgress(int solvedTodayCount, User user) {
     LocalDate now = LocalDate.now();
-    int unsolvedCount = repository.countByNextAttemptAtLessThanEqualAndUser(now, user);
+    int unsolvedCount = repository.countByNextAttemptAtLessThanEqualAndSolvedProblem_User(now, user);
 
     return new ReviewProgress(unsolvedCount, solvedTodayCount);
   }
 
   public Page<ReviewProblem> findByUser(User user, Pageable pageable) {
-    return repository.findByUser(user, pageable);
+    return repository.findBySolvedProblem_User(user, pageable);
   }
 }
