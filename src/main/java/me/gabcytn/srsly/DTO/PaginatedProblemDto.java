@@ -24,18 +24,18 @@ public class PaginatedProblemDto {
 
   private final Sort sort;
 
-  public PaginatedProblemDto(Page<Problem> pagedSolvedProblem) {
+  public PaginatedProblemDto(Page<Problem> pagedProblem) {
     List<ProblemSummaryDto> problemDtoList = new ArrayList<>();
-    for (Problem problem : pagedSolvedProblem.getContent()) {
+    for (Problem problem : pagedProblem.getContent()) {
       problemDtoList.add(problem.summarize());
     }
 
-    this.totalPages = pagedSolvedProblem.getTotalPages();
-    this.totalElements = pagedSolvedProblem.getTotalElements();
-    this.page = pagedSolvedProblem.getNumber();
-    this.numberOfElements = pagedSolvedProblem.getNumberOfElements();
-    this.size = pagedSolvedProblem.getSize();
-    this.sort = pagedSolvedProblem.getSort();
+    this.totalPages = pagedProblem.getTotalPages();
+    this.totalElements = pagedProblem.getTotalElements();
+    this.page = pagedProblem.getNumber();
+    this.numberOfElements = pagedProblem.getNumberOfElements();
+    this.size = pagedProblem.getSize();
+    this.sort = pagedProblem.getSort();
     this.content = problemDtoList;
   }
 }

@@ -2,7 +2,9 @@ package me.gabcytn.srsly.Service;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.gabcytn.srsly.DTO.PaginatedReviewProblem;
+import me.gabcytn.srsly.DTO.PaginatedSolvedProblem;
 import me.gabcytn.srsly.DTO.Problem.ProblemDetailDto;
 import me.gabcytn.srsly.DTO.Problem.ReviewDetail;
 import me.gabcytn.srsly.DTO.Review.InitialProblemReview;
@@ -15,13 +17,12 @@ import me.gabcytn.srsly.Entity.SolvedProblem;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Exception.UnprocessableEntityException;
 import me.gabcytn.srsly.Repository.Specification.ReviewProblemSpecification;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
+@Slf4j
 @Service
 public class ProblemFacadeService {
   private final ReviewAttemptService reviewAttemptService;
@@ -41,7 +42,12 @@ public class ProblemFacadeService {
     ReviewDetail reviewDetail = null;
     if (optional.isPresent()) {
       ReviewProblem reviewProblem = optional.get();
-      reviewDetail = new ReviewDetail(reviewProblem.getId(), reviewProblem.getNextAttemptAt());
+      reviewDetail =
+          new ReviewDetail(
+              reviewProblem.getId(),
+              reviewProblem.getLastAttemptAt(),
+              reviewProblem.getNextAttemptAt(),
+              reviewProblem.getStatus());
       problemDetail.setIsSolved(Boolean.TRUE);
     }
     problemDetail.setReviewDetail(reviewDetail);
@@ -49,10 +55,9 @@ public class ProblemFacadeService {
     return problemDetail;
   }
 
-  public PaginatedReviewProblem findProblemsSolvedByUser(int pageNumber) {
+  public PaginatedSolvedProblem findProblemsSolvedByUser(int pageNumber) {
     User user = userService.getCurrentUser();
-    Pageable pageRequest = PageRequest.of(pageNumber, 10);
-    return new PaginatedReviewProblem(reviewProblemService.findByUser(user, pageRequest));
+    return solvedProblemService.findByUser(pageNumber, user);
   }
 
   @Transactional

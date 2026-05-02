@@ -48,6 +48,9 @@ public class Problem {
       inverseJoinColumns = @JoinColumn(name = "tag_id", nullable = false))
   private Set<Tag> tags;
 
+  @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
+  private Set<SolvedProblem> solvedProblems;
+
   public Problem(
       int id, String title, String question, Difficulty difficulty, String url, Set<Tag> tags) {
     this.frontendId = id;

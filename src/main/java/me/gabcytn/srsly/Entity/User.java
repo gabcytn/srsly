@@ -40,6 +40,9 @@ public class User {
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   private Set<Solution> solutions;
 
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+  private Set<SolvedProblem> solvedProblems;
+
   public static User ofEmailAndPassword(String email, String password) {
     User user = new User();
     user.setEmail(email);

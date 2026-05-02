@@ -61,7 +61,7 @@ public class ReviewProblemController
   }
 
   @GetMapping("/solved")
-  public PaginatedReviewProblem getSolvedProblems(
+  public PaginatedSolvedProblem getSolvedProblems(
       @RequestParam(name = "page", defaultValue = "0") int page) {
     return problemFacadeService.findProblemsSolvedByUser(page);
   }

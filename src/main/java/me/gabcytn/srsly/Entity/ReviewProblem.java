@@ -44,8 +44,8 @@ public class ReviewProblem {
   @Column(nullable = false)
   private LocalDate nextAttemptAt;
 
-  @ManyToOne
-  @JoinColumn(name = "solved_problem_id", nullable = false)
+  @OneToOne
+  @JoinColumn(name = "solved_problem_id", nullable = false, referencedColumnName = "id")
   private SolvedProblem solvedProblem;
 
   @CreationTimestamp
