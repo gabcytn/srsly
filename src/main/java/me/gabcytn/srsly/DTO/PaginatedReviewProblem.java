@@ -8,8 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 
 @Getter
-public class PaginatedSolvedProblem {
-  private final List<SolvedProblemDto> content;
+public class PaginatedReviewProblem {
+  private final List<ReviewProblemDto> content;
 
   private final int page;
 
@@ -23,8 +23,8 @@ public class PaginatedSolvedProblem {
 
   private final Sort sort;
 
-  public PaginatedSolvedProblem(Page<ReviewProblem> pagedSolvedProblem) {
-    List<SolvedProblemDto> problemDtoList = new ArrayList<>();
+  public PaginatedReviewProblem(Page<ReviewProblem> pagedSolvedProblem) {
+    List<ReviewProblemDto> problemDtoList = new ArrayList<>();
     for (ReviewProblem problem : pagedSolvedProblem.getContent()) {
       problemDtoList.add(problem.toDto());
     }

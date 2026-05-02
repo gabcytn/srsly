@@ -3,7 +3,6 @@ package me.gabcytn.srsly.Entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -60,8 +59,8 @@ public class Attempt {
     return new Attempt(
         problem.getEaseFactor(),
         problem.getLastAttemptAt(),
-        problem.getProblem(),
-        problem.getUser());
+        problem.getSolvedProblem().getProblem(),
+        problem.getSolvedProblem().getUser());
   }
 
   public static Attempt fromSolvedProblem(ReviewProblem problem, int grade) {
@@ -69,7 +68,7 @@ public class Attempt {
         problem.getEaseFactor(),
         grade,
         problem.getLastAttemptAt(),
-        problem.getProblem(),
-        problem.getUser());
+        problem.getSolvedProblem().getProblem(),
+        problem.getSolvedProblem().getUser());
   }
 }

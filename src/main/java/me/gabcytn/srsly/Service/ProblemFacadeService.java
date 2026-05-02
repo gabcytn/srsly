@@ -2,7 +2,7 @@ package me.gabcytn.srsly.Service;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import me.gabcytn.srsly.DTO.PaginatedSolvedProblem;
+import me.gabcytn.srsly.DTO.PaginatedReviewProblem;
 import me.gabcytn.srsly.DTO.Problem.ProblemDetailDto;
 import me.gabcytn.srsly.DTO.Problem.ReviewDetail;
 import me.gabcytn.srsly.DTO.Review.InitialProblemReview;
@@ -47,10 +47,10 @@ public class ProblemFacadeService {
     return problemDetail;
   }
 
-  public PaginatedSolvedProblem findProblemsSolvedByUser(int pageNumber) {
+  public PaginatedReviewProblem findProblemsSolvedByUser(int pageNumber) {
     User user = userService.getCurrentUser();
     Pageable pageRequest = PageRequest.of(pageNumber, 10);
-    return new PaginatedSolvedProblem(reviewProblemService.findByUser(user, pageRequest));
+    return new PaginatedReviewProblem(reviewProblemService.findByUser(user, pageRequest));
   }
 
   @Transactional
@@ -87,7 +87,7 @@ public class ProblemFacadeService {
     return reviewProblemService.getReviewProgress(reviewedProblemsCount, user);
   }
 
-  public PaginatedSolvedProblem getProblemsToReviewToday(ReviewableProblemsFilter filters) {
+  public PaginatedReviewProblem getProblemsToReviewToday(ReviewableProblemsFilter filters) {
     return reviewProblemService.getTodayProblems(filters, userService.getCurrentUser());
   }
 }

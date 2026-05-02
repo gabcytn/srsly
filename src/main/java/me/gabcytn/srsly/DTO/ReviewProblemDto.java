@@ -6,7 +6,7 @@ import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
 
 @Builder
 @Data
-public class SolvedProblemDto {
+public class ReviewProblemDto {
   private int id;
 
   private LocalDate lastAttemptAt;

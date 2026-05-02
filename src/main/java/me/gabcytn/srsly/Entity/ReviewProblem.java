@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.*;
 import me.gabcytn.srsly.DTO.ProblemStatus;
-import me.gabcytn.srsly.DTO.SolvedProblemDto;
+import me.gabcytn.srsly.DTO.ReviewProblemDto;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -81,8 +81,8 @@ public class ReviewProblem {
         .build();
   }
 
-  public SolvedProblemDto toDto() {
-    return SolvedProblemDto.builder()
+  public ReviewProblemDto toDto() {
+    return ReviewProblemDto.builder()
         .id(id)
         .lastAttemptAt(lastAttemptAt)
         .nextAttemptAt(nextAttemptAt)

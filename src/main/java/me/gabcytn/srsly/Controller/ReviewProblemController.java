@@ -19,7 +19,7 @@ public class ReviewProblemController
   private final ProblemFacadeService problemFacadeService;
 
   @GetMapping("/review")
-  public PaginatedSolvedProblem getTodayProblems(
+  public PaginatedReviewProblem getTodayProblems(
       @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
       @RequestParam(name = "difficulty", required = false, defaultValue = "all") String difficulty,
       @RequestParam(name = "title", required = false) String titleSearch) {
@@ -39,7 +39,7 @@ public class ReviewProblemController
 
   /** Spaced-repetition review */
   @PostMapping("/{problemId}/review/initial")
-  public ResponseEntity<SolvedProblemDto> saveReview(
+  public ResponseEntity<ReviewProblemDto> saveReview(
       @PathVariable Integer problemId, @RequestBody @Valid InitialReviewRequest request) {
     ReviewProblem reviewedProblem =
         problemFacadeService.saveInitialAsReviewable(request, problemId);
@@ -61,7 +61,7 @@ public class ReviewProblemController
   }
 
   @GetMapping("/solved")
-  public PaginatedSolvedProblem getSolvedProblems(
+  public PaginatedReviewProblem getSolvedProblems(
       @RequestParam(name = "page", defaultValue = "0") int page) {
     return problemFacadeService.findProblemsSolvedByUser(page);
   }

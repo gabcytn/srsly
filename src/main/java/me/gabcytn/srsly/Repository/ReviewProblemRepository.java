@@ -4,11 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import me.gabcytn.srsly.DTO.Difficulty;
 import me.gabcytn.srsly.DTO.UserProblemToSolveCount;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.ReviewProblem;
+import me.gabcytn.srsly.Entity.SolvedProblem;
 import me.gabcytn.srsly.Entity.User;
-import me.gabcytn.srsly.DTO.Difficulty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,20 +19,22 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReviewProblemRepository extends JpaRepository<ReviewProblem, Integer> {
-  Page<ReviewProblem> findByUserAndNextAttemptAtLessThanEqual(
+  Page<ReviewProblem> findBySolvedProblem_UserAndNextAttemptAtLessThanEqual(
       User user, LocalDate date, Pageable pageable);
 
   Page<ReviewProblem>
-      findByUserAndNextAttemptAtLessThanEqualAndProblem_TitleContainingIgnoreCaseAndProblem_Difficulty(
+      findBySolvedProblem_UserAndNextAttemptAtLessThanEqualAndSolvedProblem_Problem_TitleContainingIgnoreCaseAndSolvedProblem_Problem_Difficulty(
           User user, LocalDate date, String titleSearch, Difficulty difficulty, Pageable pageable);
 
-  Page<ReviewProblem> findByUserAndNextAttemptAtLessThanEqualAndProblem_TitleContainingIgnoreCase(
+  Page<ReviewProblem> findBySolvedProblem_UserAndNextAttemptAtLessThanEqualAndSolvedProblem_Problem_TitleContainingIgnoreCase(
       User user, LocalDate date, String titleSearch, Pageable pageable);
 
   Page<ReviewProblem> findByUserAndNextAttemptAtLessThanEqualAndProblem_Difficulty(
       User user, LocalDate date, Difficulty difficulty, Pageable pageable);
 
   Page<ReviewProblem> findByUser(User user, Pageable pageable);
+
+  Page<ReviewProblem> findBySolvedProblem(SolvedProblem solvedProblem, Pageable pageable);
 
   @Query(
 """

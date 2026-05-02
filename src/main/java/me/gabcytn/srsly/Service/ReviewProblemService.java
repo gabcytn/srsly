@@ -19,9 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
 @Service
-public class ReviewProblemService
-{
-  private final ReviewProblemRepository reviewProblemRepository;
+public class ReviewProblemService {
+  private final ReviewProblemRepository repository;
   private final ReviewAttemptEventPublisher reviewAttemptEventPublisher;
 
   public ReviewProblem saveInitialAsReviewable(InitialProblemReview initialProblemReview) {
@@ -88,15 +87,12 @@ public class ReviewProblemService
   private int calculateInitialInterval(
       int repetitions, double easeFactor, LocalDate lastReviewedAt) {
     int suggestedInterval = SpacedRepetitionHelper.initialInterval(repetitions, easeFactor);
-    long daysSinceLastReview = daysSince(lastReviewedAt);
+    long daysSinceLastReview =
+        SpacedRepetitionHelper.dateDifference(lastReviewedAt, LocalDate.now());
 
     int adjustedDays = normalizeDaysDifference(daysSinceLastReview);
 
     return Math.min(suggestedInterval, adjustedDays);
-  }
-
-  private long daysSince(LocalDate date) {
-    return SpacedRepetitionHelper.dateDifference(date, LocalDate.now());
   }
 
   private int normalizeDaysDifference(long days) {
@@ -123,7 +119,7 @@ public class ReviewProblemService
   }
 
   private ReviewProblem findById(int id) {
-    Optional<ReviewProblem> reviewProblem = reviewProblemRepository.findById(id);
+    Optional<ReviewProblem> reviewProblem = repository.findById(id);
     return reviewProblem.orElseThrow(
         () -> new GenericNotFoundException("Review problem not found."));
   }
@@ -144,15 +140,13 @@ public class ReviewProblemService
   }
 
   private ReviewProblem updateProblemFromSuccessfulReview(
-			ReviewProblem reviewProblem, int grade, LocalDate dateNow) {
+      ReviewProblem reviewProblem, int grade, LocalDate dateNow) {
     double easeFactor = SpacedRepetitionHelper.calculateEaseFactor(reviewProblem, grade, dateNow);
-
-    reviewProblem.setEaseFactor(easeFactor);
-    reviewProblem.setRepetitions(reviewProblem.getRepetitions() + 1);
-
-    int repetitions = reviewProblem.getRepetitions();
+    int repetitions = reviewProblem.getRepetitions() + 1;
     int interval = SpacedRepetitionHelper.calculateSubsequentInterval(reviewProblem, dateNow);
 
+    reviewProblem.setEaseFactor(easeFactor);
+    reviewProblem.setRepetitions(repetitions);
     reviewProblem.setStatus(SpacedRepetitionHelper.determineProblemStatus(interval, repetitions));
     reviewProblem.setLastAttemptAt(dateNow);
     reviewProblem.setNextAttemptAt(dateNow.plusDays(interval));
@@ -170,75 +164,72 @@ public class ReviewProblemService
   }
 
   public ReviewProblem save(ReviewProblem reviewProblem) {
-    return reviewProblemRepository.save(reviewProblem);
+    return repository.save(reviewProblem);
   }
 
-  public PaginatedSolvedProblem getTodayProblems(ReviewableProblemsFilter filter, User currentUser) {
+  public PaginatedReviewProblem getTodayProblems(ReviewableProblemsFilter filter, User user) {
     Pageable pageable = PageRequest.of(filter.getPage(), 5, Sort.by("nextAttemptAt"));
-    LocalDate dateNow = LocalDate.now();
 
-    if (!"all".equals(filter.getDifficulty())) {
-      String formattedDifficulty = StringUtils.capitalize(filter.getDifficulty().toLowerCase());
-      try {
-        Difficulty diffEnum = Enum.valueOf(Difficulty.class, formattedDifficulty);
-        return getTodayProblemsWithDifficulty(
-            diffEnum, filter.getTitle(), currentUser, dateNow, pageable);
-      } catch (IllegalArgumentException e) {
-        throw new GenericNotFoundException("Invalid difficulty.");
-      }
-    }
-    return getTodayProblemsWithoutDifficulty(filter.getTitle(), currentUser, dateNow, pageable);
+    if ("all".equals(filter.getDifficulty()))
+      return getTodayProblemsWithoutDifficulty(filter.getTitle(), user, pageable);
+
+    String formattedDifficulty = StringUtils.capitalize(filter.getDifficulty().toLowerCase());
+    Difficulty difficulty = Difficulty.fromStringOrElseThrow(formattedDifficulty);
+    return getTodayProblemsWithDifficulty(difficulty, filter.getTitle(), user, pageable);
   }
 
-  private PaginatedSolvedProblem getTodayProblemsWithoutDifficulty(
-      String titleSearch, User user, LocalDate dateNow, Pageable pageable) {
+  private PaginatedReviewProblem getTodayProblemsWithoutDifficulty(
+      String titleSearch, User user, Pageable pageable) {
+    LocalDate dateNow = LocalDate.now();
     Page<ReviewProblem> paginatedSolvedProblem;
 
     if (titleSearch != null) {
       paginatedSolvedProblem =
-          reviewProblemRepository
-              .findByUserAndNextAttemptAtLessThanEqualAndProblem_TitleContainingIgnoreCase(
+          repository
+              .findBySolvedProblem_UserAndNextAttemptAtLessThanEqualAndSolvedProblem_Problem_TitleContainingIgnoreCase(
                   user, dateNow, titleSearch, pageable);
     } else {
       paginatedSolvedProblem =
-          reviewProblemRepository.findByUserAndNextAttemptAtLessThanEqual(user, dateNow, pageable);
+          repository.findBySolvedProblem_UserAndNextAttemptAtLessThanEqual(user, dateNow, pageable);
     }
 
-    return new PaginatedSolvedProblem(paginatedSolvedProblem);
+    return new PaginatedReviewProblem(paginatedSolvedProblem);
   }
 
-  private PaginatedSolvedProblem getTodayProblemsWithDifficulty(
-      Difficulty difficulty, String titleSearch, User user, LocalDate dateNow, Pageable pageable) {
+  private PaginatedReviewProblem getTodayProblemsWithDifficulty(
+      Difficulty difficulty, String titleSearch, User user, Pageable pageable) {
+    LocalDate dateNow = LocalDate.now();
     Page<ReviewProblem> paginatedSolvedProblem;
+
     if (titleSearch != null) {
       paginatedSolvedProblem =
-          reviewProblemRepository
-              .findByUserAndNextAttemptAtLessThanEqualAndProblem_TitleContainingIgnoreCaseAndProblem_Difficulty(
+          repository
+              .findBySolvedProblem_UserAndNextAttemptAtLessThanEqualAndSolvedProblem_Problem_TitleContainingIgnoreCaseAndSolvedProblem_Problem_Difficulty(
                   user, dateNow, titleSearch, difficulty, pageable);
     } else {
       paginatedSolvedProblem =
-          reviewProblemRepository.findByUserAndNextAttemptAtLessThanEqualAndProblem_Difficulty(
+          repository.findByUserAndNextAttemptAtLessThanEqualAndProblem_Difficulty(
               user, dateNow, difficulty, pageable);
     }
-    return new PaginatedSolvedProblem(paginatedSolvedProblem);
+    return new PaginatedReviewProblem(paginatedSolvedProblem);
   }
 
   public Boolean existsByProblemAndUser(Problem problem, User user) {
-    return reviewProblemRepository.existsByProblemAndUser(problem, user);
+    return repository.existsByProblemAndUser(problem, user);
   }
 
   public Optional<ReviewProblem> findByProblemAndUser(Problem problem, User user) {
-    return reviewProblemRepository.findByProblemAndUser(problem, user);
+    return repository.findByProblemAndUser(problem, user);
   }
 
   public ReviewProgress getReviewProgress(int solvedTodayCount, User user) {
     LocalDate now = LocalDate.now();
-    int unsolvedCount = reviewProblemRepository.countByNextAttemptAtLessThanEqualAndUser(now, user);
+    int unsolvedCount = repository.countByNextAttemptAtLessThanEqualAndUser(now, user);
 
     return new ReviewProgress(unsolvedCount, solvedTodayCount);
   }
 
   public Page<ReviewProblem> findByUser(User user, Pageable pageable) {
-    return reviewProblemRepository.findByUser(user, pageable);
+    return repository.findByUser(user, pageable);
   }
 }

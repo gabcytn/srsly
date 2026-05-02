@@ -41,9 +41,6 @@ public class Problem {
   @Column(nullable = false)
   private String url;
 
-  @OneToMany(mappedBy = "problem")
-  private Set<ReviewProblem> reviewProblem;
-
   @ManyToMany
   @JoinTable(
       name = "problem_tags",
