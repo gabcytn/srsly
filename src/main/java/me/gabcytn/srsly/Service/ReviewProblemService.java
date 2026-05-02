@@ -13,6 +13,7 @@ import me.gabcytn.srsly.Helper.*;
 import me.gabcytn.srsly.Publisher.ReviewAttemptEventPublisher;
 import me.gabcytn.srsly.Repository.ReviewProblemRepository;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -160,6 +161,13 @@ public class ReviewProblemService {
 
   private void createAttemptFromSolvedProblem(ReviewProblem problem, int grade) {
     reviewAttemptEventPublisher.publish(Attempt.fromSolvedProblem(problem, grade));
+  }
+
+  public PaginatedReviewProblem getReviewProblemsToday(Specification<ReviewProblem> specification, User user, int page) {
+    Pageable pageable = PageRequest.of(page, 5, Sort.by("nextAttemptAt"));
+    Page<ReviewProblem> data = repository.findBySolvedProblem_User(user, specification, pageable);
+
+    return new PaginatedReviewProblem(data);
   }
 
   public ReviewProblem save(ReviewProblem reviewProblem) {

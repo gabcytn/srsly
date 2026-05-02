@@ -14,8 +14,10 @@ import me.gabcytn.srsly.Entity.ReviewProblem;
 import me.gabcytn.srsly.Entity.SolvedProblem;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Exception.UnprocessableEntityException;
+import me.gabcytn.srsly.Repository.Specification.ReviewProblemSpecification;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,11 +91,19 @@ public class ProblemFacadeService {
 
   public PaginatedReviewProblem getProblemsToReviewToday(ReviewableProblemsFilter filters) {
     User user = userService.getCurrentUser();
-    String titleSearchFilter = filters.getTitle();
-    String difficultyFilter = filters.getDifficulty();
-    int pageNumber = filters.getPage();
+    Specification<ReviewProblem> spec = Specification.unrestricted();
 
-    throw new RuntimeException("Wait lang");
-//    return reviewProblemService.getTodayProblems(filters, userService.getCurrentUser());
+    String difficulty = filters.getDifficulty();
+    String title = filters.getTitle();
+
+    if (title != null && !title.isBlank()) {
+      spec = spec.and(ReviewProblemSpecification.hasTitle(title));
+    }
+
+    if (!difficulty.equalsIgnoreCase("all")) {
+      spec = spec.and(ReviewProblemSpecification.hasDifficulty(difficulty));
+    }
+
+    return reviewProblemService.getReviewProblemsToday(spec, user, filters.getPage());
   }
 }
