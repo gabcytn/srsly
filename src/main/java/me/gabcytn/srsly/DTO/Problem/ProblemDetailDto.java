@@ -24,7 +24,7 @@ public class ProblemDetailDto {
 
   private String content;
 
-  private Boolean isSolved;
+  private Boolean isSolved = Boolean.FALSE;
 
   private ReviewDetail reviewDetail;
 

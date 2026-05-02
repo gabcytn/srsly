@@ -1,101 +1,56 @@
 package me.gabcytn.srsly.Entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import lombok.*;
-import me.gabcytn.srsly.DTO.ProblemStatus;
-import me.gabcytn.srsly.DTO.SolvedProblemDto;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.Getter;
+import lombok.Setter;
+import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
+import me.gabcytn.srsly.DTO.Problem.ReviewDetail;
+import me.gabcytn.srsly.DTO.Problem.SolvedProblemDto;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
+@Getter
+@Setter
 @Table(
     name = "solved_problems",
     indexes = {
-      @Index(name = "solved_idx_problem", columnList = "problem_id"),
-      @Index(name = "solved_idx_user", columnList = "user_id")
+      @Index(name = "user_solved_problems_idx", columnList = "user_id"),
+      @Index(name = "problem_solved_problems_idx", columnList = "problem_id")
     })
 public class SolvedProblem {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  private Long id;
 
-  @NonNull
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private ProblemStatus status;
-
-  private Double easeFactor;
-
-  private Integer repetitions;
-
-  private Integer interval;
-
-  @NonNull
-  @Column(nullable = false)
-  private LocalDate lastAttemptAt;
-
-  private LocalDate nextAttemptAt;
-
-  @NonNull
-  @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false)
-  private User user;
-
-  @NonNull
   @ManyToOne
   @JoinColumn(name = "problem_id", nullable = false)
   private Problem problem;
 
-  @CreationTimestamp
-  @Column(updatable = false)
-  private LocalDateTime createdAt;
+  @ManyToOne
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
-  @UpdateTimestamp private LocalDateTime updatedAt;
+  @OneToOne(mappedBy = "solvedProblem", fetch = FetchType.LAZY)
+  private ReviewProblem reviewProblem;
 
-  public static SolvedProblem ofReviewableInitial(Problem problem, User user) {
-    double easeFactor =
-        switch (problem.getDifficulty()) {
-          case Easy -> 2.6;
-          case Medium -> 2.4;
-          case Hard -> 2.2;
-        };
+  public SolvedProblem() {}
 
-    LocalDate dateNow = LocalDate.now();
-    return SolvedProblem.builder()
-        .status(ProblemStatus.NEW)
-        .easeFactor(easeFactor)
-        .repetitions(0)
-        .interval(1)
-        .lastAttemptAt(dateNow)
-        .nextAttemptAt(dateNow.plusDays(1))
-        .user(user)
-        .problem(problem)
-        .build();
-  }
-
-  public static SolvedProblem ofNonReviewableInitial(Problem problem, User user) {
-    LocalDate dateNow = LocalDate.now();
-    return SolvedProblem.builder()
-        .status(ProblemStatus.NON_REVIEW)
-        .lastAttemptAt(dateNow)
-        .user(user)
-        .problem(problem)
-        .build();
+  public SolvedProblem(Problem problem, User user) {
+    this.problem = problem;
+    this.user = user;
   }
 
   public SolvedProblemDto toDto() {
-    return SolvedProblemDto.builder()
-        .id(id)
-        .lastAttemptAt(lastAttemptAt)
-        .nextAttemptAt(nextAttemptAt)
-        .status(status)
-        .problem(problem.summarize())
-        .build();
+    ProblemSummaryDto problemSummary = this.problem.summarize();
+    ReviewDetail reviewDetail = null;
+    if (this.reviewProblem != null) {
+      reviewDetail =
+          new ReviewDetail(
+              reviewProblem.getId(),
+              reviewProblem.getLastAttemptAt(),
+              reviewProblem.getNextAttemptAt(),
+              reviewProblem.getStatus());
+    }
+
+    return new SolvedProblemDto(problemSummary, reviewDetail);
   }
 }

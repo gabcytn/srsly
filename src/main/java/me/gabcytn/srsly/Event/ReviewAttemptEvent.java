@@ -1,17 +1,17 @@
 package me.gabcytn.srsly.Event;
 
-import me.gabcytn.srsly.Entity.Attempt;
+import me.gabcytn.srsly.Entity.ReviewAttempt;
 import org.springframework.context.ApplicationEvent;
 
 public class ReviewAttemptEvent extends ApplicationEvent {
-  private final Attempt attempt;
+  private final ReviewAttempt reviewAttempt;
 
-  public ReviewAttemptEvent(Object source, Attempt attempt) {
+  public ReviewAttemptEvent(Object source, ReviewAttempt reviewAttempt) {
     super(source);
-    this.attempt = attempt;
+    this.reviewAttempt = reviewAttempt;
   }
 
-  public Attempt getAttempt() {
-    return attempt;
+  public ReviewAttempt getAttempt() {
+    return reviewAttempt;
   }
 }

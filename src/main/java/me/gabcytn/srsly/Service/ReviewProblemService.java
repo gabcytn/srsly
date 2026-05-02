@@ -1,0 +1,195 @@
+package me.gabcytn.srsly.Service;
+
+import java.time.LocalDate;
+import java.util.Optional;
+import lombok.AllArgsConstructor;
+import me.gabcytn.srsly.DTO.*;
+import me.gabcytn.srsly.DTO.Review.InitialProblemReview;
+import me.gabcytn.srsly.DTO.Review.InitialReviewRequest;
+import me.gabcytn.srsly.DTO.Review.ProblemSubmissionWithHistory;
+import me.gabcytn.srsly.Entity.*;
+import me.gabcytn.srsly.Exception.*;
+import me.gabcytn.srsly.Helper.*;
+import me.gabcytn.srsly.Publisher.ReviewAttemptEventPublisher;
+import me.gabcytn.srsly.Repository.ReviewProblemRepository;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@AllArgsConstructor
+@Service
+public class ReviewProblemService {
+  private final ReviewProblemRepository repository;
+  private final ReviewAttemptEventPublisher reviewAttemptEventPublisher;
+
+  public ReviewProblem saveInitialAsReviewable(InitialProblemReview initialProblemReview) {
+    SolvedProblem solvedProblem = initialProblemReview.solvedProblem();
+    int untrackedReps = initialProblemReview.initialReview().repetitions();
+
+    int repetitions = SpacedRepetitionHelper.normalizeInitialReps(untrackedReps);
+    if (isFreshAttempt(repetitions)) {
+      return createFreshReviewableInitialAttempt(solvedProblem);
+    }
+
+    ProblemSubmissionWithHistory submission =
+        ProblemSubmissionWithHistory.builder()
+            .initialReview(initialProblemReview.initialReview())
+            .solvedProblem(solvedProblem)
+            .repetitions(repetitions)
+            .build();
+
+    return createFirstSubmissionWithHistory(submission);
+  }
+
+  private boolean isFreshAttempt(int repetitions) {
+    return repetitions == 0;
+  }
+
+  private ReviewProblem createFreshReviewableInitialAttempt(SolvedProblem solvedProblem) {
+    ReviewProblem reviewProblem = save(ReviewProblem.ofReviewableInitial(solvedProblem));
+    createAttemptFromSolvedProblem(reviewProblem);
+    return reviewProblem;
+  }
+
+  private ReviewProblem createFirstSubmissionWithHistory(ProblemSubmissionWithHistory submission) {
+    Integer repetitions = submission.getInitialReview().repetitions();
+    Problem problem = submission.getSolvedProblem().getProblem();
+    LocalDate lastReviewedAt = submission.getInitialReview().lastReviewedAt();
+
+    double easeFactor = calculateInitialEaseFactor(problem, submission.getInitialReview());
+    int interval = calculateInitialInterval(repetitions, easeFactor, lastReviewedAt);
+    LocalDate nextReviewDate = calculateNextReviewDate(lastReviewedAt, interval);
+    ProblemStatus status = SpacedRepetitionHelper.getProblemStatus(repetitions);
+
+    ReviewProblem entity =
+        ReviewProblem.builder()
+            .status(status)
+            .easeFactor(easeFactor)
+            .repetitions(repetitions)
+            .interval(interval)
+            .lastAttemptAt(lastReviewedAt)
+            .nextAttemptAt(nextReviewDate)
+            .solvedProblem(submission.getSolvedProblem())
+            .build();
+    ReviewProblem reviewProblem = this.save(entity);
+
+    createAttemptFromSolvedProblem(reviewProblem);
+    return reviewProblem;
+  }
+
+  private double calculateInitialEaseFactor(Problem problem, InitialReviewRequest request) {
+    Difficulty difficulty = problem.getDifficulty();
+    Confidence confidence = request.confidence();
+    return SpacedRepetitionHelper.initialEaseFactor(difficulty, confidence);
+  }
+
+  private int calculateInitialInterval(
+      int repetitions, double easeFactor, LocalDate lastReviewedAt) {
+    int suggestedInterval = SpacedRepetitionHelper.initialInterval(repetitions, easeFactor);
+    long daysSinceLastReview =
+        SpacedRepetitionHelper.dateDifference(lastReviewedAt, LocalDate.now());
+
+    int adjustedDays = normalizeDaysDifference(daysSinceLastReview);
+
+    return Math.min(suggestedInterval, adjustedDays);
+  }
+
+  private int normalizeDaysDifference(long days) {
+    return (days == 0) ? 1 : (int) days;
+  }
+
+  private LocalDate calculateNextReviewDate(LocalDate lastReviewedAt, int interval) {
+    return lastReviewedAt.plusDays(interval);
+  }
+
+  @Transactional
+  public void saveSubsequent(int id, int grade) {
+    LocalDate dateNow = LocalDate.now();
+    ReviewProblem reviewProblem = findById(id);
+
+    verifyProblemReviewDate(reviewProblem, dateNow);
+    if (reviewFailed(grade)) {
+      createAttemptFromFailedReview(reviewProblem, grade);
+      return;
+    }
+
+    ReviewProblem updatedProblem = updateProblemFromSuccessfulReview(reviewProblem, grade, dateNow);
+    createAttemptFromSolvedProblem(updatedProblem, grade);
+  }
+
+  private ReviewProblem findById(int id) {
+    Optional<ReviewProblem> reviewProblem = repository.findById(id);
+    return reviewProblem.orElseThrow(
+        () -> new GenericNotFoundException("Review problem not found."));
+  }
+
+  private void verifyProblemReviewDate(ReviewProblem reviewProblem, LocalDate dateNow) {
+    if (dateNow.isBefore(reviewProblem.getNextAttemptAt())) {
+      throw new EarlyReviewException();
+    }
+  }
+
+  private boolean reviewFailed(int grade) {
+    return grade < 3;
+  }
+
+  private void createAttemptFromFailedReview(ReviewProblem reviewProblem, int grade) {
+    ReviewProblem created = this.save(SpacedRepetitionHelper.reviewFailed(reviewProblem, grade));
+    createAttemptFromSolvedProblem(created, grade);
+  }
+
+  private ReviewProblem updateProblemFromSuccessfulReview(
+      ReviewProblem reviewProblem, int grade, LocalDate dateNow) {
+    double easeFactor = SpacedRepetitionHelper.calculateEaseFactor(reviewProblem, grade, dateNow);
+    int repetitions = reviewProblem.getRepetitions() + 1;
+    int interval = SpacedRepetitionHelper.calculateSubsequentInterval(reviewProblem, dateNow);
+
+    reviewProblem.setEaseFactor(easeFactor);
+    reviewProblem.setRepetitions(repetitions);
+    reviewProblem.setStatus(SpacedRepetitionHelper.determineProblemStatus(interval, repetitions));
+    reviewProblem.setLastAttemptAt(dateNow);
+    reviewProblem.setNextAttemptAt(dateNow.plusDays(interval));
+    reviewProblem.setInterval(interval);
+
+    return this.save(reviewProblem);
+  }
+
+  private void createAttemptFromSolvedProblem(ReviewProblem problem) {
+    reviewAttemptEventPublisher.publish(ReviewAttempt.fromSolvedProblem(problem));
+  }
+
+  private void createAttemptFromSolvedProblem(ReviewProblem problem, int grade) {
+    reviewAttemptEventPublisher.publish(ReviewAttempt.fromSolvedProblem(problem, grade));
+  }
+
+  public PaginatedReviewProblem getReviewProblemsToday(Specification<ReviewProblem> specification, User user, int page) {
+    Pageable pageable = PageRequest.of(page, 5, Sort.by("nextAttemptAt"));
+    Page<ReviewProblem> data = repository.findBySolvedProblem_User(user, specification, pageable);
+
+    return new PaginatedReviewProblem(data);
+  }
+
+  public ReviewProblem save(ReviewProblem reviewProblem) {
+    return repository.save(reviewProblem);
+  }
+
+  public Boolean existsByProblemAndUser(Problem problem, User user) {
+    return repository.existsBySolvedProblem_ProblemAndSolvedProblem_User(problem, user);
+  }
+
+  public Optional<ReviewProblem> findByProblemAndUser(Problem problem, User user) {
+    return repository.findBySolvedProblem_ProblemAndSolvedProblem_User(problem, user);
+  }
+
+  public ReviewProgress getReviewProgress(int solvedTodayCount, User user) {
+    LocalDate now = LocalDate.now();
+    int unsolvedCount = repository.countByNextAttemptAtLessThanEqualAndSolvedProblem_User(now, user);
+
+    return new ReviewProgress(unsolvedCount, solvedTodayCount);
+  }
+
+  public Page<ReviewProblem> findByUser(User user, Pageable pageable) {
+    return repository.findBySolvedProblem_User(user, pageable);
+  }
+}

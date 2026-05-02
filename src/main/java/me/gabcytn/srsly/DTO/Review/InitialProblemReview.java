@@ -1,6 +1,6 @@
 package me.gabcytn.srsly.DTO.Review;
 
-import me.gabcytn.srsly.Entity.Problem;
-import me.gabcytn.srsly.Entity.User;
+import me.gabcytn.srsly.Entity.SolvedProblem;
 
-public record InitialProblemReview(InitialReviewRequest initialReview, Problem problem, User user) {}
+public record InitialProblemReview(
+    InitialReviewRequest initialReview, SolvedProblem solvedProblem) {}

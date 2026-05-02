@@ -41,15 +41,15 @@ public class Problem {
   @Column(nullable = false)
   private String url;
 
-  @OneToMany(mappedBy = "problem")
-  private Set<SolvedProblem> solvedProblem;
-
   @ManyToMany
   @JoinTable(
       name = "problem_tags",
       joinColumns = @JoinColumn(name = "problem_id", nullable = false),
       inverseJoinColumns = @JoinColumn(name = "tag_id", nullable = false))
   private Set<Tag> tags;
+
+  @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY)
+  private Set<SolvedProblem> solvedProblems;
 
   public Problem(
       int id, String title, String question, Difficulty difficulty, String url, Set<Tag> tags) {
