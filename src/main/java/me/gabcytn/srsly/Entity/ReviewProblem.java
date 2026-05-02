@@ -15,38 +15,32 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @Entity
 @Table(
-    name = "solved_problems",
+    name = "review_problems",
     indexes = {
-      @Index(name = "solved_idx_problem", columnList = "problem_id"),
-      @Index(name = "solved_idx_user", columnList = "user_id")
+      @Index(name = "solved_problem_idx", columnList = "solved_problem_id"),
+      @Index(name = "next_attempt_at_idx", columnList = "next_attempt_at")
     })
 public class ReviewProblem {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private int id;
 
-  @NonNull
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private ProblemStatus status;
 
-  @NonNull
   @Column(nullable = false)
   private Double easeFactor;
 
-  @NonNull
   @Column(nullable = false)
   private Integer repetitions;
 
-  @NonNull
   @Column(nullable = false)
   private Integer interval;
 
-  @NonNull
   @Column(nullable = false)
   private LocalDate lastAttemptAt;
 
-  @NonNull
   @Column(nullable = false)
   private LocalDate nextAttemptAt;
 
@@ -55,10 +49,12 @@ public class ReviewProblem {
   private SolvedProblem solvedProblem;
 
   @CreationTimestamp
-  @Column(updatable = false)
+  @Column(updatable = false, nullable = false)
   private LocalDateTime createdAt;
 
-  @UpdateTimestamp private LocalDateTime updatedAt;
+  @UpdateTimestamp
+  @Column(nullable = false)
+  private LocalDateTime updatedAt;
 
   public static ReviewProblem ofReviewableInitial(SolvedProblem solvedProblem) {
     Problem problem = solvedProblem.getProblem();

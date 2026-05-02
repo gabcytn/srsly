@@ -156,11 +156,11 @@ public class ReviewProblemService {
   }
 
   private void createAttemptFromSolvedProblem(ReviewProblem problem) {
-    reviewAttemptEventPublisher.publish(Attempt.fromSolvedProblem(problem));
+    reviewAttemptEventPublisher.publish(ReviewAttempt.fromSolvedProblem(problem));
   }
 
   private void createAttemptFromSolvedProblem(ReviewProblem problem, int grade) {
-    reviewAttemptEventPublisher.publish(Attempt.fromSolvedProblem(problem, grade));
+    reviewAttemptEventPublisher.publish(ReviewAttempt.fromSolvedProblem(problem, grade));
   }
 
   public PaginatedReviewProblem getReviewProblemsToday(Specification<ReviewProblem> specification, User user, int page) {

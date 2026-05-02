@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 public class ProblemFacadeService {
-  private final AttemptService attemptService;
+  private final ReviewAttemptService reviewAttemptService;
   private final ReviewProblemService reviewProblemService;
   private final ProblemService problemService;
   private final SolvedProblemService solvedProblemService;
@@ -85,7 +85,7 @@ public class ProblemFacadeService {
   @Transactional
   public ReviewProgress getReviewProgress() {
     User user = userService.getCurrentUser();
-    int reviewedProblemsCount = attemptService.getCountOfReviewedProblemsToday(user);
+    int reviewedProblemsCount = reviewAttemptService.getCountOfReviewedProblemsToday(user);
     return reviewProblemService.getReviewProgress(reviewedProblemsCount, user);
   }
 
