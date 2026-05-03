@@ -4,15 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.AOP.Annotation.VerifySolutionOwner;
-import me.gabcytn.srsly.DTO.EditSolution;
-import me.gabcytn.srsly.DTO.SolutionDto;
-import me.gabcytn.srsly.Entity.Problem;
-import me.gabcytn.srsly.Entity.Solution;
-import me.gabcytn.srsly.Entity.SolvedProblem;
-import me.gabcytn.srsly.Entity.User;
-import me.gabcytn.srsly.Exception.AiException;
-import me.gabcytn.srsly.Exception.GenericNotFoundException;
-import me.gabcytn.srsly.Exception.SolutionException;
+import me.gabcytn.srsly.DTO.*;
+import me.gabcytn.srsly.Entity.*;
+import me.gabcytn.srsly.Exception.*;
 import me.gabcytn.srsly.Repository.SolutionRepository;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +63,7 @@ public class SolutionService {
   }
 
   @VerifySolutionOwner
-  public void update(long id, EditSolution dto) {
+  public Solution update(long id, EditSolution dto) {
     Solution solution = findById(id);
 
     validateSolutionEligibilityToUpdate(solution, dto);
@@ -77,7 +71,7 @@ public class SolutionService {
     solution.setNote(dto.note());
     solution.setCode(dto.code());
 
-    save(solution);
+    return save(solution);
   }
 
   private void validateSolutionEligibilityToUpdate(Solution solution, EditSolution editedSolution) {

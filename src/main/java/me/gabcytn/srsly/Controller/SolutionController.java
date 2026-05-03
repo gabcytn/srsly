@@ -30,12 +30,14 @@ public class SolutionController {
   }
 
   @PatchMapping("/solutions/{id}")
-  public void update(@PathVariable long id, @RequestBody @Valid EditSolution solutionDto) {
-    solutionService.update(id, solutionDto);
+  public SolutionDto update(@PathVariable long id, @RequestBody @Valid EditSolution solutionDto) {
+    Solution s = solutionService.update(id, solutionDto);
+    return s.toDto();
   }
 
   @DeleteMapping("/solutions/{id}")
-  public void delete(@PathVariable long id) {
+  public ResponseEntity<Void> delete(@PathVariable long id) {
     solutionService.delete(id);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }
