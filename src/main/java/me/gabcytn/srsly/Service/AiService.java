@@ -18,10 +18,11 @@ public class AiService {
 
   public AiCritique critique(long solutionId) {
     Solution solution = solutionService.findById(solutionId);
-		if (solution.getAiCritique() != null) {
-			throw new AiException("Critique already exists.");
-		}
-    String problemDescription = Jsoup.parse(solution.getProblem().getQuestion()).text();
+    if (solution.getAiCritique() != null) {
+      throw new AiException("Critique already exists.");
+    }
+    String problemDescription =
+        Jsoup.parse(solution.getSolvedProblem().getProblem().getQuestion()).text();
     String model = "gemini-2.5-flash-lite";
     AiCritique response =
         ChatClient.create(chatModel)
@@ -29,30 +30,30 @@ public class AiService {
             .options(GoogleGenAiChatOptions.builder().model(model).build())
             .system(
                 """
-				You are a senior software engineer and algorithm reviewer.
-				Your task is to analyze a given LeetCode solution and evaluate it objectively.
-				Do not assume correctness. Verify it.
-				Be strict, technical, and concise.
-				""")
+                You are a senior software engineer and algorithm reviewer.
+                Your task is to analyze a given LeetCode solution and evaluate it objectively.
+                Do not assume correctness. Verify it.
+                Be strict, technical, and concise.
+                """)
             .user(
                 u ->
                     u.text(
                             """
-				You are given:
-				1. The LeetCode problem description
-				2. The submitted solution code
+                            You are given:
+                            1. The LeetCode problem description
+                            2. The submitted solution code
 
-				Analyze the solution across the following dimensions:
-				- Correctness
-				- Time and Space complexity
-				- Readability and code quality
-				- Potential bugs or logical flaws
-				- Possible improvements or alternatives
+                            Analyze the solution across the following dimensions:
+                            - Correctness
+                            - Time and Space complexity
+                            - Readability and code quality
+                            - Potential bugs or logical flaws
+                            - Possible improvements or alternatives
 
-				### Input
-					- "problem": "{problem}",
-					- "solution": "{solution}"
-				""")
+                            ### Input
+                            	- "problem": "{problem}",
+                            	- "solution": "{solution}"
+                            """)
                         .param("problem", problemDescription)
                         .param("solution", solution.getCode()))
             .call()

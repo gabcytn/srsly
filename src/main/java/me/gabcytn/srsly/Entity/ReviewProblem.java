@@ -23,7 +23,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class ReviewProblem {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  private Long id;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -60,9 +60,9 @@ public class ReviewProblem {
     Problem problem = solvedProblem.getProblem();
     double easeFactor =
         switch (problem.getDifficulty()) {
-          case Easy -> 2.6;
-          case Medium -> 2.4;
-          case Hard -> 2.2;
+          case EASY -> 2.6;
+          case MEDIUM -> 2.4;
+          case HARD -> 2.2;
         };
 
     LocalDate dateNow = LocalDate.now();

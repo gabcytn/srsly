@@ -23,7 +23,7 @@ import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
 public class Problem {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  private Long id;
 
   @Column(nullable = false, unique = true)
   private int frontendId;
