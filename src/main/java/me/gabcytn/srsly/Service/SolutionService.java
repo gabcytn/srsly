@@ -3,13 +3,13 @@ package me.gabcytn.srsly.Service;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import me.gabcytn.srsly.AOP.Annotation.VerifySolutionOwner;
 import me.gabcytn.srsly.DTO.EditSolution;
 import me.gabcytn.srsly.DTO.SolutionDto;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.Solution;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Exception.AiException;
-import me.gabcytn.srsly.Exception.GenericForbiddenException;
 import me.gabcytn.srsly.Exception.GenericNotFoundException;
 import me.gabcytn.srsly.Exception.SolutionException;
 import me.gabcytn.srsly.Repository.SolutionRepository;
@@ -65,6 +65,7 @@ public class SolutionService {
     return solutionRepository.existsByProblemAndUser(problem, user);
   }
 
+  @VerifySolutionOwner
   public void update(long id, EditSolution dto) {
     Solution solution = findById(id);
 
@@ -80,27 +81,14 @@ public class SolutionService {
     if (isAiCritiqueIssued(solution, editedSolution)) {
       throw new AiException("Code cannot be modified once an AI critique has been completed.");
     }
-
-    if (!isCurrentUserAllowedAccessToSolution(solution)) {
-      throw new GenericForbiddenException("Access denied to solution.");
-    }
   }
 
   private boolean isAiCritiqueIssued(Solution solution, EditSolution editedSolution) {
     return solution.getAiCritique() != null && !solution.getCode().equals(editedSolution.code());
   }
 
-  private boolean isCurrentUserAllowedAccessToSolution(Solution solution) {
-    User user = userService.getCurrentUser();
-    return solution.getUser().getId().equals(user.getId());
-  }
-
+  @VerifySolutionOwner
   public void delete(long id) {
-    User user = userService.getCurrentUser();
-    Solution solution = findById(id);
-    if (!solution.getUser().getId().equals(user.getId())) {
-      throw new GenericForbiddenException("Access denied to solution.");
-    }
     solutionRepository.deleteById(id);
   }
 }
