@@ -20,10 +20,7 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(
     name = "solutions",
-    indexes = {
-      @Index(name = "sol_idx_problem", columnList = "problem_id"),
-      @Index(name = "sol_idx_user", columnList = "user_id")
-    })
+    indexes = {@Index(name = "sol_idx_solved_problem", columnList = "solved_problem_id")})
 public class Solution {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -42,12 +39,8 @@ public class Solution {
   private String note;
 
   @ManyToOne
-  @JoinColumn(name = "problem_id", nullable = false)
-  private Problem problem;
-
-  @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false)
-  private User user;
+  @JoinColumn(name = "solved_problem_id", nullable = false)
+  private SolvedProblem solvedProblem;
 
   @CreationTimestamp
   @Column(updatable = false)

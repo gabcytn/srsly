@@ -38,6 +38,6 @@ public class SolutionAccessibilityAspect {
 
   private boolean isCurrentUserAllowedAccessToSolution(Solution solution) {
     User user = userService.getCurrentUser();
-    return solution.getUser().getId().equals(user.getId());
+    return solution.getSolvedProblem().getUser().getId().equals(user.getId());
   }
 }

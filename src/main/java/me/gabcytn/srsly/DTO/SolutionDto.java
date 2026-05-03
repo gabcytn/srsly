@@ -7,9 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.gabcytn.srsly.AI.AiCritique;
-import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.Solution;
-import me.gabcytn.srsly.Entity.User;
+import me.gabcytn.srsly.Entity.SolvedProblem;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,14 +28,13 @@ public class SolutionDto {
   private AiCritique aiCritique;
   private String note;
 
-  public Solution toEntity(Problem problem, User user) {
+  public Solution toEntity(SolvedProblem solvedProblem) {
     Solution s = new Solution();
     s.setCode(code);
     s.setTitle(title);
     s.setAiCritique(aiCritique);
     s.setNote(note);
-    s.setProblem(problem);
-    s.setUser(user);
+    s.setSolvedProblem(solvedProblem);
     return s;
   }
 }

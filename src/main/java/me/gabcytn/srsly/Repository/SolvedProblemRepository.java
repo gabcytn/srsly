@@ -1,5 +1,6 @@
 package me.gabcytn.srsly.Repository;
 
+import java.util.Optional;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SolvedProblem;
 import me.gabcytn.srsly.Entity.User;
@@ -15,4 +16,6 @@ public interface SolvedProblemRepository
   Boolean existsByProblemAndUser(Problem problem, User user);
 
   Page<SolvedProblem> findAll(Specification<SolvedProblem> spec, Pageable pageable);
+
+  Optional<SolvedProblem> findByProblemAndUser(Problem problem, User user);
 }

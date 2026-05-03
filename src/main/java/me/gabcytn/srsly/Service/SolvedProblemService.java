@@ -1,10 +1,12 @@
 package me.gabcytn.srsly.Service;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.DTO.PaginatedSolvedProblem;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.SolvedProblem;
 import me.gabcytn.srsly.Entity.User;
+import me.gabcytn.srsly.Exception.GenericNotFoundException;
 import me.gabcytn.srsly.Repository.SolvedProblemRepository;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,10 +25,20 @@ public class SolvedProblemService {
     return repository.save(solvedProblem);
   }
 
-  public PaginatedSolvedProblem findByUser(Specification<SolvedProblem> spec, User user, int pageNumber) {
+  public PaginatedSolvedProblem findByUser(
+      Specification<SolvedProblem> spec, User user, int pageNumber) {
     Pageable pageable = PageRequest.of(pageNumber, 10);
     Page<SolvedProblem> data = repository.findAll(spec, pageable);
 
     return new PaginatedSolvedProblem(data);
+  }
+
+  public SolvedProblem findByProblemAndUser(Problem problem, User user) {
+    Optional<SolvedProblem> sOptional = repository.findByProblemAndUser(problem, user);
+    if (sOptional.isPresent()) {
+      return sOptional.get();
+    }
+
+    throw new GenericNotFoundException("SolvedProblem not found.");
   }
 }

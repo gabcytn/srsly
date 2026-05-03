@@ -38,9 +38,6 @@ public class User {
   @JsonIgnore @UpdateTimestamp private Timestamp updatedAt;
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-  private Set<Solution> solutions;
-
-  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   private Set<SolvedProblem> solvedProblems;
 
   public static User ofEmailAndPassword(String email, String password) {

@@ -9,11 +9,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SolutionRepository extends ListCrudRepository<Solution, Long> {
-  Boolean existsByProblemAndUser(Problem problem, User user);
+  Boolean existsBySolvedProblem_ProblemAndSolvedProblem_User(Problem problem, User user);
 
-  Integer countByProblemAndUser(Problem problem, User user);
+  Integer countBySolvedProblem_ProblemAndSolvedProblem_User(Problem problem, User user);
 
-  List<Solution> findAllByProblemAndUser(Problem problem, User user);
+  List<Solution> findAllBySolvedProblem_ProblemAndSolvedProblem_User(Problem problem, User user);
 
   void deleteById(Long id);
 }
