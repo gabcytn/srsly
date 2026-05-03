@@ -31,13 +31,8 @@ public class JwtFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     final String authorizationHeader = request.getHeader("Authorization");
-    if (request.getRequestURI().startsWith("/api/v1/auth")) {
-      log.info("Disregard filter. User is trying to authenticate.");
-      filterChain.doFilter(request, response);
-      return;
-    }
-    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-      log.info("No auth header / doesn't start with Bearer");
+
+    if (isUserAuthenticating(request) || isAuthorizationHeaderInvalid(authorizationHeader)) {
       filterChain.doFilter(request, response);
       return;
     }
@@ -72,5 +67,13 @@ public class JwtFilter extends OncePerRequestFilter {
       log.error(e.getMessage());
       handlerExceptionResolver.resolveException(request, response, null, e);
     }
+  }
+
+  private boolean isUserAuthenticating(HttpServletRequest request) {
+    return request.getRequestURI().startsWith("/api/v1/public/auth");
+  }
+
+  private boolean isAuthorizationHeaderInvalid(String header) {
+    return header == null || !header.startsWith("Bearer ");
   }
 }
