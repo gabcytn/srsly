@@ -21,10 +21,8 @@ import org.springframework.stereotype.Repository;
 public interface ReviewProblemRepository
     extends JpaRepository<ReviewProblem, Integer>, JpaSpecificationExecutor<ReviewProblem> {
   Page<ReviewProblem> findBySolvedProblem_User(User user, Pageable pageable);
-//  Page<ReviewProblem> findAllBySolvedProblem_User(User user, Pageable pageable);
 
-  Page<ReviewProblem> findBySolvedProblem_User(
-      User user, Specification<ReviewProblem> specs, Pageable pageable);
+  Page<ReviewProblem> findAll(Specification<ReviewProblem> specs, Pageable pageable);
 
   @Query(
 """

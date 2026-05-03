@@ -13,22 +13,17 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/problems")
-public class ReviewProblemController
-{
+public class ReviewProblemController {
   private final ReviewProblemService reviewProblemService;
   private final ProblemFacadeService problemFacadeService;
 
   @GetMapping("/review")
   public PaginatedReviewProblem getTodayProblems(
-      @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
-      @RequestParam(name = "difficulty", required = false, defaultValue = "all") String difficulty,
-      @RequestParam(name = "title", required = false) String titleSearch) {
-    ReviewableProblemsFilter filter =
-        ReviewableProblemsFilter.builder()
-            .page(page)
-            .difficulty(difficulty)
-            .title(titleSearch)
-            .build();
+      @RequestParam(name = "page", defaultValue = "0") Integer page,
+      @RequestParam(name = "difficulty", defaultValue = "all") String difficulty,
+      @RequestParam(name = "title", defaultValue = "") String titleSearch) {
+    ProblemSearchFilter filter =
+        ProblemSearchFilter.builder().page(page).difficulty(difficulty).title(titleSearch).build();
     return problemFacadeService.getProblemsToReviewToday(filter);
   }
 
@@ -62,7 +57,11 @@ public class ReviewProblemController
 
   @GetMapping("/solved")
   public PaginatedSolvedProblem getSolvedProblems(
-      @RequestParam(name = "page", defaultValue = "0") int page) {
-    return problemFacadeService.findProblemsSolvedByUser(page);
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "difficulty", defaultValue = "all") String difficulty,
+      @RequestParam(name = "title", defaultValue = "") String titleSearch) {
+    ProblemSearchFilter filter =
+        ProblemSearchFilter.builder().page(page).difficulty(difficulty).title(titleSearch).build();
+    return problemFacadeService.findProblemsSolvedByUser(filter);
   }
 }

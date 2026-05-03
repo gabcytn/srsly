@@ -165,7 +165,7 @@ public class ReviewProblemService {
 
   public PaginatedReviewProblem getReviewProblemsToday(Specification<ReviewProblem> specification, User user, int page) {
     Pageable pageable = PageRequest.of(page, 5, Sort.by("nextAttemptAt"));
-    Page<ReviewProblem> data = repository.findBySolvedProblem_User(user, specification, pageable);
+    Page<ReviewProblem> data = repository.findAll(specification, pageable);
 
     return new PaginatedReviewProblem(data);
   }

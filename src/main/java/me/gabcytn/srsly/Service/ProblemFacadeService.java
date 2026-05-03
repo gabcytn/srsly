@@ -7,16 +7,18 @@ import me.gabcytn.srsly.DTO.PaginatedReviewProblem;
 import me.gabcytn.srsly.DTO.PaginatedSolvedProblem;
 import me.gabcytn.srsly.DTO.Problem.ProblemDetailDto;
 import me.gabcytn.srsly.DTO.Problem.ReviewDetail;
+import me.gabcytn.srsly.DTO.ProblemSearchFilter;
 import me.gabcytn.srsly.DTO.Review.InitialProblemReview;
 import me.gabcytn.srsly.DTO.Review.InitialReviewRequest;
 import me.gabcytn.srsly.DTO.ReviewProgress;
-import me.gabcytn.srsly.DTO.ReviewableProblemsFilter;
 import me.gabcytn.srsly.Entity.Problem;
 import me.gabcytn.srsly.Entity.ReviewProblem;
 import me.gabcytn.srsly.Entity.SolvedProblem;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Exception.UnprocessableEntityException;
+import me.gabcytn.srsly.Repository.Specification.ProblemSearchSpecification;
 import me.gabcytn.srsly.Repository.Specification.ReviewProblemSpecification;
+import me.gabcytn.srsly.Repository.Specification.SolvedProblemSpecification;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,11 +57,6 @@ public class ProblemFacadeService {
     return problemDetail;
   }
 
-  public PaginatedSolvedProblem findProblemsSolvedByUser(int pageNumber) {
-    User user = userService.getCurrentUser();
-    return solvedProblemService.findByUser(pageNumber, user);
-  }
-
   @Transactional
   public ReviewProblem saveInitialAsReviewable(InitialReviewRequest reviewRequest, int problemId) {
     Problem problem = problemService.findByFrontendId(problemId);
@@ -94,21 +91,45 @@ public class ProblemFacadeService {
     return reviewProblemService.getReviewProgress(reviewedProblemsCount, user);
   }
 
-  public PaginatedReviewProblem getProblemsToReviewToday(ReviewableProblemsFilter filters) {
+  public PaginatedReviewProblem getProblemsToReviewToday(ProblemSearchFilter filters) {
     User user = userService.getCurrentUser();
     Specification<ReviewProblem> spec = Specification.unrestricted();
 
     String difficulty = filters.getDifficulty();
     String title = filters.getTitle();
 
-    if (title != null && !title.isBlank()) {
-      spec = spec.and(ReviewProblemSpecification.hasTitle(title));
+    ProblemSearchSpecification<ReviewProblem> specBuilder = new ReviewProblemSpecification();
+    spec = spec.and(specBuilder.hasUser(user));
+
+    if (!title.isBlank()) {
+      spec = spec.and(specBuilder.hasTitle(title));
     }
 
     if (!difficulty.equalsIgnoreCase("all")) {
-      spec = spec.and(ReviewProblemSpecification.hasDifficulty(difficulty));
+      spec = spec.and(specBuilder.hasDifficulty(difficulty));
     }
 
     return reviewProblemService.getReviewProblemsToday(spec, user, filters.getPage());
+  }
+
+  public PaginatedSolvedProblem findProblemsSolvedByUser(ProblemSearchFilter filters) {
+    User user = userService.getCurrentUser();
+    Specification<SolvedProblem> spec = Specification.unrestricted();
+
+    String title = filters.getTitle();
+    String difficulty = filters.getDifficulty();
+
+    ProblemSearchSpecification<SolvedProblem> specBuilder = new SolvedProblemSpecification();
+    spec = spec.and(specBuilder.hasUser(user));
+
+    if (!title.isBlank()) {
+      spec = spec.and(specBuilder.hasTitle(title));
+    }
+
+    if (!difficulty.equalsIgnoreCase("all")) {
+      spec = spec.and(specBuilder.hasDifficulty(difficulty));
+    }
+
+    return solvedProblemService.findByUser(spec, user, filters.getPage());
   }
 }

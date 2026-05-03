@@ -7,6 +7,7 @@ import me.gabcytn.srsly.Entity.SolvedProblem;
 import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Repository.SolvedProblemRepository;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -22,9 +23,9 @@ public class SolvedProblemService {
     return repository.save(solvedProblem);
   }
 
-  public PaginatedSolvedProblem findByUser(int pageNumber, User user) {
+  public PaginatedSolvedProblem findByUser(Specification<SolvedProblem> spec, User user, int pageNumber) {
     Pageable pageable = PageRequest.of(pageNumber, 10);
-    Page<SolvedProblem> data = repository.findByUser(user, pageable);
+    Page<SolvedProblem> data = repository.findAll(spec, pageable);
 
     return new PaginatedSolvedProblem(data);
   }
