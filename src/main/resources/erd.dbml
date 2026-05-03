@@ -1,56 +1,96 @@
+// Go to [this link](https://www.dbml.org/) to view ERD
+
 Table users {
-  id uuid [primary key, not null]
+  id uuid [pk, not null]
   email varchar(255) [unique, not null]
-  password varchar(255) [not null]
-  created_at timestamp
-  updated_at timestamp
+  password varchar
+  email_verified_at "timestamp(6)"
+  is_subscribed_to_mail_reminders boolean
+  created_at "timestamp(6)" [not null]
+  updated_at "timestamp(6)" [not null]
 }
 
 Table problems {
-  id int [primary key, not null]
-  frontend_id int [unique, not null]
-  difficulty varchar(255) [not null, check: `ANY ARRAY(['Easy', 'Medium', 'Hard'])`]
-  question text [not null]
+  id bigint [pk, not null]
+  frontend_id integer [unique, not null]
   title varchar(255) [not null]
+  question text [not null]
+  difficulty varchar(15) [not null, note: 'EASY, MEDIUM, or HARD']
   url varchar(255) [not null]
+
+  Indexes {
+    difficulty [name: "idx_problems_difficulty"]
+    title [name: "idx_problems_title"]
+  }
+}
+
+Table solved_problems {
+  id bigint [pk, not null]
+  problem_id bigint [ref: > problems.id, not null]
+  user_id uuid [ref: > users.id, not null]
+
+  Indexes {
+    problem_id [name: "idx_solved_problems_problem_id"]
+    user_id [name: "idx_solved_problems_user_id"]
+  }
+}
+
+Table review_problems {
+  id bigint [pk, not null]
+  solved_problem_id bigint [ref: > solved_problems.id, not null]
+  status varchar(255) [not null, note: 'NEW, LEARNING, REVIEWING, or MASTERED']
+  ease_factor double_precision [not null]
+  repetitions integer [not null]
+  interval integer [not null]
+  last_attempt_at date [not null]
+  next_attempt_at date [not null]
+  created_at "timestamp(6)" [not null]
+  updated_at "timestamp(6)" [not null]
+
+  Indexes {
+    next_attempt_at [name: "idx_review_problems_next_attempt_at"]
+    solved_problem_id [name: "idx_review_problems_solved_problem"]
+  }
 }
 
 Table solutions {
-  id integer [primary key, not null]
-  problem_id int [ref: > problems.id, not null]
-  user_id uuid [ref: > users.id, not null]
-  title varchar [not null]
+  id bigint [pk, not null]
+  solved_problem_id bigint [ref: > solved_problems.id, not null]
+  title varchar(255) [not null]
   code text [not null]
-  note text [null]
-  ai_critique text [null]
+  ai_critique jsonb
+  note text
+  created_at "timestamp(6)" [not null]
+  updated_at "timestamp(6)" [not null]
+
+  Indexes {
+    solved_problem_id [name: "idx_solutions_solved_problem_id"]
+  }
 }
 
-Table srs_problems {
-  id int [primary key, not null]
-  problem_id int [ref: > problems.id, not null]
-  user_id uuid [ref: > users.id, not null]
-  status varchar(255) [not null, check: `ANY ARRAY(['NEW', 'LEARNING', 'REVIEWING', 'MASTERED'])`]
-  repetitions int [not null]
-  previous_interval int [not null]
-  ease_factor numeric(1, 2) [not null]
-  last_attempt_at date [not null]
-  next_attempt_at date [not null]
+Table review_attempts {
+  id bigint [pk, not null]
+  solved_problem_id bigint [ref: > solved_problems.id, not null]
+  ease_factor double_precision [not null]
+  grade integer
+  attempted_at date [not null]
+  created_at "timestamp(6)" [not null]
+
+  Indexes {
+    solved_problem_id [name: "idx_review_attempts_solved_problem_id"]
+  }
 }
 
 Table tags {
-  id integer [primary key]
-  name varchar(255) [unique, not null]
+  id bigint [pk, not null]
+  name varchar [unique, not null]
 }
 
 Table problem_tags {
-  problem_id int [ref: > problems.id, not null]
-  tag_id int [ref: > tags.id, not null]
-}
-
-Table attempts {
-  id int [primary key, not null]
-  problem_id int [ref: > problems.id, not null]
-  user_id uuid [ref: > users.id, not null]
-  grade int [not null, check: `ANY ARRAY([0, 1, 2, 3, 4])`]
-  attempted_at date [not null]
+  problem_id bigint [ref: > problems.id, not null]
+  tag_id bigint [ref: > tags.id, not null]
+  
+  Indexes {
+    (problem_id, tag_id) [pk]
+  }
 }

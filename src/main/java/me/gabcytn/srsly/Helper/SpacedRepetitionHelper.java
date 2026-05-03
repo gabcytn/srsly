@@ -2,8 +2,8 @@ package me.gabcytn.srsly.Helper;
 
 import static me.gabcytn.srsly.DTO.Confidence.HIGH;
 import static me.gabcytn.srsly.DTO.Confidence.LOW;
-import static me.gabcytn.srsly.DTO.Difficulty.Easy;
-import static me.gabcytn.srsly.DTO.Difficulty.Hard;
+import static me.gabcytn.srsly.DTO.Difficulty.EASY;
+import static me.gabcytn.srsly.DTO.Difficulty.HARD;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -74,11 +74,11 @@ public class SpacedRepetitionHelper {
   }
 
   private static BigDecimal problemDifficultyAdjustment(Difficulty difficulty, BigDecimal easeFactor) {
-    if (difficulty.equals(Easy)) {
+    if (difficulty.equals(EASY)) {
       return easeFactor.add(ZERO_POINT_ONE);
     }
 
-    if (difficulty.equals(Hard)) {
+    if (difficulty.equals(HARD)) {
       return easeFactor.subtract(ZERO_POINT_ONE);
     }
 

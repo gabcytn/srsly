@@ -5,5 +5,4 @@ public enum ProblemStatus {
   LEARNING,
   REVIEWING,
   MASTERED,
-  NON_REVIEW,
 }
