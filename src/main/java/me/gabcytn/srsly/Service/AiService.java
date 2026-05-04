@@ -2,6 +2,7 @@ package me.gabcytn.srsly.Service;
 
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.AI.AiCritique;
+import me.gabcytn.srsly.AOP.Annotation.LogPerformance;
 import me.gabcytn.srsly.Entity.Solution;
 import me.gabcytn.srsly.Exception.AiException;
 import org.jsoup.Jsoup;
@@ -16,6 +17,7 @@ public class AiService {
   private final ChatModel chatModel;
   private final SolutionService solutionService;
 
+  @LogPerformance
   public AiCritique critique(long solutionId) {
     Solution solution = solutionService.findById(solutionId);
     if (solution.getAiCritique() != null) {
