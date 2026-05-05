@@ -1,7 +1,6 @@
 package me.gabcytn.srsly.Auth.Config;
 
 import java.time.Duration;
-import me.gabcytn.srsly.Auth.DTO.RefreshTokenValidatorDto;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,10 +9,8 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisConfig {
@@ -28,16 +25,7 @@ public class RedisConfig {
     return new LettuceConnectionFactory(configuration);
   }
 
-  @Bean
-  public RedisTemplate<String, RefreshTokenValidatorDto> refreshTokenRedisTemplate() {
-    RedisTemplate<String, RefreshTokenValidatorDto> template = new RedisTemplate<>();
-    template.setConnectionFactory(lettuceConnectionFactory());
-    template.setKeySerializer(StringRedisSerializer.UTF_8);
-    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-    template.afterPropertiesSet();
-    return template;
-  }
-
+  // NOTE: this is unused for now (for caching purposes)
   @Bean
   public RedisCacheManager cacheManager() {
     RedisCacheConfiguration configuration =
