@@ -28,55 +28,48 @@ public class AiLimiterServiceTest {
 
   @BeforeEach
   void setup() {
-    user = new User();
-    user.setId(UUID.randomUUID());
+    user = mock(User.class);
   }
 
   @Test
-  public void shouldCreateInitialLimitWhenNotExists() {
-    String key = generateKeyFromUser(user);
-    when(repository.findById(key)).thenReturn(Optional.empty());
+  public void incrementUsage_ShouldCreateInitialLimitWhenNotExists() {
+    when(repository.findById(anyString())).thenReturn(Optional.empty());
 
     service.incrementUsage(user);
 
     verify(repository, times(1)).save(any(AiCritiqueLimit.class));
+    verify(repository).save(argThat(limit -> limit.getUsageCount().equals(1)));
   }
 
   @Test
-  public void shouldIncrementUsageWhenLimitExists() {
-    String key = generateKeyFromUser(user);
-    AiCritiqueLimit limit = mock(AiCritiqueLimit.class);
-    when(repository.findById(key)).thenReturn(Optional.of(limit));
+  public void incrementUsage_ShouldIncrementUsageWhenLimitExists() {
+    AiCritiqueLimit limit = AiCritiqueLimit.ofInitial(UUID.randomUUID().toString());
+
+    when(repository.findById(anyString())).thenReturn(Optional.of(limit));
 
     service.incrementUsage(user);
 
     verify(repository, times(1)).save(limit);
+    verify(repository).save(argThat(arg -> arg.getUsageCount().equals(2)));
   }
 
   @Test
-  public void shouldThrowExceptionWhenLimitKeyNotFound() {
-    String key = generateKeyFromUser(user);
-    when(repository.findById(key)).thenReturn(Optional.empty());
+  public void getResetTime_ShouldThrowExceptionWhenLimitKeyNotFound() {
+    when(repository.findById(anyString())).thenReturn(Optional.empty());
     assertThrows(GenericNotFoundException.class, () -> service.getResetTime(user));
   }
 
   @Test
-  public void shouldReturnCorrectResetTime() {
+  public void getResetTime_ShouldReturnCorrectResetTime() {
     LocalDateTime dateTimeNow = LocalDateTime.now();
-    AiCritiqueLimit limit = new AiCritiqueLimit("key", 1, dateTimeNow);
+    AiCritiqueLimit limit = new AiCritiqueLimit(UUID.randomUUID().toString(), 1, dateTimeNow);
 
-    String key = generateKeyFromUser(user);
-
-    when(repository.findById(key)).thenReturn(Optional.of(limit));
+    when(repository.findById(anyString())).thenReturn(Optional.of(limit));
 
     LocalDateTime expectedResult = dateTimeNow.plusHours(24);
-
     LocalDateTime result = service.getResetTime(user);
 
     assertEquals(expectedResult, result);
-  }
-
-  private String generateKeyFromUser(User user) {
-    return String.format("user:%s", user.getId());
+    assertEquals(dateTimeNow.plusDays(1), result);
   }
 }
