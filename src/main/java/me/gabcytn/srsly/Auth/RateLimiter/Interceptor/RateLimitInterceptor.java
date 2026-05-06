@@ -1,4 +1,4 @@
-package me.gabcytn.srsly.Auth.Interceptor;
+package me.gabcytn.srsly.Auth.RateLimiter.Interceptor;
 
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
-import me.gabcytn.srsly.Auth.Service.RateLimitingService;
+import me.gabcytn.srsly.Auth.RateLimiter.Service.RateLimitingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -25,7 +25,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
       clientIp = request.getRemoteAddr();
     }
 
-    Bucket bucket = rateLimitingService.findOrCreateBucketByIp(clientIp);
+    String endpoint = request.getRequestURI();
+    Bucket bucket = rateLimitingService.findOrCreateBucketByIpAndEndpoint(clientIp, endpoint);
     ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
 
     if (probe.isConsumed()) {
