@@ -110,6 +110,12 @@
       <artifactId>flyway-core</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.bucket4j</groupId>
+      <artifactId>bucket4j_jdk17-core</artifactId>
+      <version>8.18.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-database-postgresql</artifactId>
     </dependency>
