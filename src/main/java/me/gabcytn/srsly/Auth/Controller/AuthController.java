@@ -1,5 +1,8 @@
 package me.gabcytn.srsly.Auth.Controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.Auth.DTO.AuthResponse;
@@ -19,13 +22,19 @@ public class AuthController {
   private final AuthService authService;
   private final RefreshTokenService refreshTokenService;
 
+  @Tag(name = "Authentication")
+  @Operation(summary = "Sign up", description = "Authenticates and returns details and JWT.")
   @PostMapping("/register")
+  @ApiResponse(responseCode = "201")
   public AuthResponse register(@RequestBody @Valid AuthUserDto user) {
     AuthResponse response = authService.signup(user);
     authService.generateRefreshToken(user.getEmail(), user.getDeviceName());
     return response;
   }
 
+  @Tag(name = "Authentication")
+  @Operation(summary = "Login", description = "Returns basic user details and JWT.")
+  @ApiResponse(responseCode = "200")
   @PostMapping("/login")
   public AuthResponse login(
       @RequestBody @Valid AuthUserDto user,
@@ -37,6 +46,9 @@ public class AuthController {
     return response;
   }
 
+  @Tag(name = "Authentication")
+  @Operation(summary = "Logout", description = "Deletes refresh token from repository.")
+  @ApiResponse(responseCode = "200")
   @PostMapping("/logout")
   public void logout(
       @CookieValue(value = "X-REFRESH-TOKEN", required = false) String refreshToken) {
@@ -45,6 +57,9 @@ public class AuthController {
     }
   }
 
+  @Tag(name = "Authentication")
+  @Operation(summary = "Request new JWT", description = "Rotates refresh token.")
+  @ApiResponse(responseCode = "200")
   @PostMapping("/refresh-token")
   public ResponseEntity<JwtResponse> refreshToken(
       @RequestBody @Valid RefreshTokenRequestDto tokenRequest,

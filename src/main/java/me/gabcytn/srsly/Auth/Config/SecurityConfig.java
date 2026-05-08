@@ -1,5 +1,6 @@
 package me.gabcytn.srsly.Auth.Config;
 
+import java.util.List;
 import me.gabcytn.srsly.Auth.Filter.JwtFilter;
 import me.gabcytn.srsly.Auth.Service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,13 +21,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
   @Value("${spring.application.frontend.url}")
   private String FRONTEND_URL;
+
   private final UserDetailsServiceImpl userDetailsServiceImpl;
   private final JwtFilter jwtFilter;
 
@@ -48,9 +48,10 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
     return httpSecurity
         .csrf(AbstractHttpConfigurer::disable)
-        .cors(corsConfigurer -> {
-          corsConfigurer.configurationSource(this.corsConfigurationSource());
-        })
+        .cors(
+            corsConfigurer -> {
+              corsConfigurer.configurationSource(this.corsConfigurationSource());
+            })
         .httpBasic(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
         .sessionManagement(
@@ -61,7 +62,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorizationManagerRequestMatcherRegistry -> {
               authorizationManagerRequestMatcherRegistry
-                  .requestMatchers("/api/v1/public/**")
+                  .requestMatchers("/api/v1/public/**", "/swagger-ui/**", "/v3/**")
                   .permitAll()
                   .anyRequest()
                   .authenticated();
