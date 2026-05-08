@@ -1,5 +1,7 @@
 package me.gabcytn.srsly.Controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.DTO.*;
@@ -10,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Spaced Repetition Review")
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/problems")
@@ -17,6 +20,7 @@ public class ReviewProblemController {
   private final ReviewProblemService reviewProblemService;
   private final ProblemFacadeService problemFacadeService;
 
+  @Operation(summary = "Problems to review today")
   @GetMapping("/review")
   public PaginatedReviewProblem getTodayProblems(
       @RequestParam(name = "page", defaultValue = "0") Integer page,
@@ -27,12 +31,13 @@ public class ReviewProblemController {
     return problemFacadeService.getProblemsToReviewToday(filter);
   }
 
+  @Operation(summary = "Today's progress")
   @GetMapping("/review/progress")
   public ReviewProgress progress() {
     return problemFacadeService.getReviewProgress();
   }
 
-  /** Spaced-repetition review */
+  @Operation(summary = "Start reviewing a problem")
   @PostMapping("/{problemId}/review/initial")
   public ResponseEntity<ReviewProblemDto> saveReview(
       @PathVariable Integer problemId, @RequestBody @Valid InitialReviewRequest request) {
@@ -41,13 +46,14 @@ public class ReviewProblemController {
     return new ResponseEntity<>(reviewedProblem.toDto(), HttpStatus.CREATED);
   }
 
-  /** No spaced-repetition review */
+  @Operation(summary = "Mark problem as solved")
   @PostMapping("/{problemId}/solve/initial")
   public ResponseEntity<Void> markProblemAsSolved(@PathVariable Integer problemId) {
     problemFacadeService.saveInitialAsNonReviewable(problemId);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
+  @Operation(summary = "Review a problem")
   @PostMapping("/review/{id}")
   public ResponseEntity<Void> save(
       @PathVariable int id, @RequestBody @Valid ReviewedProblem reviewedProblem) {
@@ -55,6 +61,7 @@ public class ReviewProblemController {
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
+  @Operation(summary = "All solved problems")
   @GetMapping("/solved")
   public PaginatedSolvedProblem getSolvedProblems(
       @RequestParam(name = "page", defaultValue = "0") int page,
