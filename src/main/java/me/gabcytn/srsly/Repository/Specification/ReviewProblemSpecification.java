@@ -2,6 +2,9 @@ package me.gabcytn.srsly.Repository.Specification;
 
 import me.gabcytn.srsly.Entity.ReviewProblem;
 import me.gabcytn.srsly.Entity.User;
+
+import java.time.LocalDate;
+
 import org.springframework.data.jpa.domain.Specification;
 
 public class ReviewProblemSpecification implements ProblemSearchSpecification<ReviewProblem> {
@@ -20,5 +23,9 @@ public class ReviewProblemSpecification implements ProblemSearchSpecification<Re
 
   public Specification<ReviewProblem> hasUser(User user) {
     return (root, query, cb) -> cb.equal(root.get("solvedProblem").get("user"), user);
+  }
+
+  public Specification<ReviewProblem> hasNextAttemptAtLessThanOrEqualTo(LocalDate date) {
+    return (root, query, cb) -> cb.lessThanOrEqualTo(root.get("nextAttemptAt"), date);
   }
 }

@@ -1,5 +1,6 @@
 package me.gabcytn.srsly.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -98,7 +99,7 @@ public class ProblemFacadeService {
     String difficulty = filters.getDifficulty();
     String title = filters.getTitle();
 
-    ProblemSearchSpecification<ReviewProblem> specBuilder = new ReviewProblemSpecification();
+    ReviewProblemSpecification specBuilder = new ReviewProblemSpecification();
     spec = spec.and(specBuilder.hasUser(user));
 
     if (!title.isBlank()) {
@@ -108,6 +109,8 @@ public class ProblemFacadeService {
     if (!difficulty.equalsIgnoreCase("all")) {
       spec = spec.and(specBuilder.hasDifficulty(difficulty));
     }
+
+    spec = spec.and(specBuilder.hasNextAttemptAtLessThanOrEqualTo(LocalDate.now()));
 
     return reviewProblemService.getReviewProblemsToday(spec, user, filters.getPage());
   }
