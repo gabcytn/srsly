@@ -62,6 +62,7 @@ public class SolvedProblem {
               reviewProblem.getStatus());
     }
 
-    return new SolvedProblemDto(problemSummary, reviewDetail);
+    return new SolvedProblemDto(
+        problemSummary, reviewDetail, createdAt.toLocalDateTime().toLocalDate());
   }
 }

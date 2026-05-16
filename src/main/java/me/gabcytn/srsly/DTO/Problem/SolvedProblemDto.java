@@ -1,3 +1,5 @@
 package me.gabcytn.srsly.DTO.Problem;
 
-public record SolvedProblemDto(ProblemSummaryDto problem, ReviewDetail reviewDetails) {}
+import java.time.LocalDate;
+
+public record SolvedProblemDto(ProblemSummaryDto problem, ReviewDetail reviewDetails, LocalDate solvedAt) {}
