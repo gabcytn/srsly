@@ -1,11 +1,14 @@
 package me.gabcytn.srsly.Entity;
 
 import jakarta.persistence.*;
+import java.sql.Timestamp;
 import lombok.Getter;
 import lombok.Setter;
 import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
 import me.gabcytn.srsly.DTO.Problem.ReviewDetail;
 import me.gabcytn.srsly.DTO.Problem.SolvedProblemDto;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Getter
@@ -31,6 +34,14 @@ public class SolvedProblem {
 
   @OneToOne(mappedBy = "solvedProblem", fetch = FetchType.LAZY)
   private ReviewProblem reviewProblem;
+
+  @CreationTimestamp
+  @Column(updatable = false, nullable = false)
+  private Timestamp createdAt;
+
+  @UpdateTimestamp
+  @Column(nullable = false)
+  private Timestamp updatedAt;
 
   public SolvedProblem() {}
 
