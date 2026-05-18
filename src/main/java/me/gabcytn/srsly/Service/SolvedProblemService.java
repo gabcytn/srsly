@@ -27,7 +27,7 @@ public class SolvedProblemService {
 
   public PaginatedSolvedProblem findByUser(
       Specification<SolvedProblem> spec, User user, int pageNumber) {
-    Pageable pageable = PageRequest.of(pageNumber, 10);
+    Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
     Page<SolvedProblem> data = repository.findAll(spec, pageable);
 
     return new PaginatedSolvedProblem(data);
