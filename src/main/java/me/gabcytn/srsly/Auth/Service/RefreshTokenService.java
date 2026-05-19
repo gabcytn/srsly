@@ -7,10 +7,12 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.gabcytn.srsly.Auth.DTO.RefreshTokenValidatorDto;
 import me.gabcytn.srsly.Auth.Repository.RefreshTokenRepository;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @AllArgsConstructor
 @Service
 public class RefreshTokenService {
@@ -46,8 +48,8 @@ public class RefreshTokenService {
       byte[] hash = messageDigest.digest(text.getBytes(StandardCharsets.UTF_8));
       return Base64.getEncoder().encodeToString(hash);
     } catch (NoSuchAlgorithmException exception) {
-      System.err.println("Error generating refresh token");
-      System.err.println(exception.getMessage());
+      log.error("Error generating refresh token");
+      log.error(exception.getMessage());
       return "";
     }
   }
