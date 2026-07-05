@@ -58,7 +58,7 @@ public class ReviewProblemController {
   public ResponseEntity<Void> save(
       @PathVariable int id, @RequestBody @Valid ReviewedProblem reviewedProblem) {
     reviewProblemService.saveSubsequent(id, reviewedProblem.grade());
-    return new ResponseEntity<>(HttpStatus.CREATED);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Operation(summary = "All solved problems")
