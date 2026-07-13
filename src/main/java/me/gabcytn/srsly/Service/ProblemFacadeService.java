@@ -51,8 +51,9 @@ public class ProblemFacadeService {
               reviewProblem.getLastAttemptAt(),
               reviewProblem.getNextAttemptAt(),
               reviewProblem.getStatus());
-      problemDetail.setIsSolved(Boolean.TRUE);
     }
+
+    problemDetail.setIsSolved(solvedProblemService.existsByProblemAndUser(problem, user));
     problemDetail.setReviewDetail(reviewDetail);
 
     return problemDetail;
