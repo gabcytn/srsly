@@ -2,6 +2,7 @@ package me.gabcytn.srsly.Entity;
 
 import jakarta.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 import me.gabcytn.srsly.DTO.Problem.ProblemSummaryDto;
@@ -52,17 +53,23 @@ public class SolvedProblem {
 
   public SolvedProblemDto toDto() {
     ProblemSummaryDto problemSummary = this.problem.summarize();
-    ReviewDetail reviewDetail = null;
-    if (this.reviewProblem != null) {
-      reviewDetail =
+    LocalDate solvedAt = createdAt.toLocalDateTime().toLocalDate();
+
+    if (isProblemForReview()) {
+      return SolvedProblemDto.ofReviewable(
+          problemSummary,
           new ReviewDetail(
               reviewProblem.getId(),
               reviewProblem.getLastAttemptAt(),
               reviewProblem.getNextAttemptAt(),
-              reviewProblem.getStatus());
+              reviewProblem.getStatus()),
+          reviewProblem.getLastAttemptAt());
     }
 
-    return new SolvedProblemDto(
-        problemSummary, reviewDetail, createdAt.toLocalDateTime().toLocalDate());
+    return SolvedProblemDto.ofNonReviewable(problemSummary, solvedAt);
+  }
+
+  private boolean isProblemForReview() {
+    return this.reviewProblem != null;
   }
 }
