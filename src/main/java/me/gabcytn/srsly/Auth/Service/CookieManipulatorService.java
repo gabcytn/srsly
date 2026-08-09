@@ -16,6 +16,7 @@ public class CookieManipulatorService {
     cookie.setPath("/");
     cookie.setSecure(true);
     cookie.setAttribute("SameSite", "None");
+    cookie.setAttribute("Partitioned", "true");
     cookie.setMaxAge(604800);
     response.addCookie(cookie);
   }
@@ -26,6 +27,7 @@ public class CookieManipulatorService {
     cookie.setPath("/");
     cookie.setSecure(true);
     cookie.setAttribute("SameSite", "None");
+    cookie.setAttribute("Partitioned", "true");
     cookie.setMaxAge(0);
     response.addCookie(cookie);
   }
