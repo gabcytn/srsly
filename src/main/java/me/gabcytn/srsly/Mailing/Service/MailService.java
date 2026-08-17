@@ -1,4 +1,4 @@
-package me.gabcytn.srsly.Service;
+package me.gabcytn.srsly.Mailing.Service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -14,6 +14,7 @@ import me.gabcytn.srsly.Entity.User;
 import me.gabcytn.srsly.Exception.EmailAlreadyVerifiedException;
 import me.gabcytn.srsly.Exception.InvalidEmailVerificationTokenException;
 import me.gabcytn.srsly.Repository.ReviewProblemRepository;
+import me.gabcytn.srsly.Service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;

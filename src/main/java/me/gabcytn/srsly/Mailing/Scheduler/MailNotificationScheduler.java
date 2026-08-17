@@ -1,8 +1,8 @@
-package me.gabcytn.srsly.Scheduler;
+package me.gabcytn.srsly.Mailing.Scheduler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.gabcytn.srsly.Service.MailService;
+import me.gabcytn.srsly.Mailing.Service.MailService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 

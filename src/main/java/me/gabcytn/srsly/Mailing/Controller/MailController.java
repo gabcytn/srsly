@@ -1,9 +1,10 @@
-package me.gabcytn.srsly.Controller;
+package me.gabcytn.srsly.Mailing.Controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import me.gabcytn.srsly.Service.MailService;
+import me.gabcytn.srsly.Mailing.Service.MailService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
