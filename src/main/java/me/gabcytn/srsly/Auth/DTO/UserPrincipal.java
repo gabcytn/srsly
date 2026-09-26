@@ -2,7 +2,7 @@ package me.gabcytn.srsly.Auth.DTO;
 
 import java.util.Collection;
 import java.util.List;
-import me.gabcytn.srsly.Entity.User;
+import me.gabcytn.srsly.Auth.Entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

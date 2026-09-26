@@ -1,0 +1,12 @@
+package me.gabcytn.srsly.Problem.DTO;
+
+import lombok.Data;
+import lombok.Builder;
+
+@Data
+@Builder
+public class ProblemSearchFilter {
+  private int page;
+  private String difficulty;
+  private String title;
+}

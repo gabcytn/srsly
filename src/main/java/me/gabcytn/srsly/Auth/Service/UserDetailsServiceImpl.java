@@ -3,7 +3,7 @@ package me.gabcytn.srsly.Auth.Service;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.Auth.DTO.UserPrincipal;
-import me.gabcytn.srsly.Entity.User;
+import me.gabcytn.srsly.Auth.Entity.User;
 import me.gabcytn.srsly.Auth.Repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
