@@ -1,0 +1,33 @@
+package me.gabcytn.srsly.Problem.Service;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import me.gabcytn.srsly.Problem.DTO.TagDto;
+import me.gabcytn.srsly.Problem.Entity.Tag;
+import me.gabcytn.srsly.Problem.Repository.TagRepository;
+import org.springframework.stereotype.Service;
+
+@RequiredArgsConstructor
+@Service
+public class TagService {
+  private final TagRepository tagRepository;
+
+  public List<Tag> saveAll(List<TagDto> tags) {
+    List<String> tagNames = tags.stream().map(TagDto::name).toList();
+    List<Tag> existingTags = tagRepository.findByNameIn(tagNames);
+    Set<String> existingTagNames =
+        existingTags.stream().map(Tag::getName).collect(Collectors.toSet());
+    List<Tag> toSave =
+        tags.stream()
+            .filter(tag -> !existingTagNames.contains(tag.name()))
+            .map(TagDto::toEntity)
+            .toList();
+    if (!toSave.isEmpty()) {
+      tagRepository.saveAll(toSave);
+    }
+
+    return tagRepository.findByNameIn(tagNames);
+  }
+}

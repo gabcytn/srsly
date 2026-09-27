@@ -3,10 +3,10 @@ package me.gabcytn.srsly.AOP;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.gabcytn.srsly.Entity.User;
-import me.gabcytn.srsly.Exception.AiException;
-import me.gabcytn.srsly.Service.AiLimiterService;
-import me.gabcytn.srsly.Service.UserService;
+import me.gabcytn.srsly.AI.Exception.AiException;
+import me.gabcytn.srsly.AI.Service.AiLimiterService;
+import me.gabcytn.srsly.Auth.Entity.User;
+import me.gabcytn.srsly.Auth.Service.UserService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -20,7 +20,7 @@ public class AiLimiterAspect {
   private final UserService userService;
   private final AiLimiterService limiterService;
 
-  @Around("execution(* me.gabcytn.srsly.Controller.AiController.index(..))")
+  @Around("execution(* me.gabcytn.srsly.AI.Controller.AiController.index(..))")
   public Object checkAiUsageLimit(ProceedingJoinPoint pjp) throws Throwable {
     User user = userService.getCurrentUser();
 

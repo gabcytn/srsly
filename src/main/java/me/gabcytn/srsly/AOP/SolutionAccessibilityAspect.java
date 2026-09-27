@@ -1,11 +1,11 @@
 package me.gabcytn.srsly.AOP;
 
 import lombok.extern.slf4j.Slf4j;
-import me.gabcytn.srsly.Entity.Solution;
-import me.gabcytn.srsly.Entity.User;
+import me.gabcytn.srsly.Auth.Entity.User;
+import me.gabcytn.srsly.Auth.Service.UserService;
 import me.gabcytn.srsly.Exception.GenericForbiddenException;
-import me.gabcytn.srsly.Service.SolutionService;
-import me.gabcytn.srsly.Service.UserService;
+import me.gabcytn.srsly.Solution.Entity.Solution;
+import me.gabcytn.srsly.Solution.Service.SolutionService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

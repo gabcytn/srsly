@@ -1,0 +1,77 @@
+package me.gabcytn.srsly.Problem.Entity;
+
+import jakarta.persistence.*;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import lombok.Getter;
+import lombok.Setter;
+import me.gabcytn.srsly.Auth.Entity.User;
+import me.gabcytn.srsly.Problem.DTO.ProblemSummaryDto;
+import me.gabcytn.srsly.Problem.DTO.ReviewDetail;
+import me.gabcytn.srsly.Problem.DTO.SolvedProblemDto;
+import me.gabcytn.srsly.Review.Entity.ReviewProblem;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+@Entity
+@Getter
+@Setter
+@Table(
+    name = "solved_problems",
+    indexes = {
+      @Index(name = "user_solved_problems_idx", columnList = "user_id"),
+      @Index(name = "problem_solved_problems_idx", columnList = "problem_id")
+    })
+public class SolvedProblem {
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long id;
+
+  @ManyToOne
+  @JoinColumn(name = "problem_id", nullable = false)
+  private Problem problem;
+
+  @ManyToOne
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
+
+  @OneToOne(mappedBy = "solvedProblem", fetch = FetchType.LAZY)
+  private ReviewProblem reviewProblem;
+
+  @CreationTimestamp
+  @Column(updatable = false, nullable = false)
+  private Timestamp createdAt;
+
+  @UpdateTimestamp
+  @Column(nullable = false)
+  private Timestamp updatedAt;
+
+  public SolvedProblem() {}
+
+  public SolvedProblem(Problem problem, User user) {
+    this.problem = problem;
+    this.user = user;
+  }
+
+  public SolvedProblemDto toDto() {
+    ProblemSummaryDto problemSummary = this.problem.summarize();
+    LocalDate solvedAt = createdAt.toLocalDateTime().toLocalDate();
+
+    if (isProblemForReview()) {
+      return SolvedProblemDto.ofReviewable(
+          problemSummary,
+          new ReviewDetail(
+              reviewProblem.getId(),
+              reviewProblem.getLastAttemptAt(),
+              reviewProblem.getNextAttemptAt(),
+              reviewProblem.getStatus()),
+          reviewProblem.getLastAttemptAt());
+    }
+
+    return SolvedProblemDto.ofNonReviewable(problemSummary, solvedAt);
+  }
+
+  private boolean isProblemForReview() {
+    return this.reviewProblem != null;
+  }
+}
