@@ -1,11 +1,9 @@
 package me.gabcytn.srsly.Review.Repository.Specification;
 
+import java.time.LocalDate;
+import me.gabcytn.srsly.Auth.Entity.User;
 import me.gabcytn.srsly.Problem.Repository.Specification.ProblemSearchSpecification;
 import me.gabcytn.srsly.Review.Entity.ReviewProblem;
-import me.gabcytn.srsly.Auth.Entity.User;
-
-import java.time.LocalDate;
-
 import org.springframework.data.jpa.domain.Specification;
 
 public class ReviewProblemSpecification implements ProblemSearchSpecification<ReviewProblem> {
@@ -19,7 +17,9 @@ public class ReviewProblemSpecification implements ProblemSearchSpecification<Re
 
   public Specification<ReviewProblem> hasDifficulty(String difficulty) {
     return (root, query, cb) ->
-        cb.equal(cb.lower(root.get("solvedProblem").get("problem").get("difficulty")), difficulty.toLowerCase());
+        cb.equal(
+            cb.lower(root.get("solvedProblem").get("problem").get("difficulty")),
+            difficulty.toLowerCase());
   }
 
   public Specification<ReviewProblem> hasUser(User user) {

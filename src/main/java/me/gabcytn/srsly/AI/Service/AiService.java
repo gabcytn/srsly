@@ -2,9 +2,9 @@ package me.gabcytn.srsly.AI.Service;
 
 import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.AI.DTO.AiCritique;
+import me.gabcytn.srsly.AI.Exception.AiException;
 import me.gabcytn.srsly.AOP.Annotation.LogPerformance;
 import me.gabcytn.srsly.Solution.Entity.Solution;
-import me.gabcytn.srsly.AI.Exception.AiException;
 import me.gabcytn.srsly.Solution.Service.SolutionService;
 import org.jsoup.Jsoup;
 import org.springframework.ai.chat.client.ChatClient;

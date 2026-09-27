@@ -1,9 +1,9 @@
 package me.gabcytn.srsly.Solution.Repository;
 
 import java.util.List;
+import me.gabcytn.srsly.Auth.Entity.User;
 import me.gabcytn.srsly.Problem.Entity.Problem;
 import me.gabcytn.srsly.Solution.Entity.Solution;
-import me.gabcytn.srsly.Auth.Entity.User;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,7 @@
 package me.gabcytn.srsly.Problem.DTO;
 
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
 
 @Data
 @Builder

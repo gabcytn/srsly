@@ -1,12 +1,11 @@
 package me.gabcytn.srsly.Suggestion.Service;
 
 import java.util.*;
-
+import me.gabcytn.srsly.Auth.Entity.User;
 import me.gabcytn.srsly.Auth.Service.UserService;
 import me.gabcytn.srsly.Problem.DTO.ProblemSummaryDto;
-import me.gabcytn.srsly.Suggestion.Entity.SuggestedProblems;
-import me.gabcytn.srsly.Auth.Entity.User;
 import me.gabcytn.srsly.Review.Repository.ReviewProblemRepository;
+import me.gabcytn.srsly.Suggestion.Entity.SuggestedProblems;
 import me.gabcytn.srsly.Suggestion.Repository.SuggestedProblemsRepository;
 import org.springframework.stereotype.Service;
 

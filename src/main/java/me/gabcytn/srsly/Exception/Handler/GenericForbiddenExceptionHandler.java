@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GenericForbiddenExceptionHandler {
-	@ExceptionHandler(GenericForbiddenException.class)
-	public ProblemDetail handle(GenericForbiddenException e) {
-		return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.getMessage());
-	}
+  @ExceptionHandler(GenericForbiddenException.class)
+  public ProblemDetail handle(GenericForbiddenException e) {
+    return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.getMessage());
+  }
 }

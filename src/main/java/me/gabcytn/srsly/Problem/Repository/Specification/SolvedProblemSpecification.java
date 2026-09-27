@@ -1,7 +1,7 @@
 package me.gabcytn.srsly.Problem.Repository.Specification;
 
-import me.gabcytn.srsly.Problem.Entity.SolvedProblem;
 import me.gabcytn.srsly.Auth.Entity.User;
+import me.gabcytn.srsly.Problem.Entity.SolvedProblem;
 import org.springframework.data.jpa.domain.Specification;
 
 public class SolvedProblemSpecification implements ProblemSearchSpecification<SolvedProblem> {

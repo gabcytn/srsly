@@ -9,8 +9,7 @@ import org.springframework.data.redis.core.TimeToLive;
 @RedisHash("refreshToken")
 @Getter
 @Setter
-public class RefreshTokenValidatorDto
-{
+public class RefreshTokenValidatorDto {
   @Id private String key;
   private String email;
   private String deviceName;

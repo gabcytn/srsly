@@ -61,7 +61,8 @@ public class SpacedRepetitionHelper {
     return Math.min(easeFactor.doubleValue(), 2.6);
   }
 
-  private static BigDecimal problemConfidenceAdjustment(Confidence confidence, BigDecimal easeFactor) {
+  private static BigDecimal problemConfidenceAdjustment(
+      Confidence confidence, BigDecimal easeFactor) {
     if (confidence.equals(LOW)) {
       return easeFactor.subtract(ZERO_POINT_TWO);
     }
@@ -73,7 +74,8 @@ public class SpacedRepetitionHelper {
     return easeFactor;
   }
 
-  private static BigDecimal problemDifficultyAdjustment(Difficulty difficulty, BigDecimal easeFactor) {
+  private static BigDecimal problemDifficultyAdjustment(
+      Difficulty difficulty, BigDecimal easeFactor) {
     if (difficulty.equals(EASY)) {
       return easeFactor.add(ZERO_POINT_ONE);
     }
@@ -114,7 +116,8 @@ public class SpacedRepetitionHelper {
     return reviewProblem;
   }
 
-  public static double calculateEaseFactor(ReviewProblem reviewProblem, int grade, LocalDate dateNow) {
+  public static double calculateEaseFactor(
+      ReviewProblem reviewProblem, int grade, LocalDate dateNow) {
     double previousEaseFactor = reviewProblem.getEaseFactor();
     BigDecimal gradeBD = BigDecimal.valueOf(grade);
     BigDecimal gradeDiff = FIVE.subtract(gradeBD);
@@ -130,7 +133,7 @@ public class SpacedRepetitionHelper {
   }
 
   private static double calculateEaseFactorAdjustments(
-			ReviewProblem reviewProblem, int grade, LocalDate dateNow) {
+      ReviewProblem reviewProblem, int grade, LocalDate dateNow) {
     if (dateNow.isAfter(reviewProblem.getNextAttemptAt()) && grade == 5) {
       return 0.05;
     }

@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-import me.gabcytn.srsly.AOP.AiLimiterAspect;
-import me.gabcytn.srsly.Auth.Entity.User;
 import me.gabcytn.srsly.AI.Exception.AiException;
 import me.gabcytn.srsly.AI.Service.AiLimiterService;
+import me.gabcytn.srsly.AOP.AiLimiterAspect;
+import me.gabcytn.srsly.Auth.Entity.User;
 import me.gabcytn.srsly.Auth.Service.UserService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.Test;

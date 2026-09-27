@@ -4,18 +4,18 @@ import java.time.LocalDate;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import me.gabcytn.srsly.Auth.Entity.User;
+import me.gabcytn.srsly.Exception.*;
 import me.gabcytn.srsly.Problem.DTO.Confidence;
 import me.gabcytn.srsly.Problem.DTO.Difficulty;
 import me.gabcytn.srsly.Problem.DTO.ProblemStatus;
 import me.gabcytn.srsly.Problem.Entity.Problem;
 import me.gabcytn.srsly.Problem.Entity.SolvedProblem;
 import me.gabcytn.srsly.Review.DTO.*;
-import me.gabcytn.srsly.Exception.*;
-import me.gabcytn.srsly.Review.Publisher.ReviewAttemptEventPublisher;
-import me.gabcytn.srsly.Review.Repository.ReviewProblemRepository;
 import me.gabcytn.srsly.Review.Entity.ReviewAttempt;
 import me.gabcytn.srsly.Review.Entity.ReviewProblem;
 import me.gabcytn.srsly.Review.Helper.SpacedRepetitionHelper;
+import me.gabcytn.srsly.Review.Publisher.ReviewAttemptEventPublisher;
+import me.gabcytn.srsly.Review.Repository.ReviewProblemRepository;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -167,7 +167,8 @@ public class ReviewProblemService {
     reviewAttemptEventPublisher.publish(ReviewAttempt.fromSolvedProblem(problem, grade));
   }
 
-  public PaginatedReviewProblem getReviewProblemsToday(Specification<ReviewProblem> specification, User user, int page) {
+  public PaginatedReviewProblem getReviewProblemsToday(
+      Specification<ReviewProblem> specification, User user, int page) {
     Pageable pageable = PageRequest.of(page, 5, Sort.by("nextAttemptAt"));
     Page<ReviewProblem> data = repository.findAll(specification, pageable);
 
@@ -188,7 +189,8 @@ public class ReviewProblemService {
 
   public ReviewProgress getReviewProgress(int solvedTodayCount, User user) {
     LocalDate now = LocalDate.now();
-    int unsolvedCount = repository.countByNextAttemptAtLessThanEqualAndSolvedProblem_User(now, user);
+    int unsolvedCount =
+        repository.countByNextAttemptAtLessThanEqualAndSolvedProblem_User(now, user);
 
     return new ReviewProgress(unsolvedCount, solvedTodayCount);
   }

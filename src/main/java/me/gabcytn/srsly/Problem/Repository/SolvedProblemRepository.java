@@ -1,9 +1,9 @@
 package me.gabcytn.srsly.Problem.Repository;
 
 import java.util.Optional;
+import me.gabcytn.srsly.Auth.Entity.User;
 import me.gabcytn.srsly.Problem.Entity.Problem;
 import me.gabcytn.srsly.Problem.Entity.SolvedProblem;
-import me.gabcytn.srsly.Auth.Entity.User;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;

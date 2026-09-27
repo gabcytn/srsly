@@ -17,8 +17,7 @@ import org.hibernate.annotations.CreationTimestamp;
       @Index(name = "idx_attempt_date", columnList = "attempted_at"),
       @Index(name = "idx_attempt_solved_problem", columnList = "solved_problem_id")
     })
-public class ReviewAttempt
-{
+public class ReviewAttempt {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
@@ -41,17 +40,12 @@ public class ReviewAttempt
 
   public static ReviewAttempt fromSolvedProblem(ReviewProblem problem) {
     return new ReviewAttempt(
-        problem.getEaseFactor(),
-        problem.getLastAttemptAt(),
-        problem.getSolvedProblem());
+        problem.getEaseFactor(), problem.getLastAttemptAt(), problem.getSolvedProblem());
   }
 
   public static ReviewAttempt fromSolvedProblem(ReviewProblem problem, int grade) {
     return new ReviewAttempt(
-        problem.getEaseFactor(),
-        grade,
-        problem.getLastAttemptAt(),
-        problem.getSolvedProblem());
+        problem.getEaseFactor(), grade, problem.getLastAttemptAt(), problem.getSolvedProblem());
   }
 
   private ReviewAttempt(

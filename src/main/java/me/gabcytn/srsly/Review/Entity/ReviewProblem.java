@@ -5,9 +5,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.*;
 import me.gabcytn.srsly.Problem.DTO.ProblemStatus;
-import me.gabcytn.srsly.Review.DTO.ReviewProblemDto;
-import me.gabcytn.srsly.Problem.Entity.SolvedProblem;
 import me.gabcytn.srsly.Problem.Entity.Problem;
+import me.gabcytn.srsly.Problem.Entity.SolvedProblem;
+import me.gabcytn.srsly.Review.DTO.ReviewProblemDto;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
