@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 import me.gabcytn.srsly.AI.DTO.AiCritiqueLimit;
 import me.gabcytn.srsly.Auth.Entity.User;
-import me.gabcytn.srsly.Exception.GenericNotFoundException;
+import me.gabcytn.srsly.Exception.ResourceNotFoundException;
 import me.gabcytn.srsly.AI.Repository.AiCritiqueLimitRepository;
 import me.gabcytn.srsly.AI.Service.AiLimiterService;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +56,7 @@ public class AiLimiterServiceTest {
   @Test
   public void getResetTime_ShouldThrowExceptionWhenLimitKeyNotFound() {
     when(repository.findById(anyString())).thenReturn(Optional.empty());
-    assertThrows(GenericNotFoundException.class, () -> service.getResetTime(user));
+    assertThrows(ResourceNotFoundException.class, () -> service.getResetTime(user));
   }
 
   @Test

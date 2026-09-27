@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.gabcytn.srsly.Problem.DTO.LeetCodeProblemApiResponse;
 import me.gabcytn.srsly.Problem.DTO.PaginatedProblemDto;
-import me.gabcytn.srsly.Exception.GenericNotFoundException;
+import me.gabcytn.srsly.Exception.ResourceNotFoundException;
 import me.gabcytn.srsly.Problem.Entity.Problem;
 import me.gabcytn.srsly.Problem.Entity.Tag;
 import me.gabcytn.srsly.Problem.Proxy.LeetCodeQuestionProxy;
@@ -40,7 +40,7 @@ public class ProblemService {
       return leetCodeQuestionProxy.getProblem(id);
     } catch (Exception e) {
       log.error("Error fetching problem from API with message: {}", e.getMessage());
-      throw new GenericNotFoundException("Problem not found.");
+      throw new ResourceNotFoundException("Problem not found.");
     }
   }
 

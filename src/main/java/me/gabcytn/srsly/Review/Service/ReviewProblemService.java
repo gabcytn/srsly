@@ -125,7 +125,7 @@ public class ReviewProblemService {
   private ReviewProblem findById(int id) {
     Optional<ReviewProblem> reviewProblem = repository.findById(id);
     return reviewProblem.orElseThrow(
-        () -> new GenericNotFoundException("Review problem not found."));
+        () -> new ResourceNotFoundException("Review problem not found."));
   }
 
   private void verifyProblemReviewDate(ReviewProblem reviewProblem, LocalDate dateNow) {

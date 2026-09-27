@@ -6,7 +6,7 @@ import me.gabcytn.srsly.Problem.DTO.PaginatedSolvedProblem;
 import me.gabcytn.srsly.Problem.Entity.Problem;
 import me.gabcytn.srsly.Problem.Entity.SolvedProblem;
 import me.gabcytn.srsly.Auth.Entity.User;
-import me.gabcytn.srsly.Exception.GenericNotFoundException;
+import me.gabcytn.srsly.Exception.ResourceNotFoundException;
 import me.gabcytn.srsly.Problem.Repository.SolvedProblemRepository;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -39,6 +39,6 @@ public class SolvedProblemService {
       return sOptional.get();
     }
 
-    throw new GenericNotFoundException("SolvedProblem not found.");
+    throw new ResourceNotFoundException("SolvedProblem not found.");
   }
 }

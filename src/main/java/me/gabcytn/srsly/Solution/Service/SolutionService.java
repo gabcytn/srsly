@@ -53,7 +53,7 @@ public class SolutionService {
       return solution.get();
     }
 
-    throw new GenericNotFoundException("Solution not found.");
+    throw new ResourceNotFoundException("Solution not found.");
   }
 
   public Solution save(Solution solution) {

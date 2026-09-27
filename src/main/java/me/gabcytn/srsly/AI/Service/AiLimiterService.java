@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.gabcytn.srsly.AI.DTO.AiCritiqueLimit;
 import me.gabcytn.srsly.AI.Repository.AiCritiqueLimitRepository;
 import me.gabcytn.srsly.Auth.Entity.User;
-import me.gabcytn.srsly.Exception.GenericNotFoundException;
+import me.gabcytn.srsly.Exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -43,7 +43,7 @@ public class AiLimiterService {
 
     if (limit.isEmpty()) {
       log.error("AI Critique key: {} -> NOT FOUND", key);
-      throw new GenericNotFoundException("AI Critique key not found.");
+      throw new ResourceNotFoundException("AI Critique key not found.");
     }
 
     return limit.get().getResetTime();
