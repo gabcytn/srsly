@@ -116,7 +116,7 @@ public class ProblemFacadeService {
 
     spec = spec.and(specBuilder.hasNextAttemptAtLessThanOrEqualTo(LocalDate.now()));
 
-    return reviewProblemService.getReviewProblemsToday(spec, user, filters.getPage());
+    return reviewProblemService.getReviewProblemsToday(spec, filters.getPage());
   }
 
   public PaginatedSolvedProblem findProblemsSolvedByUser(ProblemSearchFilter filters) {
