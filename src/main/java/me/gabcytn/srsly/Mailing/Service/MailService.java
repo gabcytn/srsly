@@ -3,23 +3,17 @@ package me.gabcytn.srsly.Mailing.Service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.gabcytn.srsly.Auth.DTO.UserPrincipal;
 import me.gabcytn.srsly.Auth.Entity.User;
-import me.gabcytn.srsly.Auth.Service.EmailJwtService;
 import me.gabcytn.srsly.Auth.Service.UserService;
-import me.gabcytn.srsly.Exception.EmailAlreadyVerifiedException;
-import me.gabcytn.srsly.Exception.InvalidEmailVerificationTokenException;
 import me.gabcytn.srsly.Review.DTO.UserProblemToSolveCount;
 import me.gabcytn.srsly.Review.Repository.ReviewProblemRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -38,7 +32,6 @@ public class MailService {
   private final JavaMailSender mailSender;
   private final ReviewProblemRepository reviewProblemRepository;
   private final UserService userService;
-  private final EmailJwtService jwtService;
 
   public void subscribe() {
     setUserToReceiveMailReminders(true);
@@ -46,31 +39,6 @@ public class MailService {
 
   public void unsubscribe() {
     setUserToReceiveMailReminders(false);
-  }
-
-  public void sendVerificationEmail() {
-    User user = userService.getCurrentUser();
-    if (user.getEmailVerifiedAt() != null) {
-      throw new EmailAlreadyVerifiedException();
-    }
-    String verificationToken = jwtService.generateToken(user.getEmail());
-    Context ctx = new Context();
-    ctx.setVariable("verificationUrl", APP_URL + "/verification?token=" + verificationToken);
-    sendHtmlMessage(user.getEmail(), "Email Verification", "verify-email", ctx);
-  }
-
-  public void verifyEmail(String token) {
-    String email = userService.getCurrentUserEmail();
-
-    User user = userService.findByEmail(email);
-    UserDetails userDetails = new UserPrincipal(user);
-
-    if (!jwtService.isTokenValid(token, userDetails)) {
-      throw new InvalidEmailVerificationTokenException();
-    }
-
-    user.setEmailVerifiedAt(LocalDateTime.now());
-    userService.save(user);
   }
 
   @Async

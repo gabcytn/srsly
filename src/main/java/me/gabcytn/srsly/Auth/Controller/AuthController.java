@@ -4,46 +4,30 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import me.gabcytn.srsly.Auth.DTO.AuthResponse;
-import me.gabcytn.srsly.Auth.DTO.AuthUserDto;
-import me.gabcytn.srsly.Auth.DTO.JwtResponse;
-import me.gabcytn.srsly.Auth.DTO.RefreshTokenRequestDto;
+import me.gabcytn.srsly.Auth.DTO.*;
+import me.gabcytn.srsly.Auth.DTO.Oauth.OAuthCallbackRequest;
 import me.gabcytn.srsly.Auth.Service.AuthService;
-import me.gabcytn.srsly.Auth.Service.RefreshTokenService;
+import me.gabcytn.srsly.Auth.Service.GitHubOAuthService;
+import me.gabcytn.srsly.Auth.Service.OAuthService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/public/auth")
 public class AuthController {
   private final AuthService authService;
-  private final RefreshTokenService refreshTokenService;
+  private final OAuthService googleOAuthService;
+  private final OAuthService gitHubOAuthService;
 
-  @Tag(name = "Authentication")
-  @Operation(summary = "Sign up", description = "Authenticates and returns details and JWT.")
-  @PostMapping("/register")
-  @ApiResponse(responseCode = "201")
-  public AuthResponse register(@RequestBody @Valid AuthUserDto user) {
-    AuthResponse response = authService.signup(user);
-    authService.generateRefreshToken(user.getEmail(), user.getDeviceName());
-    return response;
-  }
-
-  @Tag(name = "Authentication")
-  @Operation(summary = "Login", description = "Returns basic user details and JWT.")
-  @ApiResponse(responseCode = "200")
-  @PostMapping("/login")
-  public AuthResponse login(
-      @RequestBody @Valid AuthUserDto user,
-      @CookieValue(value = "X-REFRESH-TOKEN", required = false) String refreshToken) {
-    AuthResponse response = authService.authenticate(user);
-    if (refreshToken == null || !refreshTokenService.exists(refreshToken)) {
-      authService.generateRefreshToken(user.getEmail(), user.getDeviceName());
-    }
-    return response;
+  public AuthController(
+      AuthService authService,
+      @Qualifier("GoogleOAuthService") OAuthService googleOAuthService,
+      @Qualifier("GitHubOAuthService") GitHubOAuthService gitHubOAuthService) {
+    this.authService = authService;
+    this.googleOAuthService = googleOAuthService;
+    this.gitHubOAuthService = gitHubOAuthService;
   }
 
   @Tag(name = "Authentication")
@@ -62,9 +46,22 @@ public class AuthController {
   @ApiResponse(responseCode = "200")
   @PostMapping("/refresh-token")
   public ResponseEntity<JwtResponse> refreshToken(
-      @RequestBody @Valid RefreshTokenRequestDto tokenRequest,
       @CookieValue(value = "X-REFRESH-TOKEN") String refreshToken) {
-    JwtResponse responseDto = authService.newJwt(refreshToken, tokenRequest.getDeviceName());
+    JwtResponse responseDto = authService.newJwt(refreshToken);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
+
+  @Tag(name = "Authentication")
+  @Operation(summary = "Sign in with GitHub callback")
+  @PostMapping("/oauth/callback/github")
+  public AuthResponse githubCallback(@RequestBody @Valid OAuthCallbackRequest request) {
+    return gitHubOAuthService.authorize(request.code());
+  }
+
+  @Tag(name = "Authentication")
+  @Operation(summary = "Sign in with Google callback")
+  @PostMapping("/oauth/callback/google")
+  public AuthResponse googleCallback(@RequestBody @Valid OAuthCallbackRequest request) {
+    return googleOAuthService.authorize(request.code());
   }
 }

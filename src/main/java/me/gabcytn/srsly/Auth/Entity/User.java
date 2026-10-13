@@ -3,10 +3,10 @@ package me.gabcytn.srsly.Auth.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 import lombok.*;
+import me.gabcytn.srsly.Auth.DTO.Oauth.SignUpMethod;
 import me.gabcytn.srsly.Problem.Entity.SolvedProblem;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -25,9 +25,7 @@ public class User {
   @Column(unique = true, nullable = false)
   private String email;
 
-  private String password;
-
-  private LocalDateTime emailVerifiedAt;
+  private String signUpMethod;
 
   private Boolean isSubscribedToMailReminders = false;
 
@@ -41,10 +39,10 @@ public class User {
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   private Set<SolvedProblem> solvedProblems;
 
-  public static User ofEmailAndPassword(String email, String password) {
+  public static User ofEmailAndSignUpMethod(String email, SignUpMethod signUpMethod) {
     User user = new User();
     user.setEmail(email);
-    user.setPassword(password);
+    user.setSignUpMethod(signUpMethod.getProvider());
     return user;
   }
 }
