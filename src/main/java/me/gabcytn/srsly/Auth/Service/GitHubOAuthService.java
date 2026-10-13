@@ -34,27 +34,44 @@ public class GitHubOAuthService extends OAuthService {
 
   @Override
   public AuthResponse authenticate(String code) {
-    GitHubApiAuthorizationRequest request = new GitHubApiAuthorizationRequest(code);
-    String id = request.getClientId(), secret = request.getClientSecret();
-    GitHubAccessTokenResponse tokenResponse =
-        accessTokenRetrievalProxy.getAccessToken(id, secret, code);
+    String accessToken = getAccessToken(code);
+    String email = getEmailFromGitHub(accessToken);
 
-    String accessToken = tokenResponse.access_token();
-    GitHubUser gitHubUser = gitHubUserInfoProxy.retrieveUser("Bearer " + accessToken);
-
-    String email = gitHubUser.email();
-
-    if (!userService.existsByEmail(email)) {
-      User user = User.ofEmailAndSignUpMethod(email, SignUpMethod.GITHUB);
-      userService.save(user);
+    if (isUserSigningUp(email)) {
+      userSignUp(email);
     }
 
     // TODO: check if same email is used across different providers
 
-    String token = jwtService.generateToken(email);
-    JwtResponse jwtResponse = new JwtResponse(token, jwtService.getExpirationTime());
-
     this.setSecurityContextHolder(email);
-    return new AuthResponse(email, jwtResponse);
+    return new AuthResponse(email, generateJwt(email));
+  }
+
+  private String getAccessToken(String code) {
+    GitHubApiAuthorizationRequest request = new GitHubApiAuthorizationRequest(code);
+    GitHubAccessTokenResponse tokenResponse =
+        accessTokenRetrievalProxy.getAccessToken(
+            request.getClientId(), request.getClientSecret(), request.getCode());
+
+    return tokenResponse.access_token();
+  }
+
+  private String getEmailFromGitHub(String accessToken) {
+    GitHubUser gitHubUser = gitHubUserInfoProxy.retrieveUser("Bearer " + accessToken);
+    return gitHubUser.email();
+  }
+
+  private boolean isUserSigningUp(String email) {
+    return !userService.existsByEmail(email);
+  }
+
+  private void userSignUp(String email) {
+    User user = User.ofEmailAndSignUpMethod(email, SignUpMethod.GITHUB);
+    userService.save(user);
+  }
+
+  private JwtResponse generateJwt(String email) {
+    String token = jwtService.generateToken(email);
+    return new JwtResponse(token, jwtService.getExpirationTime());
   }
 }
