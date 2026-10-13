@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import me.gabcytn.srsly.Auth.DTO.*;
-import me.gabcytn.srsly.Auth.DTO.Oauth.GoogleOauthCallbackRequest;
+import me.gabcytn.srsly.Auth.DTO.Oauth.OAuthCallbackRequest;
 import me.gabcytn.srsly.Auth.Service.AuthService;
 import me.gabcytn.srsly.Auth.Service.GitHubOAuthService;
 import me.gabcytn.srsly.Auth.Service.OAuthService;
@@ -55,14 +55,14 @@ public class AuthController {
   @Tag(name = "Authentication")
   @Operation(summary = "Sign in with GitHub callback")
   @PostMapping("/oauth/callback/github")
-  public AuthResponse githubCallback() {
-    return gitHubOAuthService.authenticate("");
+  public AuthResponse githubCallback(@RequestBody @Valid OAuthCallbackRequest request) {
+    return gitHubOAuthService.authenticate(request.code());
   }
 
   @Tag(name = "Authentication")
   @Operation(summary = "Sign in with Google callback")
   @PostMapping("/oauth/callback/google")
-  public AuthResponse googleCallback(@RequestBody @Valid GoogleOauthCallbackRequest request) {
+  public AuthResponse googleCallback(@RequestBody @Valid OAuthCallbackRequest request) {
     return googleOAuthService.authenticate(request.code());
   }
 }

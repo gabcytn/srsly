@@ -3,10 +3,8 @@ package me.gabcytn.srsly.Auth.DTO.Oauth;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import me.gabcytn.srsly.Util.ApplicationContextProvider;
 
-@ToString
 @Getter
 public class GoogleApiAuthorizationRequest {
   private String code;

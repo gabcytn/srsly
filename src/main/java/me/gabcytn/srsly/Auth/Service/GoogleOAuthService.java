@@ -26,13 +26,13 @@ public class GoogleOAuthService extends OAuthService {
     GoogleApiAuthorizationResponse response = googleProxy.authorize(request);
 
     String email = googleJwtService.extractEmail(response.id_token());
-    this.setSecurityContextHolder(email);
 
     if (!userService.existsByEmail(email)) {
       User user = User.ofEmailAndSignUpMethod(email, SignUpMethod.GOOGLE);
       userService.save(user);
     }
 
+    // NOTE: check if same email is used across different providers
     if (!userService
         .findByEmail(email)
         .getSignUpMethod()
@@ -43,6 +43,7 @@ public class GoogleOAuthService extends OAuthService {
     String token = jwtService.generateToken(email);
     JwtResponse jwtResponse = new JwtResponse(token, jwtService.getExpirationTime());
 
+    this.setSecurityContextHolder(email);
     return new AuthResponse(email, jwtResponse);
   }
 }
