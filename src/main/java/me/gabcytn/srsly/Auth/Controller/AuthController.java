@@ -56,13 +56,13 @@ public class AuthController {
   @Operation(summary = "Sign in with GitHub callback")
   @PostMapping("/oauth/callback/github")
   public AuthResponse githubCallback(@RequestBody @Valid OAuthCallbackRequest request) {
-    return gitHubOAuthService.authenticate(request.code());
+    return gitHubOAuthService.authorize(request.code());
   }
 
   @Tag(name = "Authentication")
   @Operation(summary = "Sign in with Google callback")
   @PostMapping("/oauth/callback/google")
   public AuthResponse googleCallback(@RequestBody @Valid OAuthCallbackRequest request) {
-    return googleOAuthService.authenticate(request.code());
+    return googleOAuthService.authorize(request.code());
   }
 }

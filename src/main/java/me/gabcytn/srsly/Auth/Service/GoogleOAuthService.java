@@ -1,49 +1,43 @@
 package me.gabcytn.srsly.Auth.Service;
 
-import lombok.RequiredArgsConstructor;
 import me.gabcytn.srsly.Auth.DTO.AuthResponse;
-import me.gabcytn.srsly.Auth.DTO.JwtResponse;
 import me.gabcytn.srsly.Auth.DTO.Oauth.GoogleApiAuthorizationRequest;
 import me.gabcytn.srsly.Auth.DTO.Oauth.GoogleApiAuthorizationResponse;
 import me.gabcytn.srsly.Auth.DTO.Oauth.SignUpMethod;
-import me.gabcytn.srsly.Auth.Entity.User;
 import me.gabcytn.srsly.Auth.Proxy.GoogleProxy;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
 @Service
 @Qualifier("GoogleOAuthService")
 public class GoogleOAuthService extends OAuthService {
   private final GoogleProxy googleProxy;
   private final GoogleJwtService googleJwtService;
-  private final JwtService jwtService;
-  private final UserService userService;
+
+  public GoogleOAuthService(
+      UserService userService,
+      JwtService jwtService,
+      GoogleProxy googleProxy,
+      GoogleJwtService googleJwtService) {
+    super(userService, jwtService);
+    this.googleProxy = googleProxy;
+    this.googleJwtService = googleJwtService;
+  }
 
   @Override
-  public AuthResponse authenticate(String code) {
+  public AuthResponse authorize(String code) {
+    GoogleApiAuthorizationResponse response = authorizeUser(code);
+    String email = extractEmailFromGoogleJwt(response);
+
+    return authenticate(email, SignUpMethod.GOOGLE);
+  }
+
+  private GoogleApiAuthorizationResponse authorizeUser(String code) {
     GoogleApiAuthorizationRequest request = new GoogleApiAuthorizationRequest(code);
-    GoogleApiAuthorizationResponse response = googleProxy.authorize(request);
+    return googleProxy.authorize(request);
+  }
 
-    String email = googleJwtService.extractEmail(response.id_token());
-
-    if (!userService.existsByEmail(email)) {
-      User user = User.ofEmailAndSignUpMethod(email, SignUpMethod.GOOGLE);
-      userService.save(user);
-    }
-
-    // NOTE: check if same email is used across different providers
-    if (!userService
-        .findByEmail(email)
-        .getSignUpMethod()
-        .equals(SignUpMethod.GOOGLE.getProvider())) {
-      throw new IllegalStateException("Invalid SignUp provider");
-    }
-
-    String token = jwtService.generateToken(email);
-    JwtResponse jwtResponse = new JwtResponse(token, jwtService.getExpirationTime());
-
-    this.setSecurityContextHolder(email);
-    return new AuthResponse(email, jwtResponse);
+  private String extractEmailFromGoogleJwt(GoogleApiAuthorizationResponse response) {
+    return googleJwtService.extractEmail(response.id_token());
   }
 }
