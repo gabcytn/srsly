@@ -12,13 +12,11 @@ import org.springframework.data.redis.core.TimeToLive;
 public class RefreshTokenValidatorDto {
   @Id private String key;
   private String email;
-  private String deviceName;
   @TimeToLive private Long expiresAt;
 
-  public RefreshTokenValidatorDto(String key, String email, String deviceName) {
+  public RefreshTokenValidatorDto(String key, String email) {
     this.key = key;
     this.email = email;
-    this.deviceName = deviceName;
     this.expiresAt = 604800L;
   }
 }

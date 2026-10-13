@@ -46,9 +46,8 @@ public class AuthController {
   @ApiResponse(responseCode = "200")
   @PostMapping("/refresh-token")
   public ResponseEntity<JwtResponse> refreshToken(
-      @RequestBody @Valid RefreshTokenRequestDto tokenRequest,
       @CookieValue(value = "X-REFRESH-TOKEN") String refreshToken) {
-    JwtResponse responseDto = authService.newJwt(refreshToken, tokenRequest.getDeviceName());
+    JwtResponse responseDto = authService.newJwt(refreshToken);
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 

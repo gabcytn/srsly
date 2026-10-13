@@ -16,14 +16,14 @@ public class AuthService {
   private final JwtService jwtService;
   private final RefreshTokenService refreshTokenService;
 
-  public void generateRefreshToken(String userEmail, String userDeviceName) {
+  public void generateRefreshToken(String userEmail) {
     String generatedRefreshToken = refreshTokenService.generateRefreshToken();
     RefreshTokenValidatorDto tokenValidatorDto =
-        new RefreshTokenValidatorDto(generatedRefreshToken, userEmail, userDeviceName);
+        new RefreshTokenValidatorDto(generatedRefreshToken, userEmail);
     refreshTokenService.save(tokenValidatorDto);
   }
 
-  public JwtResponse newJwt(String refreshTokenKey, String requestDeviceName) {
+  public JwtResponse newJwt(String refreshTokenKey) {
     Optional<RefreshTokenValidatorDto> optionalValidator =
         refreshTokenService.find(refreshTokenKey);
     if (optionalValidator.isEmpty()) {
@@ -31,13 +31,8 @@ public class AuthService {
       throw new RefreshTokenException("Refresh token not found.");
     }
     RefreshTokenValidatorDto validator = optionalValidator.get();
-    // TODO: remove device name
-    if (!requestDeviceName.equals(validator.getDeviceName())) {
-      LOG.error("Device names don't match.");
-      throw new RefreshTokenException("Stored device name does not match request's device name.");
-    }
     refreshTokenService.delete(refreshTokenKey);
-    generateRefreshToken(validator.getEmail(), validator.getDeviceName());
+    generateRefreshToken(validator.getEmail());
     String jwt = jwtService.generateToken(validator.getEmail());
     return new JwtResponse(jwt, jwtService.getExpirationTime());
   }
