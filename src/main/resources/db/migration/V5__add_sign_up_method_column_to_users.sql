@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN sign_up_method VARCHAR(255);

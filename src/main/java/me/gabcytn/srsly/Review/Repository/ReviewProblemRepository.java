@@ -47,7 +47,7 @@ public interface ReviewProblemRepository
   @Query(
 """
     SELECT u.email, COUNT(srs.id) FROM ReviewProblem srs
-    JOIN srs.solvedProblem.user u WHERE srs.nextAttemptAt <= :date AND u.emailVerifiedAt IS NOT NULL GROUP BY u.email
+    JOIN srs.solvedProblem.user u WHERE srs.nextAttemptAt <= :date GROUP BY u.email
 """)
   List<UserProblemToSolveCount> findUserWithToSolveCountByNextAttemptAtLessThanEqual(
       @Param("date") LocalDate nextAttemptAt);
