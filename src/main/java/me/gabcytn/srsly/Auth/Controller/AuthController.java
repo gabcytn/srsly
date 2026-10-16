@@ -9,6 +9,7 @@ import me.gabcytn.srsly.Auth.DTO.Oauth.OAuthCallbackRequest;
 import me.gabcytn.srsly.Auth.Service.AuthService;
 import me.gabcytn.srsly.Auth.Service.GitHubOAuthService;
 import me.gabcytn.srsly.Auth.Service.OAuthService;
+import me.gabcytn.srsly.Auth.Service.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +21,17 @@ public class AuthController {
   private final AuthService authService;
   private final OAuthService googleOAuthService;
   private final OAuthService gitHubOAuthService;
+  private final RefreshTokenService refreshTokenService;
 
   public AuthController(
       AuthService authService,
       @Qualifier("GoogleOAuthService") OAuthService googleOAuthService,
-      @Qualifier("GitHubOAuthService") GitHubOAuthService gitHubOAuthService) {
+      @Qualifier("GitHubOAuthService") GitHubOAuthService gitHubOAuthService,
+      RefreshTokenService refreshTokenService) {
     this.authService = authService;
     this.googleOAuthService = googleOAuthService;
     this.gitHubOAuthService = gitHubOAuthService;
+    this.refreshTokenService = refreshTokenService;
   }
 
   @Tag(name = "Authentication")
@@ -54,14 +58,28 @@ public class AuthController {
   @Tag(name = "Authentication")
   @Operation(summary = "Sign in with GitHub callback")
   @PostMapping("/oauth/callback/github")
-  public AuthResponse githubCallback(@RequestBody @Valid OAuthCallbackRequest request) {
-    return gitHubOAuthService.authorize(request.code());
+  public AuthResponse githubCallback(
+      @RequestBody @Valid OAuthCallbackRequest request,
+      @CookieValue(value = "X-REFRESH-TOKEN", required = false) String refreshToken) {
+    AuthResponse response = gitHubOAuthService.authorize(request.code());
+
+    if (refreshToken == null || !refreshTokenService.exists(refreshToken))
+      authService.generateRefreshToken(response.email());
+
+    return response;
   }
 
   @Tag(name = "Authentication")
   @Operation(summary = "Sign in with Google callback")
   @PostMapping("/oauth/callback/google")
-  public AuthResponse googleCallback(@RequestBody @Valid OAuthCallbackRequest request) {
-    return googleOAuthService.authorize(request.code());
+  public AuthResponse googleCallback(
+      @RequestBody @Valid OAuthCallbackRequest request,
+      @CookieValue(value = "X-REFRESH-TOKEN", required = false) String refreshToken) {
+    AuthResponse response = googleOAuthService.authorize(request.code());
+
+    if (refreshToken == null || !refreshTokenService.exists(refreshToken))
+      authService.generateRefreshToken(response.email());
+
+    return response;
   }
 }
