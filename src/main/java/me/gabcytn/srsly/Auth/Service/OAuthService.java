@@ -41,7 +41,7 @@ public abstract class OAuthService {
 
   private void verifyEmailAndProviderIntegrity(String email, SignUpMethod signUpMethod) {
     if (!userService.findByEmail(email).getSignUpMethod().equals(signUpMethod.getProvider())) {
-      throw new IllegalStateException();
+      throw new IllegalStateException("Email is already associated with another provider.");
     }
   }
 
