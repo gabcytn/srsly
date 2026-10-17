@@ -21,7 +21,7 @@ public abstract class OAuthService {
 
   protected final AuthResponse authenticate(String email, SignUpMethod signUpMethod) {
     if (this.isUserSigningUp(email)) {
-      this.userSignUp(email);
+      this.userSignUp(email, signUpMethod);
     }
 
     verifyEmailAndProviderIntegrity(email, signUpMethod);
@@ -34,8 +34,8 @@ public abstract class OAuthService {
     return !userService.existsByEmail(email);
   }
 
-  private void userSignUp(String email) {
-    User user = User.ofEmailAndSignUpMethod(email, SignUpMethod.GITHUB);
+  private void userSignUp(String email, SignUpMethod signUpMethod) {
+    User user = User.ofEmailAndSignUpMethod(email, signUpMethod);
     userService.save(user);
   }
 
