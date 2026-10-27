@@ -2,6 +2,7 @@ package me.gabcytn.srsly.Settings.Controller;
 
 import jakarta.validation.Valid;
 import me.gabcytn.srsly.Settings.DTO.UserPatchDto;
+import me.gabcytn.srsly.Settings.DTO.UserSettingsDto;
 import me.gabcytn.srsly.Settings.Service.SettingsService;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +13,11 @@ public class SettingsController {
 
   public SettingsController(SettingsService settingsService) {
     this.settingsService = settingsService;
+  }
+
+  @GetMapping("/")
+  public UserSettingsDto settings() {
+    return settingsService.getSettingsInfo();
   }
 
   @PatchMapping("/user")
