@@ -4,6 +4,7 @@ import me.gabcytn.srsly.Auth.DTO.AuthResponse;
 import me.gabcytn.srsly.Auth.DTO.Oauth.GoogleApiAuthorizationRequest;
 import me.gabcytn.srsly.Auth.DTO.Oauth.GoogleApiAuthorizationResponse;
 import me.gabcytn.srsly.Auth.DTO.Oauth.SignUpMethod;
+import me.gabcytn.srsly.Auth.Entity.UserDto;
 import me.gabcytn.srsly.Auth.Proxy.GoogleProxy;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -27,9 +28,9 @@ public class GoogleOAuthService extends OAuthService {
   @Override
   public AuthResponse authorize(String code) {
     GoogleApiAuthorizationResponse response = authorizeUser(code);
-    String email = extractEmailFromGoogleJwt(response);
+    UserDto userDto = extractUserDtoFromGoogleJwt(response);
 
-    return authenticate(email, SignUpMethod.GOOGLE);
+    return authenticate(userDto, SignUpMethod.GOOGLE);
   }
 
   private GoogleApiAuthorizationResponse authorizeUser(String code) {
@@ -37,7 +38,7 @@ public class GoogleOAuthService extends OAuthService {
     return googleProxy.authorize(request);
   }
 
-  private String extractEmailFromGoogleJwt(GoogleApiAuthorizationResponse response) {
-    return googleJwtService.extractEmail(response.id_token());
+  private UserDto extractUserDtoFromGoogleJwt(GoogleApiAuthorizationResponse response) {
+    return googleJwtService.extractUserDto(response.id_token());
   }
 }

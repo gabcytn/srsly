@@ -25,6 +25,8 @@ public class User {
   @Column(unique = true, nullable = false)
   private String email;
 
+  private String name;
+
   private String signUpMethod;
 
   private Boolean isSubscribedToMailReminders = false;
@@ -39,10 +41,9 @@ public class User {
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   private Set<SolvedProblem> solvedProblems;
 
-  public static User ofEmailAndSignUpMethod(String email, SignUpMethod signUpMethod) {
-    User user = new User();
-    user.setEmail(email);
-    user.setSignUpMethod(signUpMethod.getProvider());
-    return user;
+  public User (UserDto userDto, SignUpMethod signUpMethod) {
+    this.email = userDto.email();
+    this.name = userDto.name();
+    this.signUpMethod = signUpMethod.getProvider();
   }
 }

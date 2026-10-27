@@ -26,7 +26,7 @@ public class AuthController {
   public AuthController(
       AuthService authService,
       @Qualifier("GoogleOAuthService") OAuthService googleOAuthService,
-      @Qualifier("GitHubOAuthService") GitHubOAuthService gitHubOAuthService,
+      @Qualifier("GitHubOAuthService") OAuthService gitHubOAuthService,
       RefreshTokenService refreshTokenService) {
     this.authService = authService;
     this.googleOAuthService = googleOAuthService;

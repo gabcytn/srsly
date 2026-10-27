@@ -4,6 +4,7 @@ import me.gabcytn.srsly.Auth.DTO.AuthResponse;
 import me.gabcytn.srsly.Auth.DTO.JwtResponse;
 import me.gabcytn.srsly.Auth.DTO.Oauth.SignUpMethod;
 import me.gabcytn.srsly.Auth.Entity.User;
+import me.gabcytn.srsly.Auth.Entity.UserDto;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,9 +20,11 @@ public abstract class OAuthService {
 
   public abstract AuthResponse authorize(String code);
 
-  protected final AuthResponse authenticate(String email, SignUpMethod signUpMethod) {
+  protected final AuthResponse authenticate(UserDto userDto, SignUpMethod signUpMethod) {
+    String email = userDto.email();
+
     if (this.isUserSigningUp(email)) {
-      this.userSignUp(email, signUpMethod);
+      this.userSignUp(userDto, signUpMethod);
     }
 
     verifyEmailAndProviderIntegrity(email, signUpMethod);
@@ -34,8 +37,8 @@ public abstract class OAuthService {
     return !userService.existsByEmail(email);
   }
 
-  private void userSignUp(String email, SignUpMethod signUpMethod) {
-    User user = User.ofEmailAndSignUpMethod(email, signUpMethod);
+  private void userSignUp(UserDto userDto, SignUpMethod signUpMethod) {
+    User user = new User(userDto, signUpMethod);
     userService.save(user);
   }
 

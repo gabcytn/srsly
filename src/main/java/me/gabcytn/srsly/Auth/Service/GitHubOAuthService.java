@@ -5,6 +5,7 @@ import me.gabcytn.srsly.Auth.DTO.Oauth.GitHubAccessTokenResponse;
 import me.gabcytn.srsly.Auth.DTO.Oauth.GitHubApiAuthorizationRequest;
 import me.gabcytn.srsly.Auth.DTO.Oauth.GitHubUser;
 import me.gabcytn.srsly.Auth.DTO.Oauth.SignUpMethod;
+import me.gabcytn.srsly.Auth.Entity.UserDto;
 import me.gabcytn.srsly.Auth.Proxy.GitHubAccessTokenRetrievalProxy;
 import me.gabcytn.srsly.Auth.Proxy.GitHubUserInfoProxy;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,9 +31,9 @@ public class GitHubOAuthService extends OAuthService {
   @Override
   public AuthResponse authorize(String code) {
     String accessToken = getAccessToken(code);
-    String email = getEmailFromGitHub(accessToken);
+    UserDto userDto = getUserDtoFromGitHub(accessToken);
 
-    return authenticate(email, SignUpMethod.GITHUB);
+    return authenticate(new UserDto(userDto.email(), userDto.name()), SignUpMethod.GITHUB);
   }
 
   private String getAccessToken(String code) {
@@ -44,8 +45,8 @@ public class GitHubOAuthService extends OAuthService {
     return tokenResponse.access_token();
   }
 
-  private String getEmailFromGitHub(String accessToken) {
+  private UserDto getUserDtoFromGitHub(String accessToken) {
     GitHubUser gitHubUser = gitHubUserInfoProxy.retrieveUser("Bearer " + accessToken);
-    return gitHubUser.email();
+    return new UserDto(gitHubUser.email(), gitHubUser.name());
   }
 }
