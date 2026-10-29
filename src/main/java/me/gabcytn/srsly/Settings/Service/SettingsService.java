@@ -1,6 +1,7 @@
 package me.gabcytn.srsly.Settings.Service;
 
 import me.gabcytn.srsly.Auth.Entity.User;
+import me.gabcytn.srsly.Auth.Service.AuthService;
 import me.gabcytn.srsly.Auth.Service.UserService;
 import me.gabcytn.srsly.Settings.DTO.UserPatchDto;
 import me.gabcytn.srsly.Settings.DTO.UserSettingsDto;
@@ -25,5 +26,10 @@ public class SettingsService {
     user.setName(userPatchDto.name());
 
     userService.save(user);
+  }
+
+  public void deleteUser() {
+    User user = userService.getCurrentUser();
+    userService.deleteByUser(user);
   }
 }
