@@ -46,4 +46,9 @@ public class UserService {
   public Boolean existsByEmail(String email) {
     return userRepository.existsByEmail(email);
   }
+
+  public void deleteByUser(User user) {
+    // NOTE: delete records from tables referencing users as well
+    userRepository.delete(user);
+  }
 }
